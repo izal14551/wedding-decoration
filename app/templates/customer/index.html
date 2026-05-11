@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Set up Package variables from database query -->
+{% set silver = None %}
+{% set gold = None %}
+{% set platinum = None %}
+{% for p in products %}
+{% if p.name == "Silver Package" %}{% set silver = p %}{% endif %}
+{% if p.name == "Gold Package" %}{% set gold = p %}{% endif %}
+{% if p.name == "Platinum Package" %}{% set platinum = p %}{% endif %}
+{% endfor %}
+
+<!-- Hero Section -->
+<div class="hero-section" style="background-image: url('{{ url_for('static', filename='images/wedding_hero.png') }}');">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <h1 class="hero-title">Griya Rias Saraswati</h1>
+    <p class="hero-subtitle">"Beauty, Elegance, and Wedding Needs All in One Place."</p>
+    <a href="#catalog" class="btn btn-gold-cta">Book Now <i class="bi bi-chevron-right ms-1"></i></a>
+  </div>
+</div>
+
+<!-- Why Choose Us Section -->
+<div class="container section-padding text-center">
+  <h2 class="section-title">Why Choose Us?</h2>
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-8">
+      <p class="why-choose-us-p">
+        Kami percaya bahwa setiap pernikahan memiliki cerita istimewa. Melalui layanan rias professional dan penyewaan
+        peralatan pernikahan, kami hadir untuk mempercantik setiap momen berharga di hari bahagia Anda.
+      </p>
+      <p class="why-choose-us-p">
+        Dengan sentuhan keahlian dari tim yang berpengalaman, serta pelayanan yang tulus, kami berkomitmen memberikan
+        pengalaman terbaik agar Anda dapat menikmati hari pernikahan dengan penuh percaya diri dan kebahagiaan.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Gallery Section -->
+<div class="gallery-section text-center">
+  <div class="container">
+    <h2 class="serif-font mb-4">Wujudkan Momen Spesialmu Bersama Kami</h2>
+
+    <div class="gallery-container">
+      <!-- Card 1 -->
+      <div class="gallery-card">
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=500&q=80"
+          alt="Dekorasi Pengantin Premium">
+        <div class="gallery-card-overlay">
+          <h4 class="gallery-card-title">Gambar Dekor</h4>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="gallery-card">
+        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=500&q=80"
+          alt="Pelaminan Mewah">
+        <div class="gallery-card-overlay">
+          <h4 class="gallery-card-title">Gambar Dekor</h4>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="gallery-card">
+        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=500&q=80"
+          alt="Tenda Resepsi & Pencahayaan">
+        <div class="gallery-card-overlay">
+          <h4 class="gallery-card-title">Gambar Dekor</h4>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="gallery-card">
+        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=500&q=80"
+          alt="Setup Meja Jamuan Pernikahan">
+        <div class="gallery-card-overlay">
+          <h4 class="gallery-card-title">Gambar Dekor</h4>
+        </div>
+      </div>
+      <!-- Card 5 -->
+      <div class="gallery-card">
+        <img src="https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=500&q=80"
+          alt="Aksesoris Jalur Pengantin">
+        <div class="gallery-card-overlay">
+          <h4 class="gallery-card-title">Gambar Dekor</h4>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-5">
+      <a href="#catalog" class="btn btn-dark-outline">Lihat Paket</a>
+    </div>
+  </div>
+</div>
+
+<!-- Packages Section -->
+<div id="catalog" class="packages-section">
+  <div class="container text-center">
+    <h2 class="serif-font mb-5" style="font-size: 2.5rem; letter-spacing: 1px;">Packages</h2>
+
+    <div class="row g-4 justify-content-center text-start">
+      <!-- Silver Package -->
+      <div class="col-lg-4 col-md-6">
+        <div class="package-card shadow">
+          <div class="package-name">Silver Package</div>
+          <ul class="package-features">
+            <li>Makeup Busana Pengantin 1x ganti</li>
+            <li>Makeup Busana Orang Tua (2)</li>
+            <li>Makeup Busana Penerima Tamu (2)</li>
+            <li>Tarub 6x 12 Meter + Gerbang</li>
+            <li>Unlimited High Res Photos + Cetak Album Magnetic</li>
+            <li>Accessories + Melati Asli</li>
+            <li>Dekorasi Kamar</li>
+            <li>Wedding Gate</li>
+            <li>Henna</li>
+            <li>MC</li>
+            <li>Untuk 1 hari</li>
+          </ul>
+          <div class="package-footer-area">
+            <div class="package-price">Rp. 12.200.000</div>
+            {% if silver %}
+            <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
+              data-product-id="{{ silver.id }}" data-product-name="{{ silver.name }}"
+              data-product-price="Rp. 12.200.000" aria-label="Book Silver Package">
+              <i class="bi bi-cart3"></i>
+            </button>
+            {% else %}
+            <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
+                class="bi bi-cart3"></i></button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Gold Package -->
+      <div class="col-lg-4 col-md-6">
+        <div class="package-card shadow">
+          <div class="package-name">Gold Package</div>
+          <ul class="package-features">
+            <li>Makeup Busana Pengantin 3x Ganti</li>
+            <li>Makeup Busana Orang Tua (2)</li>
+            <li>Makeup Busana Resepsi (2)</li>
+            <li>Makeup Busana Pagar Ayu (4)</li>
+            <li>Makeup Busana Manggolo (2)</li>
+            <li>Tarub 6x 12 Meter + Cetabah</li>
+            <li>Unlimited High Res Photos + Cetak Album Magnetic</li>
+            <li>Accessories + Melati Asli</li>
+            <li>Dekorasi Kamar</li>
+            <li>Wedding Gate</li>
+            <li>Henna</li>
+            <li>MC + Tari Pengiring</li>
+            <li>Hiburan Organ Tunggal + Singer</li>
+            <li>Genset</li>
+            <li>Sound System</li>
+            <li>Kursi VIP Kursi Alum</li>
+          </ul>
+          <div class="package-footer-area">
+            <div class="package-price">Rp. 15.300.000</div>
+            {% if gold %}
+            <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
+              data-product-id="{{ gold.id }}" data-product-name="{{ gold.name }}" data-product-price="Rp. 15.300.000"
+              aria-label="Book Gold Package">
+              <i class="bi bi-cart3"></i>
+            </button>
+            {% else %}
+            <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
+                class="bi bi-cart3"></i></button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Platinum Package -->
+      <div class="col-lg-4 col-md-6">
+        <div class="package-card shadow">
+          <div class="package-name">Platinum Package</div>
+          <ul class="package-features">
+            <li>Makeup Busana Pengantin 3x ganti</li>
+            <li>Makeup Busana Orang Tua (2)</li>
+            <li>Makeup Busana Resepsi (2)</li>
+            <li>Makeup Busana Pagar Ayu (4)</li>
+            <li>Makeup Busana Manggolo (2)</li>
+            <li>Tarub 6x 12 Meter</li>
+            <li>Unlimited High Res Photos + Cetak Album Magnetic</li>
+            <li>Hiburan + Organ Tunggal + Singer</li>
+            <li>Dekorasi Utama</li>
+            <li>Wedding Gate</li>
+            <li>Henna Putih + Melati Asli</li>
+            <li>MC + Tari Pengiring</li>
+            <li>Genset + Sound System</li>
+            <li>Free Acara Adat Panggih</li>
+            <li>Free Makeup Pre-Wedding</li>
+            <li>Gunting + Full Karpet (Bebas Request Warna Karpet)</li>
+          </ul>
+          <div class="package-footer-area">
+            <div class="package-price">Rp. 17.400.000</div>
+            {% if platinum %}
+            <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
+              data-product-id="{{ platinum.id }}" data-product-name="{{ platinum.name }}"
+              data-product-price="Rp. 17.400.000" aria-label="Book Platinum Package">
+              <i class="bi bi-cart3"></i>
+            </button>
+            {% else %}
+            <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
+                class="bi bi-cart3"></i></button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer Section -->
+<div class="footer-section">
+  footer
+</div>
+
+<!-- Booking Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 15px; border: 1px solid rgba(197, 168, 128, 0.25);">
+      <div class="modal-header bg-dark text-white"
+        style="border-top-left-radius: 14px; border-top-right-radius: 14px; border-bottom: 2px solid var(--primary-gold);">
+        <h5 class="modal-title" id="orderModalLabel"><i class="bi bi-calendar-check text-warning me-2"></i> Form
+          Pemesanan Paket</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        {% if current_user.is_authenticated %}
+        <form action="{{ url_for('customer.book') }}" method="POST">
+          <input type="hidden" name="product_id" id="modal-product-id">
+
+          <div class="mb-4">
+            <label class="form-label text-muted small uppercase fw-bold">Paket yang Dipilih</label>
+            <div class="p-3 bg-light rounded d-flex justify-content-between align-items-center">
+              <strong id="modal-product-name" class="text-dark"></strong>
+              <span id="modal-product-price" class="badge bg-dark text-warning p-2 px-3 fs-6"></span>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="start_date" class="form-label fw-semibold">Tanggal Mulai Sewa</label>
+              <input type="date" class="form-control" id="start_date" name="start_date" required min="{{ datetime }}">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="end_date" class="form-label fw-semibold">Tanggal Selesai Sewa</label>
+              <input type="date" class="form-control" id="end_date" name="end_date" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold">Nomor HP / WhatsApp</label>
+            <input type="text" class="form-control" id="phone" name="phone" placeholder="Contoh: 081234567890"
+              value="{{ current_user.phone or '' }}" required>
+          </div>
+
+          <div class="mb-4">
+            <label for="address" class="form-label fw-semibold">Alamat Lokasi Acara</label>
+            <textarea class="form-control" id="address" name="address" rows="3"
+              placeholder="Sebutkan alamat lengkap tempat pemasangan dekorasi..."
+              required>{{ current_user.address or '' }}</textarea>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-gold-cta py-2.5">Konfirmasi & Pesan Sekarang</button>
+          </div>
+        </form>
+        {% else %}
+        <div class="text-center py-4">
+          <i class="bi bi-shield-lock-fill text-warning mb-3" style="font-size: 3.5rem;"></i>
+          <h4>Akses Terbatas</h4>
+          <p class="text-muted mt-2 mb-4">Silakan masuk (Login) terlebih dahulu untuk melakukan pemesanan paket
+            pernikahan Anda.</p>
+          <div class="d-grid gap-2">
+            <a href="{{ url_for('auth.login') }}" class="btn btn-dark-outline py-2.5">Login Sekarang</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-link text-muted small">Belum punya akun? Daftar
+              gratis</a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Javascript Controller -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Set minimal date input to today
+    const today = new Date().toISOString().split('T')[0];
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+
+    if (startDateInput) {
+      startDateInput.min = today;
+      startDateInput.addEventListener('change', function () {
+        endDateInput.min = this.value;
+      });
+    }
+
+    // Modal data bindings
+    const orderModal = document.getElementById('orderModal');
+    if (orderModal) {
+      orderModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const productId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name');
+        const productPrice = button.getAttribute('data-product-price');
+
+        const modalIdInput = orderModal.querySelector('#modal-product-id');
+        const modalNameEl = orderModal.querySelector('#modal-product-name');
+        const modalPriceEl = orderModal.querySelector('#modal-product-price');
+
+        if (modalIdInput) modalIdInput.value = productId;
+        if (modalNameEl) modalNameEl.textContent = productName;
+        if (modalPriceEl) modalPriceEl.textContent = productPrice;
+      });
+    }
+  });
+</script>
+{% endblock %}
