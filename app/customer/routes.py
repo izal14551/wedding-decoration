@@ -40,7 +40,7 @@ def book():
     if duration <= 0:
         duration = 1 # Minimal 1 hari
         
-    total_price = product.price_per_day * duration
+    total_price = product.price * duration
     
     # Update data profil pengguna jika belum ada
     if phone and not current_user.phone:
@@ -49,20 +49,21 @@ def book():
         current_user.address = address
         
     order = Order(
-        user_id=current_user.id,
+        customer_id=current_user.id,
         start_date=start_date,
         end_date=end_date,
+        event_address=address,
         total_price=total_price,
-        order_status='Pending'
+        status='Pending'
     )
     db.session.add(order)
-    db.session.flush() # Mendapatkan ID order sebelum commit
+    db.session.flush()
     
     order_item = OrderItem(
         order_id=order.id,
         product_id=product.id,
         quantity=1,
-        subtotal=total_price
+        price=product.price
     )
     db.session.add(order_item)
     db.session.commit()

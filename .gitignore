@@ -1,0 +1,22 @@
+# Python standard ignores
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# SQLite database
+app.db
+
+# Flask/Development files
+.env
+instance/
+.pytest_cache/
+
+# Agent configuration / PRD ignore
+AGENTS.md

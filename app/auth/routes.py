@@ -5,13 +5,18 @@ from app.models import User
 from app.auth.forms import LoginForm, RegistrationForm
 from flask_login import login_user, logout_user, current_user, login_required
 
+from app.models import Customer, Admin
+
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('customer.index'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = Customer.query.filter_by(email=form.email.data).first()
+        if user is None:
+            user = Admin.query.filter_by(email=form.email.data).first()
+            
         if user is None or not user.check_password(form.password.data):
             flash('Invalid email or password', 'danger')
             return redirect(url_for('auth.login'))

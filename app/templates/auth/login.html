@@ -1,42 +1,134 @@
-{% extends "base.html" %}
+<!doctype html>
+<html lang="id" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | Griya Rias Saraswati</title>
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">Login</h4>
-            </div>
-            <div class="card-body">
-                <form action="" method="post" novalidate>
-                    {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {{ form.email(class="form-control") }}
-                        {% for error in form.email.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control") }}
-                        {% for error in form.password.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3 form-check">
-                        {{ form.remember_me(class="form-check-input") }}
-                        {{ form.remember_me.label(class="form-check-label") }}
-                    </div>
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary") }}
-                    </div>
-                </form>
-            </div>
-            <div class="card-footer text-center">
-                New User? <a href="{{ url_for('auth.register') }}">Click to Register!</a>
-            </div>
+    <!-- TailwindCSS Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "custom-blue": "#3498db",
+              "custom-blue-dark": "#2980b9",
+              "dark-slate": "#2c3e50",
+              "dark-slate-hover": "#1a252f",
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Bootstrap Icons (untuk ikon jika diperlukan) -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <!-- Custom Global CSS Terpisah -->
+    <link
+      href="{{ url_for('static', filename='css/login.css') }}"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body
+    class="h-full m-0 flex items-center justify-center font-['Inter'] login-bg"
+  >
+    <div class="w-full p-4 flex items-center justify-center">
+      <div
+        class="glass-card text-white rounded-[20px] p-8 md:p-10 w-full max-w-[440px] shadow-2xl"
+      >
+        <div
+          class="font-['Playfair_Display'] text-[2.25rem] font-medium mb-8 tracking-[2px] text-center text-white"
+        >
+          LOGIN
         </div>
+
+        <!-- Flash Messages Inside Card -->
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %}
+        <div class="mb-5 space-y-2">
+          {% for category, message in messages %}
+          <div
+            class="text-[0.88rem] px-4 py-3 rounded-lg flex justify-between items-center {% if category == 'success' %}bg-green-500/25 border border-green-500/40 text-green-200{% elif category == 'danger' %}bg-red-500/25 border border-red-500/40 text-red-200{% else %}bg-blue-500/25 border border-blue-500/40 text-blue-200{% endif %}"
+            role="alert"
+          >
+            <span>{{ message }}</span>
+            <button
+              type="button"
+              class="text-white hover:text-gray-300 focus:outline-none"
+              onclick="this.parentElement.remove()"
+            >
+              <i class="bi bi-x-lg text-xs"></i>
+            </button>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+
+        <form action="" method="post" novalidate class="space-y-4">
+          {{ form.hidden_tag() }}
+
+          <div>
+            {{ form.email(class="w-full rounded-lg px-4 py-3 input-glass
+            text-[0.95rem] font-normal", placeholder="Email Address") }} {% for
+            error in form.email.errors %}
+            <div class="text-red-400 text-xs text-left mt-1">[{{ error }}]</div>
+            {% endfor %}
+          </div>
+
+          <div>
+            {{ form.password(class="w-full rounded-lg px-4 py-3 input-glass
+            text-[0.95rem] font-normal", placeholder="Password") }} {% for error
+            in form.password.errors %}
+            <div class="text-red-400 text-xs text-left mt-1">[{{ error }}]</div>
+            {% endfor %}
+          </div>
+
+          <div
+            class="flex justify-between items-center text-[0.88rem] pt-1 pb-3 text-[#f1f2f6]"
+          >
+            <div class="flex items-center gap-2">
+              {{ form.remember_me(class="w-4 h-4 rounded bg-white/20 border
+              border-white/40 cursor-pointer accent-custom-blue",
+              id="rememberMe") }}
+              <label class="cursor-pointer select-none" for="rememberMe"
+                >Remember Me</label
+              >
+            </div>
+            <a
+              href="#"
+              class="text-custom-blue hover:text-custom-blue-dark hover:underline font-medium transition-colors duration-200"
+              >Forgot Password?</a
+            >
+          </div>
+
+          {{ form.submit(class="w-full rounded-lg py-3 font-semibold text-[1rem]
+          bg-dark-slate hover:bg-dark-slate-hover active:scale-[0.98]
+          transition-all duration-200 shadow-md cursor-pointer text-white",
+          value="Sign In") }}
+
+          <a
+            href="{{ url_for('customer.index') }}"
+            class="block w-full text-center rounded-lg py-3 font-semibold text-[1rem] border border-white/20 bg-white/5 hover:bg-white/10 active:scale-[0.98] transition-all duration-200 shadow-md text-white"
+          >
+            Back
+          </a>
+        </form>
+
+        <div class="mt-6 text-[0.88rem] text-center text-[#f1f2f6]">
+          Don't have an account?
+          <a
+            href="{{ url_for('auth.register') }}"
+            class="text-custom-blue hover:text-custom-blue-dark hover:underline font-medium transition-colors duration-200"
+            >Register</a
+          >
+        </div>
+      </div>
     </div>
-</div>
-{% endblock %}
+  </body>
+</html>

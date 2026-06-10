@@ -1,0 +1,42 @@
+/* --- Login Glassmorphism Custom Global CSS --- */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap");
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.login-bg {
+  background:
+    linear-gradient(rgba(30, 20, 10, 0.7), rgba(30, 20, 10, 0.75)),
+    url("/static/images/wedding_hero.png") no-repeat center center fixed;
+  background-size: cover;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.input-glass {
+  background: rgba(225, 225, 225, 0.85) !important;
+  color: #2c3e50 !important;
+  transition: all 0.2s ease-in-out;
+  border: none !important;
+}
+
+.input-glass::placeholder {
+  color: #555555 !important;
+  opacity: 0.9;
+}
+
+.input-glass:focus {
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35) !important;
+  outline: none !important;
+}
