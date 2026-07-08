@@ -1,6 +1,6 @@
 # Wedding Decoration Rental System
 
-This is a web application for renting wedding decorations, built using Python (Flask), SQLAlchemy, and Flask-Migrate (Alembic) with an SQLite database.
+This is a web application for renting wedding decorations, built using Python (Flask), SQLAlchemy, and Flask-Migrate (Alembic) with a MySQL database.
 
 ## Prerequisites
 
@@ -8,6 +8,7 @@ Ensure you have the following installed on your system:
 
 - **Python 3.8 or higher**
 - **pip** (Python package installer)
+- **MySQL/MariaDB Server** (e.g., Laragon, XAMPP, or standalone MySQL)
 
 ---
 
@@ -42,25 +43,29 @@ source venv/bin/activate
 
 ### 3. Install Dependencies
 
-Install the required Python packages. If a `requirements.txt` is not present, you can install the core packages manually:
+Install the required Python packages (including driver for MySQL `pymysql` and encryption library `bcrypt`). Ensure your virtual environment is active before running the command:
 
 ```bash
-pip install Flask Flask-SQLAlchemy Flask-Migrate Flask-Login Flask-WTF email-validator
+pip install Flask Flask-SQLAlchemy Flask-Migrate Flask-Login Flask-WTF email-validator flask-security-too bcrypt pymysql
 ```
 
 ---
 
 ## Database Configuration
 
-By default, the application uses **SQLite** (a local `app.db` file) for simplicity. If you want to use an external database like **MySQL/MariaDB** or **PostgreSQL**, you can configure it using the **`DATABASE_URL`** environment variable (Option A).
+By default, the application is configured to use **MySQL/MariaDB** (specifically `mysql+pymysql://root:@localhost/wedding_db` which fits default Laragon/XAMPP setups without database password).
 
-### For MySQL / MariaDB
+Before running the seed script, make sure to launch your MySQL server (Laragon) and create the database named **`wedding_db`**:
 
-1. Install the MySQL driver package:
-   ```bash
-   pip install pymysql
-   ```
-2. Set the `DATABASE_URL` environment variable:
+```sql
+CREATE DATABASE IF NOT EXISTS wedding_db;
+```
+
+If you want to use a different database connection (like **PostgreSQL** or a MySQL server with custom credentials), you can override the default setting by configuring the **`DATABASE_URL`** environment variable:
+
+### For MySQL / MariaDB (Custom Credentials)
+
+1. Set the `DATABASE_URL` environment variable:
    - **Windows (PowerShell)**:
      ```powershell
      $env:DATABASE_URL="mysql+pymysql://username:password@localhost/wedding_db"
@@ -92,28 +97,30 @@ By default, the application uses **SQLite** (a local `app.db` file) for simplici
 
 ---
 
-## Database Migration & Seeding
+## Database Initialization & Seeding
 
-The database structure has been updated according to the latest ERD design. To initialize the SQLite database (`app.db`) and seed the initial data:
+The database structure uses a centralized `User` and `Role` model for multi-role security (Flask-Security). To initialize the database and load complete demo/sample data (including Admin, Customers, Categories, Products, and Schedules):
 
-### 1. Run Migrations
+### 1. Reset and Seed Sample Data
 
-Generate the database schema by upgrading to the latest migration script:
+Run the dashboard seed script to create all tables and populate the database with comprehensive mock transactions:
 
 ```bash
-flask db upgrade
+python seed_dashboard.py
 ```
 
-### 2. Seed Initial Data
+_Note: If you are on Windows and virtual environment is not activated, you can run:_
 
-Populate the database with a default administrator account and sample product packages:
+```powershell
+.\venv\Scripts\python seed_dashboard.py
+```
+
+### 2. Seed Admin Only
+
+If you only want to create the default Administrator account on an existing database structure:
 
 ```bash
-# Seed default Administrator
 python seed_admin.py
-
-# Seed default Products/Packages
-python seed_products.py
 ```
 
 ---
@@ -126,8 +133,24 @@ Start the local development server:
 python run.py
 ```
 
+_Note: If you are on Windows and virtual environment is not activated, you can run:_
+
+```powershell
+.\venv\Scripts\python run.py
+```
+
 By default, the application will run at:
 **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+
+---
+
+## Running Automated Tests
+
+To verify user registration, login security, input validations, and route authorization protections:
+
+```bash
+python -m unittest tests/test_auth.py
+```
 
 ---
 
@@ -137,3 +160,8 @@ You can log in to the administrator dashboard using the following credentials:
 
 - **Email:** `admin@example.com`
 - **Password:** `admin123`
+
+You can log in as a customer using:
+
+- **Email:** `budi@example.com`
+- **Password:** `budi123`

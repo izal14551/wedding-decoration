@@ -1,32 +1,102 @@
 from datetime import datetime
+import uuid
 from app import db, login_manager
-from flask_login import UserMixin
+from flask_security import UserMixin, RoleMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# 1. Customer (formerly Pelanggan)
-class Customer(UserMixin, db.Model):
+# Many-to-many relationship helper table for roles and users
+roles_users = db.Table('roles_users',
+    db.Column('user_id', db.Integer(), db.ForeignKey('user.id')),
+    db.Column('role_id', db.Integer(), db.ForeignKey('role.id'))
+)
+
+# Role Model
+class Role(db.Model, RoleMixin):
+    __tablename__ = 'role'
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+    description = db.Column(db.String(255))
+
+    def __repr__(self):
+        return f'<Role {self.name}>'
+
+# User Model (Centralized Auth & Security)
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
+    password = db.Column(db.String(256), nullable=False) # flask-security expects 'password'
+    active = db.Column(db.Boolean(), default=True)
+    fs_uniquifier = db.Column(db.String(64), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    roles = db.relationship('Role', secondary=roles_users, backref=db.backref('users', lazy='dynamic'))
+    customer = db.relationship('Customer', backref='user', uselist=False, cascade="all, delete-orphan")
+    admin = db.relationship('Admin', backref='user', uselist=False, cascade="all, delete-orphan")
+
+    def set_password(self, password_plain):
+        from flask_security.utils import hash_password
+        self.password = hash_password(password_plain)
+
+    def check_password(self, password_plain):
+        from flask_security.utils import verify_password
+        return verify_password(password_plain, self.password)
+
+    def is_admin(self):
+        return any(role.name == 'admin' for role in self.roles)
+
+    # Compatibility properties for current_user
+    @property
+    def name(self):
+        if self.is_admin() and self.admin:
+            return self.admin.name
+        elif self.customer:
+            return self.customer.name
+        return None
+
+    @property
+    def phone(self):
+        if self.is_admin() and self.admin:
+            return self.admin.phone
+        elif self.customer:
+            return self.customer.phone
+        return None
+
+    @property
+    def address(self):
+        if not self.is_admin() and self.customer:
+            return self.customer.address
+        return None
+
+    def __repr__(self):
+        return f'<User {self.email}>'
+
+# 1. Customer (linked to User)
+class Customer(db.Model):
     __tablename__ = 'customer'
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
     phone = db.Column(db.String(20))
     address = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     orders = db.relationship('Order', backref='customer', lazy='dynamic')
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    @property
+    def email(self):
+        return self.user.email if self.user else None
 
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    def set_password(self, password_plain):
+        if self.user:
+            self.user.set_password(password_plain)
+
+    def check_password(self, password_plain):
+        return self.user.check_password(password_plain) if self.user else False
 
     def is_admin(self):
         return False
-
-    def get_id(self):
-        return f"customer_{self.id}"
 
     def __repr__(self):
         return f'<Customer {self.email}>'
@@ -105,30 +175,31 @@ class Payment(db.Model):
     def __repr__(self):
         return f'<Payment {self.id}>'
 
-# 7. Admin
-class Admin(UserMixin, db.Model):
+# 7. Admin (linked to User)
+class Admin(db.Model):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(120), index=True, unique=True, nullable=False)
-    password_hash = db.Column(db.String(256), nullable=False)
     phone = db.Column(db.String(20))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     verified_payments = db.relationship('Payment', backref='admin', lazy='dynamic')
     reports = db.relationship('Report', backref='admin', lazy='dynamic')
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    @property
+    def email(self):
+        return self.user.email if self.user else None
 
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+    def set_password(self, password_plain):
+        if self.user:
+            self.user.set_password(password_plain)
+
+    def check_password(self, password_plain):
+        return self.user.check_password(password_plain) if self.user else False
 
     def is_admin(self):
         return True
-
-    def get_id(self):
-        return f"admin_{self.id}"
 
     def __repr__(self):
         return f'<Admin {self.email}>'
@@ -158,24 +229,17 @@ class Schedule(db.Model):
     def __repr__(self):
         return f'<Schedule {self.id}>'
 
-# Flask-Login user_loader
+# Flask-Login user_loader (integrated with Flask-Security User model)
 @login_manager.user_loader
-def load_user(id_str):
-    if not id_str:
+def load_user(user_id):
+    if not user_id:
         return None
     try:
-        if id_str.startswith('admin_'):
-            admin_id = int(id_str.split('_')[1])
-            return db.session.get(Admin, admin_id)
-        elif id_str.startswith('customer_'):
-            customer_id = int(id_str.split('_')[1])
-            return db.session.get(Customer, customer_id)
-    except (ValueError, IndexError):
+        return db.session.get(User, int(user_id))
+    except ValueError:
         return None
-    return None
 
 # Aliases for backward compatibility
-User = Customer
 Transaction = Payment
 Kategori = Category
 Barang = Product

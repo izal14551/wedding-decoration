@@ -1,63 +1,180 @@
-{% extends "base.html" %}
+<!doctype html>
+<html lang="id" class="h-full">
 
-{% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card shadow-sm">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0">Register</h4>
-            </div>
-            <div class="card-body">
-                <form action="" method="post" novalidate>
-                    {{ form.hidden_tag() }}
-                    <div class="mb-3">
-                        {{ form.name.label(class="form-label") }}
-                        {{ form.name(class="form-control") }}
-                        {% for error in form.name.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.email.label(class="form-label") }}
-                        {{ form.email(class="form-control") }}
-                        {% for error in form.email.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.password.label(class="form-label") }}
-                        {{ form.password(class="form-control") }}
-                        {% for error in form.password.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.password_confirm.label(class="form-label") }}
-                        {{ form.password_confirm(class="form-control") }}
-                        {% for error in form.password_confirm.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.phone.label(class="form-label") }}
-                        {{ form.phone(class="form-control") }}
-                        {% for error in form.phone.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="mb-3">
-                        {{ form.address.label(class="form-label") }}
-                        {{ form.address(class="form-control", rows="3") }}
-                        {% for error in form.address.errors %}
-                            <span class="text-danger">[{{ error }}]</span>
-                        {% endfor %}
-                    </div>
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-success") }}
-                    </div>
-                </form>
-            </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | Griya Rias Saraswati</title>
+
+  <!-- TailwindCSS Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "custom-blue": "#3498db",
+            "custom-blue-dark": "#2980b9",
+            "dark-slate": "#2c3e50",
+            "dark-slate-hover": "#1a252f",
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+
+  <!-- Custom Global CSS Terpisah -->
+  <link href="{{ url_for('static', filename='css/login.css') }}" rel="stylesheet" />
+</head>
+
+<body class="h-full m-0 flex items-center justify-center font-['Inter'] login-bg py-8">
+  <div class="w-full p-4 flex items-center justify-center">
+    <div class="glass-card text-white rounded-[20px] p-6 md:p-8 w-full max-w-[600px] shadow-2xl">
+      <div class="font-['Playfair_Display'] text-[2rem] font-medium mb-6 tracking-[2px] text-center text-white">
+        DAFTAR AKUN
+      </div>
+
+      <!-- Flash Messages Inside Card -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="mb-5 space-y-2">
+        {% for category, message in messages %}
+        <div
+          class="text-[0.88rem] px-4 py-3 rounded-lg flex justify-between items-center {% if category == 'success' %}bg-green-500/25 border border-green-500/40 text-green-200{% elif category == 'danger' %}bg-red-500/25 border border-red-500/40 text-red-200{% else %}bg-blue-500/25 border border-blue-500/40 text-blue-200{% endif %}"
+          role="alert">
+          <span>{{ message }}</span>
+          <button type="button" class="text-white hover:text-gray-300 focus:outline-none"
+            onclick="this.parentElement.remove()">
+            <i class="bi bi-x-lg text-xs"></i>
+          </button>
         </div>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
+
+      <form action="" method="post" novalidate class="space-y-4">
+        {{ form.hidden_tag() }}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-200 mb-1">Nama Lengkap</label>
+            {{ form.name(class="w-full rounded-lg px-4 py-2.5 input-glass
+            text-[0.95rem] font-normal", placeholder="Nama Lengkap") }} {% for
+            error in form.name.errors %}
+            <div class="text-red-400 text-xs text-left mt-1">
+              [{{ error }}]
+            </div>
+            {% endfor %}
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-200 mb-1">Email Address</label>
+            {{ form.email(class="w-full rounded-lg px-4 py-2.5 input-glass
+            text-[0.95rem] font-normal", placeholder="Email Address") }} {%
+            for error in form.email.errors %}
+            <div class="text-red-400 text-xs text-left mt-1">
+              [{{ error }}]
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold text-gray-200 mb-1">Password</label>
+            <div class="relative">
+              {{ form.password(class="w-full rounded-lg pl-4 pr-10 py-2.5 input-glass text-[0.95rem] font-normal",
+              placeholder="Min. 6 Karakter", id="passwordInput") }}
+              <button type="button" id="togglePassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 transition-colors focus:outline-none">
+                <i class="bi bi-eye text-[1rem]"></i>
+              </button>
+            </div>
+            {% for error in form.password.errors %}
+            <div class="text-red-400 text-xs text-left mt-1">
+              [{{ error }}]
+            </div>
+            {% endfor %}
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-200 mb-1">Konfirmasi Password</label>
+            <div class="relative">
+              {{ form.password_confirm(class="w-full rounded-lg pl-4 pr-10 py-2.5 input-glass text-[0.95rem]
+              font-normal", placeholder="Ulangi Password", id="confirmPasswordInput") }}
+              <button type="button" id="toggleConfirmPassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 hover:text-gray-800 transition-colors focus:outline-none">
+                <i class="bi bi-eye text-[1rem]"></i>
+              </button>
+            </div>
+            {% for error in form.password_confirm.errors %}
+            <div class="text-red-400 text-xs text-left mt-1">
+              [{{ error }}]
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-200 mb-1">Nomor Telepon</label>
+          {{ form.phone(class="w-full rounded-lg px-4 py-2.5 input-glass
+          text-[0.95rem] font-normal", placeholder="Contoh: 081234567890") }}
+          {% for error in form.phone.errors %}
+          <div class="text-red-400 text-xs text-left mt-1">[{{ error }}]</div>
+          {% endfor %}
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-200 mb-1">Alamat Lengkap</label>
+          {{ form.address(class="w-full rounded-lg px-4 py-2.5 input-glass
+          text-[0.95rem] font-normal", rows="3", placeholder="Alamat Pengiriman Dekorasi") }} {% for error in
+          form.address.errors %}
+          <div class="text-red-400 text-xs text-left mt-1">[{{ error }}]</div>
+          {% endfor %}
+        </div>
+
+        <div class="pt-2">
+          {{ form.submit(class="w-full rounded-lg py-3 font-semibold
+          text-[1rem] bg-dark-slate hover:bg-dark-slate-hover
+          active:scale-[0.98] transition-all duration-200 shadow-md
+          cursor-pointer text-white", value="Register") }}
+        </div>
+
+        <a href="{{ url_for('auth.login') }}"
+          class="block w-full text-center rounded-lg py-2.5 font-semibold text-[0.95rem] border border-white/20 bg-white/5 hover:bg-white/10 active:scale-[0.98] transition-all duration-200 shadow-md text-white">
+          Back to Login
+        </a>
+      </form>
     </div>
-</div>
-{% endblock %}
+  </div>
+  <script>
+    function setupPasswordToggle(toggleId, inputId) {
+      const toggleBtn = document.getElementById(toggleId);
+      const inputEl = document.getElementById(inputId);
+
+      if (toggleBtn && inputEl) {
+        toggleBtn.addEventListener('click', function () {
+          const type = inputEl.getAttribute('type') === 'password' ? 'text' : 'password';
+          inputEl.setAttribute('type', type);
+
+          const icon = this.querySelector('i');
+          if (type === 'text') {
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+          } else {
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+          }
+        });
+      }
+    }
+
+    setupPasswordToggle('togglePassword', 'passwordInput');
+    setupPasswordToggle('toggleConfirmPassword', 'confirmPasswordInput');
+  </script>
+</body>
+
+</html>

@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, request, session, c
 from flask_login import current_user, login_required
 from app import db
 from app.customer import bp
-from app.models import Product, Order, OrderItem, Category, Payment, Schedule, Customer
+from app.models import Product, Order, OrderItem, Category, Payment, Schedule, Customer, User
 from datetime import datetime, date, time, timedelta
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash
@@ -170,14 +170,14 @@ def checkout():
         
     # Perbarui informasi pelanggan jika berubah/baru
     if phone and current_user.phone != phone:
-        current_user.phone = phone
+        current_user.customer.phone = phone
     if address and current_user.address != address:
-        current_user.address = address
-    db.session.add(current_user)
+        current_user.customer.address = address
+    db.session.add(current_user.customer)
     
     # Buat pesanan baru
     order = Order(
-        customer_id=current_user.id,
+        customer_id=current_user.customer.id,
         order_date=date.today(),
         start_date=start_date,
         end_date=end_date,
@@ -222,7 +222,7 @@ def checkout():
 @login_required
 def profile():
     # Ambil riwayat transaksi pesanan milik pelanggan saat ini
-    orders = Order.query.filter_by(customer_id=current_user.id).order_by(Order.id.desc()).all()
+    orders = Order.query.filter_by(customer_id=current_user.customer.id).order_by(Order.id.desc()).all()
     return render_template('customer/profile.html', title='Profil Saya', orders=orders)
 
 @bp.route('/profile/update', methods=['POST'])
@@ -239,19 +239,21 @@ def profile_update():
         return redirect(url_for('customer.profile'))
         
     # Cek duplikasi email
-    existing_user = Customer.query.filter(Customer.email == email, Customer.id != current_user.id).first()
+    existing_user = User.query.filter(User.email == email, User.id != current_user.id).first()
     if existing_user:
         flash('Email sudah digunakan oleh pengguna lain.', 'danger')
         return redirect(url_for('customer.profile'))
         
-    current_user.name = name
+    current_user.customer.name = name
     current_user.email = email
-    current_user.phone = phone
-    current_user.address = address
+    current_user.customer.phone = phone
+    current_user.customer.address = address
     
     if password:
         current_user.set_password(password)
         
+    db.session.add(current_user)
+    db.session.add(current_user.customer)
     db.session.commit()
     flash('Informasi profil berhasil diperbarui.', 'success')
     return redirect(url_for('customer.profile'))
@@ -260,7 +262,7 @@ def profile_update():
 @login_required
 def upload_payment(order_id):
     order = db.session.get(Order, order_id)
-    if not order or order.customer_id != current_user.id:
+    if not order or order.customer_id != current_user.customer.id:
         abort(404)
         
     payment_method = request.form.get('payment_method')
@@ -317,7 +319,7 @@ def upload_payment(order_id):
 @login_required
 def invoice(order_id):
     order = db.session.get(Order, order_id)
-    if not order or order.customer_id != current_user.id:
+    if not order or order.customer_id != current_user.customer.id:
         abort(404)
         
     # Menghitung durasi sewa

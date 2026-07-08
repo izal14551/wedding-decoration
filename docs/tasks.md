@@ -13,7 +13,7 @@ Fokus pada pembuatan akun, hak akses multi-role (Pelanggan & Admin), dan manajem
 - [x] **1.2 Halaman & Fitur Login Multi-Role**
   - Penyesuaian `load_user` Flask-Login menggunakan prefix ID (`admin_{id}` dan `pelanggan_{id}`).
   - Implementasi tampilan halaman login dengan desain Glassmorphism + Tailwind CSS.
-- [ ] **1.3 Fitur Registrasi Pelanggan**
+- [x] **1.3 Fitur Registrasi Pelanggan**
   - Validasi input registrasi (nama, email unik, password, nomor HP, alamat).
   - Enkripsi password menggunakan bcrypt hashing (`generate_password_hash`).
 - [ ] **1.4 Fitur Kelola Profil (Pelanggan)**

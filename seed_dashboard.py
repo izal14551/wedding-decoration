@@ -1,24 +1,48 @@
 import os
 from datetime import datetime, date, time
 from app import create_app, db
-from app.models import Customer, Category, Product, Order, OrderItem, Payment, Admin, Schedule
+from app.models import Customer, Category, Product, Order, OrderItem, Payment, Admin, Schedule, User, Role
 
 app = create_app()
 
 with app.app_context():
     print("Mereset database...")
+    if db.engine.name == 'mysql':
+        db.session.execute(db.text("SET FOREIGN_KEY_CHECKS = 0;"))
+        db.session.commit()
+        
+        old_tables = ['detail_pesanan', 'laporan', 'pembayaran', 'pesanan', 'jadwal', 'barang', 'kategori', 'pelanggan']
+        for table in old_tables:
+            db.session.execute(db.text(f"DROP TABLE IF EXISTS `{table}`;"))
+        db.session.commit()
+
     db.drop_all()
     db.create_all()
+
+    if db.engine.name == 'mysql':
+        db.session.execute(db.text("SET FOREIGN_KEY_CHECKS = 1;"))
+        db.session.commit()
+
     print("Database berhasil direset!")
 
     # 1. Seed Admin
     print("Seeding Admin...")
+    admin_role = Role(name='admin', description='Administrator')
+    customer_role = Role(name='customer', description='Pelanggan')
+    db.session.add_all([admin_role, customer_role])
+    db.session.flush()
+
+    u_admin = User(email='admin@example.com')
+    u_admin.set_password('admin123')
+    u_admin.roles.append(admin_role)
+    db.session.add(u_admin)
+    db.session.flush()
+
     admin = Admin(
+        user_id=u_admin.id,
         name='Administrator',
-        email='admin@example.com',
         phone='081234567890'
     )
-    admin.set_password('admin123')
     db.session.add(admin)
     db.session.flush()
 
@@ -70,29 +94,41 @@ with app.app_context():
 
     # 4. Seed Customer
     print("Seeding Customer...")
+    u1 = User(email='budi@example.com')
+    u1.set_password('budi123')
+    u1.roles.append(customer_role)
+    
+    u2 = User(email='ani@example.com')
+    u2.set_password('ani123')
+    u2.roles.append(customer_role)
+    
+    u3 = User(email='siti@example.com')
+    u3.set_password('siti123')
+    u3.roles.append(customer_role)
+    
+    db.session.add_all([u1, u2, u3])
+    db.session.flush()
+
     p1 = Customer(
+        user_id=u1.id,
         name='Budi Santoso',
-        email='budi@example.com',
         phone='085611223344',
         address='Jl. Merdeka No. 10, Jakarta Pusat'
     )
-    p1.set_password('budi123')
 
     p2 = Customer(
+        user_id=u2.id,
         name='Ani Lestari',
-        email='ani@example.com',
         phone='087799887766',
         address='Jl. Melati No. 5, Sleman, Yogyakarta'
     )
-    p2.set_password('ani123')
 
     p3 = Customer(
+        user_id=u3.id,
         name='Siti Aminah',
-        email='siti@example.com',
         phone='081233445566',
         address='Jl. Mawar Gg. 3 No. 12, Solo'
     )
-    p3.set_password('siti123')
     db.session.add_all([p1, p2, p3])
     db.session.flush()
 
