@@ -1,0 +1,342 @@
+{% extends "base.html" %} {% block content %}
+<div class="container my-5">
+  <h2
+    class="serif-font mb-4 text-center"
+    style="font-size: 2.2rem; letter-spacing: 1px"
+  >
+    Keranjang Sewa Anda
+  </h2>
+
+  {% if cart_items %}
+  <div class="row g-4">
+    <!-- Cart Items Table -->
+    <div class="col-lg-8">
+      <div
+        class="card shadow-sm p-4"
+        style="
+          background-color: #ffffff;
+          border-radius: 15px;
+          border: 1px solid rgba(197, 168, 128, 0.15);
+        "
+      >
+        <h4
+          class="serif-font mb-4 text-gold-accent"
+          style="color: var(--primary-gold-dark)"
+        >
+          Detail Barang
+        </h4>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead class="text-muted small uppercase fw-bold">
+              <tr>
+                <th scope="col">Dekorasi</th>
+                <th scope="col" class="text-center">Harga / Hari</th>
+                <th scope="col" class="text-center">Kuantitas</th>
+                <th scope="col" class="text-end">Subtotal / Hari</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in cart_items %}
+              <tr>
+                <!-- Product Name -->
+                <td>
+                  <div class="d-flex align-items-center">
+                    {% if item.product.category.name == 'Package' %}
+                    <i class="bi bi-box-fill text-warning me-3 fs-3"></i>
+                    {% elif item.product.category.name == 'Makeup' %}
+                    <i class="bi bi-brush-fill text-warning me-3 fs-3"></i>
+                    {% else %}
+                    <i class="bi bi-layout-wtf text-warning me-3 fs-3"></i>
+                    {% endif %}
+                    <div>
+                      <h6 class="mb-0 fw-bold">{{ item.product.name }}</h6>
+                      <small class="text-muted"
+                        >{{ item.product.category.name }}</small
+                      >
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Price -->
+                <td class="text-center">
+                  Rp {{ "{:,.0f}".format(item.product.price).replace(',', '.')
+                  }}
+                </td>
+
+                <!-- Quantity Controls -->
+                <td class="text-center">
+                  <div class="d-flex justify-content-center align-items-center">
+                    <!-- Decrease -->
+                    <form
+                      action="{{ url_for('customer.cart_update', product_id=item.product.id) }}"
+                      method="POST"
+                      class="d-inline"
+                    >
+                      <input type="hidden" name="action" value="decrease" />
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-secondary rounded-circle px-2 py-0"
+                        style="width: 28px; height: 28px"
+                      >
+                        -
+                      </button>
+                    </form>
+
+                    <span class="mx-3 fw-bold">{{ item.quantity }}</span>
+
+                    <!-- Increase -->
+                    <form
+                      action="{{ url_for('customer.cart_update', product_id=item.product.id) }}"
+                      method="POST"
+                      class="d-inline"
+                    >
+                      <input type="hidden" name="action" value="increase" />
+                      <button
+                        type="submit"
+                        class="btn btn-sm btn-outline-secondary rounded-circle px-2 py-0"
+                        style="width: 28px; height: 28px"
+                      >
+                        +
+                      </button>
+                    </form>
+                  </div>
+                </td>
+
+                <!-- Subtotal -->
+                <td class="text-end fw-bold text-dark">
+                  Rp {{ "{:,.0f}".format(item.total).replace(',', '.') }}
+                </td>
+
+                <!-- Remove -->
+                <td class="text-end">
+                  <form
+                    action="{{ url_for('customer.cart_remove', product_id=item.product.id) }}"
+                    method="POST"
+                    class="d-inline"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-link text-danger p-0"
+                      title="Hapus Barang"
+                    >
+                      <i class="bi bi-trash3 fs-5"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkout Form & Pricing Summary -->
+    <div class="col-lg-4">
+      <div
+        class="card shadow-sm p-4 mb-4"
+        style="
+          background-color: #ffffff;
+          border-radius: 15px;
+          border: 1px solid rgba(197, 168, 128, 0.15);
+        "
+      >
+        <h4
+          class="serif-font mb-4 text-gold-accent"
+          style="color: var(--primary-gold-dark)"
+        >
+          Formulir Checkout
+        </h4>
+
+        <form action="{{ url_for('customer.checkout') }}" method="POST">
+          <div class="row">
+            <div class="col-12 mb-3">
+              <label for="start_date" class="form-label fw-semibold"
+                >Tanggal Mulai Sewa</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="start_date"
+                name="start_date"
+                required
+                style="border-radius: 8px"
+              />
+            </div>
+            <div class="col-12 mb-3">
+              <label for="end_date" class="form-label fw-semibold"
+                >Tanggal Selesai Sewa</label
+              >
+              <input
+                type="date"
+                class="form-control"
+                id="end_date"
+                name="end_date"
+                required
+                style="border-radius: 8px"
+              />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label fw-semibold"
+              >Nomor HP / WhatsApp</label
+            >
+            <input
+              type="text"
+              class="form-control"
+              id="phone"
+              name="phone"
+              placeholder="Contoh: 081234567890"
+              value="{{ current_user.phone or '' }}"
+              required
+              style="border-radius: 8px"
+            />
+          </div>
+
+          <div class="mb-3">
+            <label for="address" class="form-label fw-semibold"
+              >Alamat Lokasi Acara</label
+            >
+            <textarea
+              class="form-control"
+              id="address"
+              name="address"
+              rows="3"
+              placeholder="Alamat lengkap tempat pemasangan dekorasi..."
+              required
+              style="border-radius: 8px"
+            >
+{{ current_user.address or '' }}</textarea
+            >
+          </div>
+
+          <div class="mb-4">
+            <label for="notes" class="form-label fw-semibold"
+              >Catatan Acara (Opsional)</label
+            >
+            <textarea
+              class="form-control"
+              id="notes"
+              name="notes"
+              rows="2"
+              placeholder="Warna tema, permintaan khusus, dll..."
+              style="border-radius: 8px"
+            ></textarea>
+          </div>
+
+          <!-- Pricing Summary Card -->
+          <div
+            class="p-3 bg-light rounded mb-4"
+            style="border-left: 4px solid var(--primary-gold)"
+          >
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Total / Hari:</span>
+              <span class="fw-bold"
+                >Rp {{ "{:,.0f}".format(total_price).replace(',', '.') }}</span
+              >
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span class="text-muted">Durasi Sewa:</span>
+              <span id="rental-duration" class="fw-bold">1 Hari</span>
+            </div>
+            <hr class="my-2" />
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-bold text-dark">Estimasi Total:</span>
+              <span
+                id="grand-total"
+                data-base-total="{{ total_price }}"
+                class="fw-bold text-success fs-5"
+                >Rp {{ "{:,.0f}".format(total_price).replace(',', '.') }}</span
+              >
+            </div>
+          </div>
+
+          <div class="d-grid">
+            <button
+              type="submit"
+              class="btn btn-gold-cta py-2.5"
+              style="border-radius: 30px"
+            >
+              <i class="bi bi-shield-check me-2"></i> Konfirmasi Sewa & Checkout
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- Empty Cart State -->
+  <div class="text-center py-5">
+    <i class="bi bi-cart-x text-muted" style="font-size: 5rem"></i>
+    <h3 class="serif-font mt-4">Keranjang sewa Anda kosong</h3>
+    <p class="text-muted">
+      Jelajahi dekorasi menawan kami untuk acara spesial Anda.
+    </p>
+    <a
+      href="{{ url_for('customer.decorations') }}"
+      class="btn btn-gold-cta mt-3 px-4 py-2"
+      style="border-radius: 30px"
+    >
+      Jelajahi Dekorasi
+    </a>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const today = new Date().toISOString().split("T")[0];
+    const startDateInput = document.getElementById("start_date");
+    const endDateInput = document.getElementById("end_date");
+    const durationEl = document.getElementById("rental-duration");
+    const grandTotalEl = document.getElementById("grand-total");
+
+    // Ambil total harga dasar dari data-base-total untuk menghindari error linter statis
+    const baseTotal =
+      parseFloat(
+        grandTotalEl ? grandTotalEl.getAttribute("data-base-total") : 0,
+      ) || 0;
+
+    if (startDateInput && endDateInput) {
+      startDateInput.min = today;
+
+      startDateInput.addEventListener("change", function () {
+        endDateInput.min = this.value;
+        calculateTotal();
+      });
+
+      endDateInput.addEventListener("change", function () {
+        calculateTotal();
+      });
+    }
+
+    function calculateTotal() {
+      if (
+        startDateInput.value &&
+        endDateInput.value &&
+        durationEl &&
+        grandTotalEl
+      ) {
+        const start = new Date(startDateInput.value);
+        const end = new Date(endDateInput.value);
+
+        let diffTime = Math.abs(end - start);
+        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 0) diffDays = 1;
+
+        durationEl.textContent = diffDays + " Hari";
+
+        const total = baseTotal * diffDays;
+        grandTotalEl.textContent = "Rp " + total.toLocaleString("id-ID");
+      } else if (durationEl && grandTotalEl) {
+        durationEl.textContent = "1 Hari";
+        grandTotalEl.textContent = "Rp " + baseTotal.toLocaleString("id-ID");
+      }
+    }
+  });
+</script>
+{% endblock %}
