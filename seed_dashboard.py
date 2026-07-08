@@ -113,21 +113,24 @@ with app.app_context():
         user_id=u1.id,
         name='Budi Santoso',
         phone='085611223344',
-        address='Jl. Merdeka No. 10, Jakarta Pusat'
+        address='Jl. Merdeka No. 10, Jakarta Pusat',
+        is_active=True
     )
 
     p2 = Customer(
         user_id=u2.id,
         name='Ani Lestari',
         phone='087799887766',
-        address='Jl. Melati No. 5, Sleman, Yogyakarta'
+        address='Jl. Melati No. 5, Sleman, Yogyakarta',
+        is_active=True
     )
 
     p3 = Customer(
         user_id=u3.id,
         name='Siti Aminah',
         phone='081233445566',
-        address='Jl. Mawar Gg. 3 No. 12, Solo'
+        address='Jl. Mawar Gg. 3 No. 12, Solo',
+        is_active=True
     )
     db.session.add_all([p1, p2, p3])
     db.session.flush()

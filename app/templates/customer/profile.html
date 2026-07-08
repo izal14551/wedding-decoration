@@ -3,30 +3,22 @@
   <div class="row g-4">
     <!-- Sidebar User Quick Info -->
     <div class="col-lg-4">
-      <div
-        class="card shadow-sm p-4 text-center"
-        style="
+      <div class="card shadow-sm p-4 text-center" style="
           background-color: #ffffff;
           border-radius: 15px;
           border: 1px solid rgba(197, 168, 128, 0.15);
-        "
-      >
-        <div
-          class="rounded-circle bg-dark text-warning d-flex justify-content-center align-items-center mx-auto mb-3"
+        ">
+        <div class="rounded-circle bg-dark text-warning d-flex justify-content-center align-items-center mx-auto mb-3"
           style="
             width: 80px;
             height: 80px;
             border: 2px solid var(--primary-gold);
-          "
-        >
+          ">
           <i class="bi bi-person-fill fs-1"></i>
         </div>
         <h4 class="serif-font mb-1">{{ current_user.name }}</h4>
         <p class="text-muted small mb-3">{{ current_user.email }}</p>
-        <span
-          class="badge bg-light text-dark p-2 px-3 border"
-          style="font-size: 0.8rem; border-radius: 20px"
-        >
+        <span class="badge bg-light text-dark p-2 px-3 border" style="font-size: 0.8rem; border-radius: 20px">
           Pelanggan Griya Rias Saraswati
         </span>
         <hr class="my-4" />
@@ -44,48 +36,23 @@
 
     <!-- Main Content Tabs -->
     <div class="col-lg-8">
-      <div
-        class="card shadow-sm p-4 h-100"
-        style="
+      <div class="card shadow-sm p-4 h-100" style="
           background-color: #ffffff;
           border-radius: 15px;
           border: 1px solid rgba(197, 168, 128, 0.15);
-        "
-      >
+        ">
         <!-- Navigation Tabs -->
-        <ul
-          class="nav nav-pills mb-4 pb-3"
-          id="profileTabs"
-          role="tablist"
-          style="border-bottom: 1px solid rgba(0, 0, 0, 0.06)"
-        >
+        <ul class="nav nav-pills mb-4 pb-3" id="profileTabs" role="tablist"
+          style="border-bottom: 1px solid rgba(0, 0, 0, 0.06)">
           <li class="nav-item" role="presentation">
-            <button
-              class="nav-link active me-2"
-              id="orders-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#orders-pane"
-              type="button"
-              role="tab"
-              aria-controls="orders-pane"
-              aria-selected="true"
-              style="border-radius: 20px"
-            >
+            <button class="nav-link active me-2" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane"
+              type="button" role="tab" aria-controls="orders-pane" aria-selected="true" style="border-radius: 20px">
               <i class="bi bi-clock-history me-1"></i> Riwayat Pesanan
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button
-              class="nav-link"
-              id="edit-tab"
-              data-bs-toggle="tab"
-              data-bs-target="#edit-pane"
-              type="button"
-              role="tab"
-              aria-controls="edit-pane"
-              aria-selected="false"
-              style="border-radius: 20px"
-            >
+            <button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit-pane" type="button"
+              role="tab" aria-controls="edit-pane" aria-selected="false" style="border-radius: 20px">
               <i class="bi bi-pencil-square me-1"></i> Ubah Profil
             </button>
           </li>
@@ -93,61 +60,32 @@
 
         <div class="tab-content" id="profileTabsContent">
           <!-- Tab 1: Orders History -->
-          <div
-            class="tab-pane fade show active"
-            id="orders-pane"
-            role="tabpanel"
-            aria-labelledby="orders-tab"
-            tabindex="0"
-          >
+          <div class="tab-pane fade show active" id="orders-pane" role="tabpanel" aria-labelledby="orders-tab"
+            tabindex="0">
             {% if orders %} {% for order in orders %}
-            <div
-              class="card mb-3 border"
-              style="border-radius: 10px; overflow: hidden"
-            >
-              <div
-                class="card-header bg-light d-flex justify-content-between align-items-center py-3"
-              >
+            <div class="card mb-3 border" style="border-radius: 10px; overflow: hidden">
+              <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
                 <div>
                   <span class="fw-bold text-dark">Order #{{ order.id }}</span>
                   <span class="text-muted mx-2">|</span>
-                  <small class="text-muted"
-                    >{{ order.order_date.strftime('%d %B %Y') }}</small
-                  >
+                  <small class="text-muted">{{ order.order_date.strftime('%d %B %Y') }}</small>
                 </div>
 
                 <!-- Order Status Badge -->
                 <div>
                   {% if order.status == 'Pending' %} {% if order.payment %} {%
                   if order.payment.status == 'Pending' %}
-                  <span
-                    class="badge bg-warning text-dark px-3 py-2 rounded-pill"
-                    >Menunggu Verifikasi</span
-                  >
+                  <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Verifikasi</span>
                   {% elif order.payment.status == 'Rejected' %}
-                  <span
-                    class="badge bg-danger text-white px-3 py-2 rounded-pill"
-                    >Pembayaran Ditolak</span
-                  >
+                  <span class="badge bg-danger text-white px-3 py-2 rounded-pill">Pembayaran Ditolak</span>
                   {% endif %} {% else %}
-                  <span
-                    class="badge bg-secondary text-white px-3 py-2 rounded-pill"
-                    >Belum Bayar</span
-                  >
+                  <span class="badge bg-secondary text-white px-3 py-2 rounded-pill">Belum Bayar</span>
                   {% endif %} {% elif order.status == 'Processing' %}
-                  <span class="badge bg-info text-white px-3 py-2 rounded-pill"
-                    >Diproses</span
-                  >
+                  <span class="badge bg-info text-white px-3 py-2 rounded-pill">Diproses</span>
                   {% elif order.status == 'Completed' %}
-                  <span
-                    class="badge bg-success text-white px-3 py-2 rounded-pill"
-                    >Selesai</span
-                  >
+                  <span class="badge bg-success text-white px-3 py-2 rounded-pill">Selesai</span>
                   {% elif order.status == 'Cancelled' %}
-                  <span
-                    class="badge bg-danger text-white px-3 py-2 rounded-pill"
-                    >Dibatalkan</span
-                  >
+                  <span class="badge bg-danger text-white px-3 py-2 rounded-pill">Dibatalkan</span>
                   {% endif %}
                 </div>
               </div>
@@ -180,14 +118,9 @@
                   </div>
 
                   <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                    <span class="text-muted small d-block"
-                      >Durasi Sewa: {{ order.start_date.strftime('%d %b') }} s/d
-                      {{ order.end_date.strftime('%d %b %Y') }}</span
-                    >
-                    <h5
-                      class="text-dark fw-bold mt-1 mb-0"
-                      style="color: var(--primary-gold-dark) !important"
-                    >
+                    <span class="text-muted small d-block">Durasi Sewa: {{ order.start_date.strftime('%d %b') }} s/d
+                      {{ order.end_date.strftime('%d %b %Y') }}</span>
+                    <h5 class="text-dark fw-bold mt-1 mb-0" style="color: var(--primary-gold-dark) !important">
                       Total: Rp {{
                       "{:,.0f}".format(order.total_price).replace(',', '.') }}
                     </h5>
@@ -195,35 +128,25 @@
                 </div>
 
                 <!-- Payment Flow / Actions -->
-                <div
-                  class="d-flex justify-content-between align-items-center pt-3 border-top"
-                  style="border-style: dashed !important"
-                >
+                <div class="d-flex justify-content-between align-items-center pt-3 border-top"
+                  style="border-style: dashed !important">
                   <div>
                     {% if order.status == 'Pending' and not order.payment %}
                     <!-- Payment instructions -->
-                    <span class="text-danger small fw-semibold"
-                      ><i class="bi bi-info-circle-fill me-1"></i> Silakan
-                      transfer dan unggah bukti pembayaran</span
-                    >
+                    <span class="text-danger small fw-semibold"><i class="bi bi-info-circle-fill me-1"></i> Silakan
+                      transfer dan unggah bukti pembayaran</span>
                     {% elif order.status == 'Pending' and order.payment and
                     order.payment.status == 'Pending' %}
-                    <span class="text-warning small fw-semibold"
-                      ><i class="bi bi-hourglass-split me-1"></i> Pembayaran
-                      dalam proses verifikasi oleh Admin</span
-                    >
+                    <span class="text-warning small fw-semibold"><i class="bi bi-hourglass-split me-1"></i> Pembayaran
+                      dalam proses verifikasi oleh Admin</span>
                     {% elif order.status == 'Pending' and order.payment and
                     order.payment.status == 'Rejected' %}
-                    <span class="text-danger small fw-semibold"
-                      ><i class="bi bi-exclamation-triangle-fill me-1"></i>
-                      Pembayaran ditolak. Silakan unggah bukti yang valid</span
-                    >
+                    <span class="text-danger small fw-semibold"><i class="bi bi-exclamation-triangle-fill me-1"></i>
+                      Pembayaran ditolak. Silakan unggah bukti yang valid</span>
                     {% elif order.status == 'Processing' or order.status ==
                     'Completed' %}
-                    <span class="text-success small fw-semibold"
-                      ><i class="bi bi-check-circle-fill me-1"></i> Pembayaran
-                      Lunas & Terverifikasi</span
-                    >
+                    <span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Pembayaran
+                      Lunas & Terverifikasi</span>
                     {% endif %}
                   </div>
 
@@ -232,12 +155,8 @@
                     {% if order.payment and order.payment.status == 'Approved'
                     or order.status == 'Processing' or order.status ==
                     'Completed' %}
-                    <a
-                      href="{{ url_for('customer.invoice', order_id=order.id) }}"
-                      class="btn btn-sm btn-outline-dark"
-                      target="_blank"
-                      style="border-radius: 20px"
-                    >
+                    <a href="{{ url_for('customer.invoice', order_id=order.id) }}" class="btn btn-sm btn-outline-dark"
+                      target="_blank" style="border-radius: 20px">
                       <i class="bi bi-file-earmark-pdf-fill me-1"></i> Cetak
                       Invoice
                     </a>
@@ -246,13 +165,8 @@
                     <!-- Upload Proof Button -->
                     {% if order.status == 'Pending' and (not order.payment or
                     order.payment.status == 'Rejected') %}
-                    <button
-                      class="btn btn-sm btn-gold-cta"
-                      data-bs-toggle="modal"
-                      data-bs-target="#uploadModal"
-                      data-order-id="{{ order.id }}"
-                      style="border-radius: 20px"
-                    >
+                    <button class="btn btn-sm btn-gold-cta" data-bs-toggle="modal" data-bs-target="#uploadModal"
+                      data-order-id="{{ order.id }}" style="border-radius: 20px">
                       <i class="bi bi-upload me-1"></i> Unggah Bukti Transfer
                     </button>
                     {% endif %}
@@ -262,19 +176,13 @@
             </div>
             {% endfor %} {% else %}
             <div class="text-center py-5">
-              <i
-                class="bi bi-receipt-cutoff text-muted"
-                style="font-size: 4rem"
-              ></i>
+              <i class="bi bi-receipt-cutoff text-muted" style="font-size: 4rem"></i>
               <h5 class="serif-font mt-3">Belum ada pesanan</h5>
               <p class="text-muted">
                 Riwayat transaksi pemesanan Anda akan muncul di sini.
               </p>
-              <a
-                href="{{ url_for('customer.decorations') }}"
-                class="btn btn-gold-cta btn-sm mt-1 px-4"
-                style="border-radius: 20px"
-              >
+              <a href="{{ url_for('customer.decorations') }}" class="btn btn-gold-cta btn-sm mt-1 px-4"
+                style="border-radius: 20px">
                 Pesan Sekarang
               </a>
             </div>
@@ -282,108 +190,57 @@
           </div>
 
           <!-- Tab 2: Edit Profile -->
-          <div
-            class="tab-pane fade"
-            id="edit-pane"
-            role="tabpanel"
-            aria-labelledby="edit-tab"
-            tabindex="0"
-          >
-            <form
-              action="{{ url_for('customer.profile_update') }}"
-              method="POST"
-            >
+          <div class="tab-pane fade" id="edit-pane" role="tabpanel" aria-labelledby="edit-tab" tabindex="0">
+            <form action="{{ url_for('customer.profile_update') }}" method="POST">
               <div class="row">
                 <div class="col-md-6 mb-3">
-                  <label for="profile-name" class="form-label fw-semibold"
-                    >Nama Lengkap</label
-                  >
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="profile-name"
-                    name="name"
-                    value="{{ current_user.name }}"
-                    required
-                    style="border-radius: 8px"
-                  />
+                  <label for="profile-name" class="form-label fw-semibold">Nama Lengkap</label>
+                  <input type="text" class="form-control" id="profile-name" name="name" value="{{ current_user.name }}"
+                    required style="border-radius: 8px" />
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label for="profile-email" class="form-label fw-semibold"
-                    >Alamat Email</label
-                  >
-                  <input
-                    type="email"
-                    class="form-control"
-                    id="profile-email"
-                    name="email"
-                    value="{{ current_user.email }}"
-                    required
-                    style="border-radius: 8px"
-                  />
+                  <label for="profile-email" class="form-label fw-semibold">Alamat Email</label>
+                  <input type="email" class="form-control" id="profile-email" name="email"
+                    value="{{ current_user.email }}" required style="border-radius: 8px" />
                 </div>
               </div>
 
               <div class="mb-3">
-                <label for="profile-phone" class="form-label fw-semibold"
-                  >Nomor HP / WhatsApp</label
-                >
-                <input
-                  type="text"
-                  class="form-control"
-                  id="profile-phone"
-                  name="phone"
-                  value="{{ current_user.phone or '' }}"
-                  placeholder="Contoh: 081234567890"
-                  style="border-radius: 8px"
-                />
+                <label for="profile-phone" class="form-label fw-semibold">Nomor HP / WhatsApp</label>
+                <input type="text" class="form-control" id="profile-phone" name="phone"
+                  value="{{ current_user.phone or '' }}" placeholder="Contoh: 081234567890"
+                  style="border-radius: 8px" />
               </div>
 
               <div class="mb-3">
-                <label for="profile-address" class="form-label fw-semibold"
-                  >Alamat Lengkap</label
-                >
-                <textarea
-                  class="form-control"
-                  id="profile-address"
-                  name="address"
-                  rows="3"
-                  placeholder="Masukkan alamat lengkap..."
-                  style="border-radius: 8px"
-                >
-{{ current_user.address or '' }}</textarea
-                >
+                <label for="profile-address" class="form-label fw-semibold">Alamat Lengkap</label>
+                <textarea class="form-control" id="profile-address" name="address" rows="3"
+                  placeholder="Masukkan alamat lengkap..." style="border-radius: 8px">
+{{ current_user.address or '' }}</textarea>
               </div>
 
               <hr class="my-4" />
-              <h5
-                class="serif-font mb-3 text-gold-accent"
-                style="color: var(--primary-gold-dark)"
-              >
+              <h5 class="serif-font mb-3 text-gold-accent" style="color: var(--primary-gold-dark)">
                 Keamanan & Password
               </h5>
 
               <div class="mb-4">
-                <label for="profile-password" class="form-label fw-semibold"
-                  >Ubah Password (Kosongkan jika tidak ingin diubah)</label
-                >
-                <input
-                  type="password"
-                  class="form-control"
-                  id="profile-password"
-                  name="password"
-                  placeholder="Masukkan password baru..."
-                  style="border-radius: 8px"
-                />
+                <label for="profile-password" class="form-label fw-semibold">Ubah Password (Kosongkan jika tidak ingin
+                  diubah)</label>
+                <div class="relative position-relative">
+                  <input type="password" class="form-control" id="profile-password" name="password"
+                    placeholder="Masukkan password baru..." style="border-radius: 8px; padding-right: 40px;" />
+                  <button type="button" id="toggleProfilePassword"
+                    class="position-absolute end-0 top-50 translate-middle-y me-3 btn p-0 border-0 text-muted hover:text-dark focus:outline-none"
+                    style="z-index: 10;">
+                    <i class="bi bi-eye fs-5"></i>
+                  </button>
+                </div>
               </div>
 
               <div class="d-grid gap-2">
-                <button
-                  type="submit"
-                  class="btn btn-gold-cta py-2.5"
-                  style="border-radius: 30px"
-                >
+                <button type="submit" class="btn btn-gold-cta py-2.5" style="border-radius: 30px">
                   <i class="bi bi-save2-fill me-2"></i> Simpan Perubahan Profil
                 </button>
               </div>
@@ -395,44 +252,22 @@
   </div>
 </div>
 
-<!-- Upload Payment Proof Modal -->
-<div
-  class="modal fade"
-  id="uploadModal"
-  tabindex="-1"
-  aria-labelledby="uploadModalLabel"
-  aria-hidden="true"
->
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div
-      class="modal-content"
-      style="border-radius: 15px; border: 1px solid rgba(197, 168, 128, 0.25)"
-    >
-      <div
-        class="modal-header bg-dark text-white"
-        style="
+    <div class="modal-content" style="border-radius: 15px; border: 1px solid rgba(197, 168, 128, 0.25)">
+      <div class="modal-header bg-dark text-white" style="
           border-top-left-radius: 14px;
           border-top-right-radius: 14px;
           border-bottom: 2px solid var(--primary-gold);
-        "
-      >
+        ">
         <h5 class="modal-title" id="uploadModalLabel">
           <i class="bi bi-credit-card text-warning me-2"></i> Unggah Bukti
           Pembayaran
         </h5>
-        <button
-          type="button"
-          class="btn-close btn-close-white"
-          data-bs-dismiss="modal"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4">
-        <!-- Bank transfer info -->
-        <div
-          class="p-3 bg-light rounded mb-4"
-          style="border-left: 4px solid var(--primary-gold); font-size: 0.9rem"
-        >
+        <div class="p-3 bg-light rounded mb-4" style="border-left: 4px solid var(--primary-gold); font-size: 0.9rem">
           <h6 class="fw-bold mb-2">Instruksi Transfer:</h6>
           <p class="mb-1">
             Silakan transfer sesuai total tagihan pesanan Anda ke salah satu
@@ -440,38 +275,19 @@
           </p>
           <ul class="list-unstyled mb-0 mt-2">
             <li>
-              <strong>Bank BCA:</strong> 037-1234-567 <br /><span
-                class="text-muted"
-                >a.n. Griya Rias Saraswati</span
-              >
+              <strong>Bank BCA:</strong> 037-1234-567 <br /><span class="text-muted">a.n. Griya Rias Saraswati</span>
             </li>
             <li class="mt-2">
-              <strong>Bank Mandiri:</strong> 137-00-1234567-8 <br /><span
-                class="text-muted"
-                >a.n. Griya Rias Saraswati</span
-              >
+              <strong>Bank Mandiri:</strong> 137-00-1234567-8 <br /><span class="text-muted">a.n. Griya Rias
+                Saraswati</span>
             </li>
           </ul>
         </div>
 
-        <form
-          id="uploadForm"
-          action=""
-          method="POST"
-          enctype="multipart/form-data"
-        >
-          <!-- Payment Method -->
+        <form id="uploadForm" action="" method="POST" enctype="multipart/form-data">
           <div class="mb-3">
-            <label for="payment_method" class="form-label fw-semibold"
-              >Metode Pembayaran</label
-            >
-            <select
-              class="form-select"
-              id="payment_method"
-              name="payment_method"
-              required
-              style="border-radius: 8px"
-            >
+            <label for="payment_method" class="form-label fw-semibold">Metode Pembayaran</label>
+            <select class="form-select" id="payment_method" name="payment_method" required style="border-radius: 8px">
               <option value="">-- Pilih Bank --</option>
               <option value="Transfer Bank BCA">Transfer Bank BCA</option>
               <option value="Transfer Bank Mandiri">
@@ -480,20 +296,11 @@
             </select>
           </div>
 
-          <!-- File -->
           <div class="mb-4">
-            <label for="payment_proof" class="form-label fw-semibold"
-              >Berkas Bukti Transfer (Format Gambar: PNG, JPG, JPEG)</label
-            >
-            <input
-              type="file"
-              class="form-control"
-              id="payment_proof"
-              name="payment_proof"
-              accept="image/*"
-              required
-              style="border-radius: 8px"
-            />
+            <label for="payment_proof" class="form-label fw-semibold">Berkas Bukti Transfer (Format Gambar: PNG, JPG,
+              JPEG)</label>
+            <input type="file" class="form-control" id="payment_proof" name="payment_proof" accept="image/*" required
+              style="border-radius: 8px" />
           </div>
 
           <div class="d-grid gap-2">
@@ -516,18 +323,34 @@
         const orderId = button.getAttribute("data-order-id");
         const form = uploadModal.querySelector("#uploadForm");
 
-        // Atur action form dinamis berdasarkan ID Pesanan
         if (form) {
           form.action = `/order/${orderId}/upload_payment`;
         }
       });
     }
 
-    // Aktifkan tab berdasarkan hash jika ada
     const hash = window.location.hash;
     if (hash === "#edit") {
       const editTab = document.getElementById("edit-tab");
       if (editTab) editTab.click();
+    }
+
+    const toggleProfilePassword = document.getElementById("toggleProfilePassword");
+    const profilePasswordInput = document.getElementById("profile-password");
+    if (toggleProfilePassword && profilePasswordInput) {
+      toggleProfilePassword.addEventListener("click", function () {
+        const type = profilePasswordInput.getAttribute("type") === "password" ? "text" : "password";
+        profilePasswordInput.setAttribute("type", type);
+
+        const icon = this.querySelector("i");
+        if (type === "text") {
+          icon.classList.remove("bi-eye");
+          icon.classList.add("bi-eye-slash");
+        } else {
+          icon.classList.remove("bi-eye-slash");
+          icon.classList.add("bi-eye");
+        }
+      });
     }
   });
 </script>

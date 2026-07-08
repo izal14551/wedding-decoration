@@ -16,9 +16,9 @@ Fokus pada pembuatan akun, hak akses multi-role (Pelanggan & Admin), dan manajem
 - [x] **1.3 Fitur Registrasi Pelanggan**
   - Validasi input registrasi (nama, email unik, password, nomor HP, alamat).
   - Enkripsi password menggunakan bcrypt hashing (`generate_password_hash`).
-- [ ] **1.4 Fitur Kelola Profil (Pelanggan)**
+- [x] **1.4 Fitur Kelola Profil (Pelanggan)**
   - Pelanggan dapat mengubah data profil mereka (nama, nomor HP, alamat, password).
-- [ ] **1.5 Manajemen Pengguna (Admin)**
+- [x] **1.5 Manajemen Pengguna (Admin)**
   - Halaman admin untuk melihat daftar pelanggan terdaftar.
   - Fitur untuk menonaktifkan akun pelanggan atau menghapus akun.
 

@@ -1,0 +1,268 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <!-- Page Header & Statistics Cards -->
+  <div class="row mb-4 g-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <div>
+        <h4 class="fw-bold text-dark-slate mb-1">Manajemen Pelanggan</h4>
+        <p class="text-muted small mb-0">Kelola status keaktifan dan data akun seluruh pelanggan terdaftar.</p>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3"
+        style="border-radius: 12px; background: linear-gradient(135deg, #2c3e50, #34495e); color: white;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-white-50 small fw-semibold d-block">Total Pelanggan</span>
+            <span class="fs-2 fw-bold">{{ total_customers }}</span>
+          </div>
+          <div class="bg-white/10 rounded p-2.5">
+            <i class="bi bi-people-fill fs-3"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3"
+        style="border-radius: 12px; background: linear-gradient(135deg, #27ae60, #2ecc71); color: white;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-white-50 small fw-semibold d-block">Pelanggan Aktif</span>
+            <span class="fs-2 fw-bold">{{ active_customers }}</span>
+          </div>
+          <div class="bg-white/10 rounded p-2.5">
+            <i class="bi bi-person-check-fill fs-3"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm p-3"
+        style="border-radius: 12px; background: linear-gradient(135deg, #c0392b, #e74c3c); color: white;">
+        <div class="d-flex align-items-center justify-content-between">
+          <div>
+            <span class="text-white-50 small fw-semibold d-block">Pelanggan Nonaktif</span>
+            <span class="fs-2 fw-bold">{{ inactive_customers }}</span>
+          </div>
+          <div class="bg-white/10 rounded p-2.5">
+            <i class="bi bi-person-x-fill fs-3"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="mb-4">
+    {% for category, message in messages %}
+    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
+      role="alert" style="border-radius: 8px;">
+      <i class="bi {{ 'bi-check-circle-fill' if category == 'success' else 'bi-exclamation-triangle-fill' }} me-2"></i>
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <!-- Customers Table Card -->
+  <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+      <h6 class="fw-bold mb-0 text-dark-slate"><i class="bi bi-table me-2 text-primary"></i>Daftar Akun Pelanggan</h6>
+
+      <!-- Live Search Bar -->
+      <div class="input-group input-group-sm" style="max-width: 250px;">
+        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" id="tableSearch" class="form-control bg-light border-start-0" placeholder="Cari pelanggan..."
+          style="border-radius: 0 8px 8px 0;" />
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="customersTable">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4">ID</th>
+              <th>Nama Lengkap</th>
+              <th>Email</th>
+              <th>No. Telepon</th>
+              <th>Alamat Utama</th>
+              <th>Terdaftar Pada</th>
+              <th>Status</th>
+              <th class="text-end pe-4">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if customers %}
+            {% for customer in customers %}
+            <tr>
+              <td class="ps-4 text-muted fw-bold">#{{ customer.id }}</td>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div
+                    class="avatar-placeholder rounded-circle bg-secondary-subtle text-dark-slate d-flex align-items-center justify-content-center fw-bold"
+                    style="width: 32px; height: 32px; font-size: 0.85rem;">
+                    {{ customer.name[:2].upper() }}
+                  </div>
+                  <span class="fw-semibold text-dark-slate">{{ customer.name }}</span>
+                </div>
+              </td>
+              <td>{{ customer.email }}</td>
+              <td>{{ customer.phone or '-' }}</td>
+              <td style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                title="{{ customer.address or '' }}">
+                {{ customer.address or '-' }}
+              </td>
+              <td class="text-muted small">{{ customer.created_at.strftime('%d %b %Y %H:%M') }}</td>
+              <td>
+                {% if customer.is_active %}
+                <span
+                  class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 rounded-pill"
+                  style="font-size: 0.75rem;">
+                  <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Aktif
+                </span>
+                {% else %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5 rounded-pill"
+                  style="font-size: 0.75rem;">
+                  <i class="bi bi-circle-fill me-1" style="font-size: 0.5rem;"></i> Nonaktif
+                </span>
+                {% endif %}
+              </td>
+              <td class="text-end pe-4">
+                <div class="d-inline-flex gap-2">
+                  <!-- Toggle Status Button -->
+                  <form action="{{ url_for('admin.customer_toggle_status', customer_id=customer.id) }}" method="POST"
+                    class="m-0">
+                    <button type="submit"
+                      class="btn btn-sm {{ 'btn-outline-warning' if customer.is_active else 'btn-warning' }}"
+                      title="{{ 'Nonaktifkan Akun' if customer.is_active else 'Aktifkan Akun' }}"
+                      style="border-radius: 6px;">
+                      <i class="bi {{ 'bi-person-dash-fill' if customer.is_active else 'bi-person-check-fill' }}"></i>
+                      <span class="small ms-1 d-none d-lg-inline">{{ 'Nonaktifkan' if customer.is_active else 'Aktifkan'
+                        }}</span>
+                    </button>
+                  </form>
+
+                  <!-- Delete Button Triggering Modal -->
+                  <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#deleteModal" data-customer-id="{{ customer.id }}"
+                    data-customer-name="{{ customer.name }}" title="Hapus Akun Permanen" style="border-radius: 6px;">
+                    <i class="bi bi-trash3-fill"></i>
+                    <span class="small ms-1 d-none d-lg-inline">Hapus</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="8" class="text-center py-5">
+                <i class="bi bi-people text-muted" style="font-size: 3rem;"></i>
+                <h6 class="mt-3 text-muted">Belum ada pelanggan terdaftar</h6>
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 12px; border: none;">
+      <div class="modal-header bg-danger text-white"
+        style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <h6 class="modal-title fw-bold" id="deleteModalLabel"><i
+            class="bi bi-exclamation-triangle-fill me-2"></i>Konfirmasi Hapus Akun</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-trash3 text-danger" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold mt-3 text-dark-slate">Hapus Akun Pelanggan?</h5>
+        <p class="text-muted small mb-0 mt-2">
+          Apakah Anda yakin ingin menghapus akun pelanggan <strong id="deleteCustName"></strong> secara permanen?<br>
+          <span class="text-danger fw-semibold">Tindakan ini tidak dapat dibatalkan dan semua data profil pelanggan akan
+            terhapus.</span>
+        </p>
+      </div>
+      <div class="modal-footer border-0 pb-4 justify-content-center">
+        <form id="deleteForm" action="" method="POST" class="m-0 w-100 px-3">
+          <div class="row g-2">
+            <div class="col-6">
+              <button type="button" class="btn btn-light w-100 py-2" data-bs-dismiss="modal"
+                style="border-radius: 8px;">Batal</button>
+            </div>
+            <div class="col-6">
+              <button type="submit" class="btn btn-danger w-100 py-2" style="border-radius: 8px;">Hapus
+                Permanen</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript Live Search & Modal Setup -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // 1. Live Search Tabel Pelanggan
+    const searchInput = document.getElementById("tableSearch");
+    const table = document.getElementById("customersTable");
+    const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    if (searchInput) {
+      searchInput.addEventListener("keyup", function () {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 0; i < rows.length; i++) {
+          const cells = rows[i].getElementsByTagName("td");
+          if (cells.length > 1) {
+            const name = cells[1].textContent.toLowerCase();
+            const email = cells[2].textContent.toLowerCase();
+            const phone = cells[3].textContent.toLowerCase();
+
+            if (name.includes(filter) || email.includes(filter) || phone.includes(filter)) {
+              rows[i].style.display = "";
+            } else {
+              rows[i].style.display = "none";
+            }
+          }
+        }
+      });
+    }
+
+    // 2. Setup Action Dynamic Form Modal Hapus
+    const deleteModal = document.getElementById("deleteModal");
+    if (deleteModal) {
+      deleteModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const customerId = button.getAttribute("data-customer-id");
+        const customerName = button.getAttribute("data-customer-name");
+
+        const deleteForm = deleteModal.querySelector("#deleteForm");
+        const deleteCustName = deleteModal.querySelector("#deleteCustName");
+
+        if (deleteForm) {
+          deleteForm.action = `/admin/customer/${customerId}/delete`;
+        }
+        if (deleteCustName) {
+          deleteCustName.textContent = customerName;
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

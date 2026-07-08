@@ -17,6 +17,11 @@ def login():
         if user is None or not user.check_password(form.password.data):
             flash('Invalid email or password', 'danger')
             return redirect(url_for('auth.login'))
+        
+        if not user.active:
+            flash('Your account has been deactivated.', 'danger')
+            return redirect(url_for('auth.login'))
+            
         login_user(user, remember=form.remember_me.data)
         if user.is_admin():
             return redirect(url_for('admin.dashboard'))

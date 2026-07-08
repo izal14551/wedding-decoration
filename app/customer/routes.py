@@ -236,21 +236,32 @@ def profile_update():
     
     if not name or not email:
         flash('Nama dan Email harus diisi.', 'danger')
-        return redirect(url_for('customer.profile'))
+        return redirect(url_for('customer.profile') + '#edit')
         
     # Cek duplikasi email
     existing_user = User.query.filter(User.email == email, User.id != current_user.id).first()
     if existing_user:
         flash('Email sudah digunakan oleh pengguna lain.', 'danger')
-        return redirect(url_for('customer.profile'))
+        return redirect(url_for('customer.profile') + '#edit')
+        
+    # Validasi format nomor telepon Indonesia
+    import re
+    if phone:
+        if not re.match(r'^(08|\+628)\d{8,11}$', phone):
+            flash('Nomor telepon harus format Indonesia (cth: 08123456789 atau +628123456789).', 'danger')
+            return redirect(url_for('customer.profile') + '#edit')
+            
+    # Validasi panjang password baru
+    if password:
+        if len(password) < 6:
+            flash('Password minimal harus 6 karakter.', 'danger')
+            return redirect(url_for('customer.profile') + '#edit')
+        current_user.set_password(password)
         
     current_user.customer.name = name
     current_user.email = email
     current_user.customer.phone = phone
     current_user.customer.address = address
-    
-    if password:
-        current_user.set_password(password)
         
     db.session.add(current_user)
     db.session.add(current_user.customer)

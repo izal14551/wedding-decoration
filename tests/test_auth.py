@@ -169,5 +169,233 @@ class AuthTestCase(unittest.TestCase):
         response = self.client.get('/admin/dashboard', follow_redirects=True)
         self.assertNotIn(b'Admin Dashboard', response.data)
 
+    def test_customer_profile_update_success(self):
+        """Uji sukses mengubah data profil"""
+        u = User(email='budi@example.com')
+        u.set_password('budi123')
+        u.roles.append(self.customer_role)
+        db.session.add(u)
+        db.session.flush()
+        c = Customer(user_id=u.id, name='Budi', phone='081234567890', address='Alamat Asli')
+        db.session.add(c)
+        db.session.commit()
+
+        # Login
+        self.client.post('/auth/login', data={
+            'email': 'budi@example.com',
+            'password': 'budi123'
+        }, follow_redirects=True)
+
+        # Update Profile
+        response = self.client.post('/profile/update', data={
+            'name': 'Budi Baru',
+            'email': 'budibaru@example.com',
+            'phone': '081299998888',
+            'address': 'Alamat Baru',
+            'password': 'newpassword123'
+        }, follow_redirects=True)
+
+        self.assertIn(b'Informasi profil berhasil diperbarui.', response.data)
+        
+        # Periksa di DB
+        updated_user = db.session.get(User, u.id)
+        self.assertEqual(updated_user.email, 'budibaru@example.com')
+        self.assertEqual(updated_user.customer.name, 'Budi Baru')
+        self.assertEqual(updated_user.customer.phone, '081299998888')
+        self.assertEqual(updated_user.customer.address, 'Alamat Baru')
+        self.assertTrue(updated_user.check_password('newpassword123'))
+
+    def test_customer_profile_update_duplicate_email(self):
+        """Uji gagal mengubah profil jika email baru sudah digunakan orang lain"""
+        u1 = User(email='budi@example.com')
+        u1.set_password('budi123')
+        u1.roles.append(self.customer_role)
+        db.session.add(u1)
+        db.session.flush()
+        c1 = Customer(user_id=u1.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(c1)
+
+        u2 = User(email='ani@example.com')
+        u2.set_password('ani123')
+        u2.roles.append(self.customer_role)
+        db.session.add(u2)
+        db.session.flush()
+        c2 = Customer(user_id=u2.id, name='Ani', phone='081234567891', address='Alamat')
+        db.session.add(c2)
+        db.session.commit()
+
+        # Login budi
+        self.client.post('/auth/login', data={
+            'email': 'budi@example.com',
+            'password': 'budi123'
+        }, follow_redirects=True)
+
+        # Coba ubah email budi menjadi ani@example.com
+        response = self.client.post('/profile/update', data={
+            'name': 'Budi',
+            'email': 'ani@example.com',
+            'phone': '081234567890',
+            'address': 'Alamat'
+        }, follow_redirects=True)
+
+        self.assertIn(b'Email sudah digunakan oleh pengguna lain.', response.data)
+
+    def test_customer_profile_update_invalid_phone(self):
+        """Uji gagal mengubah profil jika format nomor telepon salah"""
+        u = User(email='budi@example.com')
+        u.set_password('budi123')
+        u.roles.append(self.customer_role)
+        db.session.add(u)
+        db.session.flush()
+        c = Customer(user_id=u.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(c)
+        db.session.commit()
+
+        # Login
+        self.client.post('/auth/login', data={
+            'email': 'budi@example.com',
+            'password': 'budi123'
+        }, follow_redirects=True)
+
+        # Phone non-Indonesia
+        response = self.client.post('/profile/update', data={
+            'name': 'Budi',
+            'email': 'budi@example.com',
+            'phone': '12345abcde',
+            'address': 'Alamat'
+        }, follow_redirects=True)
+
+        self.assertIn(b'Nomor telepon harus format Indonesia', response.data)
+
+    def test_customer_profile_update_short_password(self):
+        """Uji gagal mengubah profil jika password baru di bawah 6 karakter"""
+        u = User(email='budi@example.com')
+        u.set_password('budi123')
+        u.roles.append(self.customer_role)
+        db.session.add(u)
+        db.session.flush()
+        c = Customer(user_id=u.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(c)
+        db.session.commit()
+
+        # Login
+        self.client.post('/auth/login', data={
+            'email': 'budi@example.com',
+            'password': 'budi123'
+        }, follow_redirects=True)
+
+        # Password 5 char
+        response = self.client.post('/profile/update', data={
+            'name': 'Budi',
+            'email': 'budi@example.com',
+            'phone': '081234567890',
+            'address': 'Alamat',
+            'password': '12345'
+        }, follow_redirects=True)
+
+        self.assertIn(b'Password minimal harus 6 karakter.', response.data)
+
+    def test_admin_view_customers_page(self):
+        """Uji admin dapat membuka halaman kelola pelanggan sedangkan pelanggan biasa ditolak"""
+        u_admin = User(email='admin_test@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+        db.session.commit()
+
+        self.client.post('/auth/login', data={
+            'email': 'admin_test@example.com',
+            'password': 'admin123'
+        }, follow_redirects=True)
+
+        response = self.client.get('/admin/customers', follow_redirects=True)
+        self.assertIn(b'Manajemen Pelanggan', response.data)
+        self.assertIn(b'Daftar Akun Pelanggan', response.data)
+
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        u_cust = User(email='cust_test@example.com')
+        u_cust.set_password('budi123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        c = Customer(user_id=u_cust.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(c)
+        db.session.commit()
+
+        self.client.post('/auth/login', data={
+            'email': 'cust_test@example.com',
+            'password': 'budi123'
+        }, follow_redirects=True)
+
+        response_cust = self.client.get('/admin/customers', follow_redirects=True)
+        self.assertNotIn(b'Manajemen Pelanggan', response_cust.data)
+
+    def test_admin_toggle_customer_status(self):
+        """Uji admin mengubah keaktifan akun pelanggan (is_active)"""
+        u_admin = User(email='admin_test@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+
+        u_cust = User(email='cust_test@example.com')
+        u_cust.set_password('budi123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        c = Customer(user_id=u_cust.id, name='Budi', phone='081234567890', address='Alamat', is_active=True)
+        db.session.add(c)
+        db.session.commit()
+
+        self.client.post('/auth/login', data={
+            'email': 'admin_test@example.com',
+            'password': 'admin123'
+        }, follow_redirects=True)
+
+        response = self.client.post(f'/admin/customer/{c.id}/toggle_status', follow_redirects=True)
+        self.assertIn(b'berhasil dinonaktifkan', response.data)
+        
+        db.session.refresh(c)
+        db.session.refresh(u_cust)
+        self.assertFalse(c.is_active)
+        self.assertFalse(u_cust.active)
+
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        response_login = self.client.post('/auth/login', data={
+            'email': 'cust_test@example.com',
+            'password': 'budi123'
+        }, follow_redirects=True)
+        self.assertIn(b'Your account has been deactivated.', response_login.data)
+
+    def test_admin_delete_customer(self):
+        """Uji admin menghapus akun pelanggan secara permanen"""
+        u_admin = User(email='admin_test@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+
+        u_cust = User(email='cust_test@example.com')
+        u_cust.set_password('budi123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        c = Customer(user_id=u_cust.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(c)
+        db.session.commit()
+
+        self.client.post('/auth/login', data={
+            'email': 'admin_test@example.com',
+            'password': 'admin123'
+        }, follow_redirects=True)
+
+        response = self.client.post(f'/admin/customer/{c.id}/delete', follow_redirects=True)
+        self.assertIn(b'berhasil dihapus permanen', response.data)
+
+        deleted_cust = db.session.get(Customer, c.id)
+        deleted_user = db.session.get(User, u_cust.id)
+        self.assertIsNone(deleted_cust)
+        self.assertIsNone(deleted_user)
+
 if __name__ == '__main__':
     unittest.main()

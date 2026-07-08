@@ -81,6 +81,7 @@ class Customer(db.Model):
     phone = db.Column(db.String(20))
     address = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_active = db.Column(db.Boolean, default=True)
     
     orders = db.relationship('Order', backref='customer', lazy='dynamic')
 

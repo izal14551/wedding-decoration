@@ -1,10 +1,10 @@
 from datetime import date, datetime, timedelta
 from collections import defaultdict
-from flask import render_template, redirect, url_for
+from flask import render_template, redirect, url_for, flash, request, abort
 from sqlalchemy import func
 from app import db
 from app.admin import bp
-from app.models import Customer, Product, Order, OrderItem, Payment, Schedule
+from app.models import Customer, Product, Order, OrderItem, Payment, Schedule, User
 from flask_login import login_required, current_user
 from functools import wraps
 
@@ -148,3 +148,61 @@ def dashboard():
         recent_payments=recent_payments,
         top_rented=top_rented
     )
+
+@bp.route('/customers')
+@login_required
+@admin_required
+def customers():
+    customers_list = Customer.query.join(User).all()
+    
+    total_cust = len(customers_list)
+    active_cust = sum(1 for c in customers_list if c.is_active)
+    inactive_cust = total_cust - active_cust
+    
+    return render_template(
+        'admin/customers.html',
+        title='Kelola Pelanggan',
+        customers=customers_list,
+        total_customers=total_cust,
+        active_customers=active_cust,
+        inactive_customers=inactive_cust
+    )
+
+@bp.route('/customer/<int:customer_id>/toggle_status', methods=['POST'])
+@login_required
+@admin_required
+def customer_toggle_status(customer_id):
+    customer = db.session.get(Customer, customer_id)
+    if not customer:
+        flash('Pelanggan tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.customers'))
+        
+    customer.is_active = not customer.is_active
+    if customer.user:
+        customer.user.active = customer.is_active
+        
+    db.session.commit()
+    
+    status_str = 'diaktifkan' if customer.is_active else 'dinonaktifkan'
+    flash(f'Akun {customer.name} berhasil {status_str}.', 'success')
+    return redirect(url_for('admin.customers'))
+
+@bp.route('/customer/<int:customer_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def customer_delete(customer_id):
+    customer = db.session.get(Customer, customer_id)
+    if not customer:
+        flash('Pelanggan tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.customers'))
+        
+    name = customer.name
+    user = customer.user
+    if user:
+        db.session.delete(user)
+    else:
+        db.session.delete(customer)
+        
+    db.session.commit()
+    flash(f'Akun pelanggan {name} berhasil dihapus permanen.', 'success')
+    return redirect(url_for('admin.customers'))
