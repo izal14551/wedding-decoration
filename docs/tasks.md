@@ -28,10 +28,10 @@ Fokus pada pembuatan akun, hak akses multi-role (Pelanggan & Admin), dan manajem
 
 Fokus pada manajemen inventaris dekorasi yang disewakan oleh Admin dan tampilannya di sisi pelanggan.
 
-- [ ] **2.1 Modul CRUD Kategori (Admin)**
+- [x] **2.1 Modul CRUD Kategori (Admin)**
   - Fitur tambah kategori dekorasi dan makeup (contoh: Tenda, Kursi, Panggung, Bunga).
   - Fitur edit dan hapus kategori dekorasi.
-- [ ] **2.2 Modul CRUD Barang (Admin)**
+- [x] **2.2 Modul CRUD Barang (Admin)**
   - Fitur tambah barang baru (mengaitkan kategori, mengisi nama, harga sewa per hari, stok awal/kapasitas slot harian untuk jasa, deskripsi lengkap, upload foto barang).
   - Fitur edit informasi barang dan hapus barang.
   - Pembeda perlakuan stok (Kuantitas fisik untuk alat dekor, Kapasitas slot harian untuk jasa/makeup).

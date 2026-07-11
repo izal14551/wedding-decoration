@@ -1,0 +1,550 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container-fluid px-0">
+  <!-- Page Header & Action -->
+  <div class="row mb-4 g-3 align-items-center">
+    <div class="col-sm-6">
+      <h4 class="fw-bold text-dark-slate mb-1">Manajemen Dekorasi & Layanan</h4>
+      <p class="text-muted small mb-0">Kelola inventaris alat dekorasi fisik serta kapasitas layanan makeup/rias.</p>
+    </div>
+    <div class="col-sm-6 text-sm-end">
+      <button type="button" class="btn btn-primary py-2 px-3 shadow-sm d-inline-flex align-items-center gap-2"
+        data-bs-toggle="modal" data-bs-target="#addProductModal" style="border-radius: 8px;">
+        <i class="bi bi-plus-lg fw-bold"></i>
+        <span>Tambah Barang/Jasa</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistik Ringkas -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm bg-gradient-primary text-white"
+        style="border-radius: 12px; background: linear-gradient(135deg, #4f46e5, #3b82f6);">
+        <div class="card-body p-3.5 d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-white-50 small fw-semibold d-block">Total Barang & Jasa</span>
+            <span class="fs-3 fw-bold">{{ products|length }}</span>
+          </div>
+          <div class="bg-white/10 rounded p-2">
+            <i class="bi bi-box-seam fs-3"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      {% set active_count = namespace(val=0) %}
+      {% for p in products %}
+      {% if p.status == 'Active' %}
+      {% set active_count.val = active_count.val + 1 %}
+      {% endif %}
+      {% endfor %}
+      <div class="card border-0 shadow-sm text-white"
+        style="border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669);">
+        <div class="card-body p-3.5 d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-white-50 small fw-semibold d-block">Barang Aktif</span>
+            <span class="fs-3 fw-bold">{{ active_count.val }}</span>
+          </div>
+          <div class="bg-white/10 rounded p-2">
+            <i class="bi bi-check-circle-fill fs-3"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm text-white"
+        style="border-radius: 12px; background: linear-gradient(135deg, #ef4444, #dc2626);">
+        <div class="card-body p-3.5 d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-white-50 small fw-semibold d-block">Barang Nonaktif</span>
+            <span class="fs-3 fw-bold">{{ products|length - active_count.val }}</span>
+          </div>
+          <div class="bg-white/10 rounded p-2">
+            <i class="bi bi-x-circle-fill fs-3"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      {% set total_types = namespace(physical=0, service=0) %}
+      {% for p in products %}
+      {% if 'rias' in p.category.name|lower or 'makeup' in p.category.name|lower or 'mc' in p.category.name|lower or
+      'dance' in p.category.name|lower or 'jasa' in p.category.name|lower %}
+      {% set total_types.service = total_types.service + 1 %}
+      {% else %}
+      {% set total_types.physical = total_types.physical + 1 %}
+      {% endif %}
+      {% endfor %}
+      <div class="card border-0 shadow-sm text-white"
+        style="border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706);">
+        <div class="card-body p-3.5 d-flex justify-content-between align-items-center">
+          <div>
+            <span class="text-white-50 small fw-semibold d-block">Fisik / Layanan</span>
+            <span class="fs-4 fw-bold">{{ total_types.physical }} / {{ total_types.service }}</span>
+          </div>
+          <div class="bg-white/10 rounded p-2">
+            <i class="bi bi-inboxes-fill fs-4"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Table Card -->
+  <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+    <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+      <h6 class="fw-bold mb-0 text-dark-slate"><i class="bi bi-box-seam-fill me-2 text-primary"></i>Daftar Barang
+        Pernikahan</h6>
+
+      <!-- Search Bar -->
+      <div class="input-group input-group-sm" style="max-width: 250px;">
+        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" id="productSearch" class="form-control bg-light border-start-0"
+          placeholder="Cari barang/layanan..." style="border-radius: 0 8px 8px 0;" />
+      </div>
+    </div>
+
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="productsTable">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-4" style="width: 80px;">Foto</th>
+              <th>Nama Barang / Jasa</th>
+              <th>Kategori</th>
+              <th>Harga Sewa / Hari</th>
+              <th>Stok / Slot Harian</th>
+              <th>Status</th>
+              <th class="text-end pe-4" style="width: 200px;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if products %}
+            {% for product in products %}
+            {% set is_service = 'rias' in product.category.name|lower or 'makeup' in product.category.name|lower or 'mc'
+            in product.category.name|lower or 'dance' in product.category.name|lower or 'jasa' in
+            product.category.name|lower %}
+            <tr>
+              <td class="ps-4">
+                {% if product.image_path %}
+                <img src="{{ url_for('static', filename='uploads/products/' ~ product.image_path) }}"
+                  alt="{{ product.name }}" class="rounded"
+                  style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #e2e8f0;"
+                  onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=150&q=80';" />
+                {% else %}
+                <div class="rounded bg-light d-flex align-items-center justify-content-center border"
+                  style="width: 50px; height: 50px; color: #a0aec0;">
+                  <i class="bi bi-image fs-4"></i>
+                </div>
+                {% endif %}
+              </td>
+              <td>
+                <span class="fw-semibold text-dark-slate d-block">{{ product.name }}</span>
+                <span class="text-muted small">{{ product.description|truncate(50) if product.description else '-'
+                  }}</span>
+              </td>
+              <td>
+                <span class="badge bg-secondary-subtle text-secondary border px-2.5 py-1.5 rounded-pill small">
+                  <i class="bi bi-tag-fill me-1"></i>{{ product.category.name }}
+                </span>
+              </td>
+              <td class="fw-bold text-primary">
+                Rp {{ "{:,.0f}".format(product.price).replace(',', '.') }}
+              </td>
+              <td>
+                {% if product.stock > 0 %}
+                <span class="badge bg-success-subtle text-success border px-2.5 py-1.5 rounded-pill">
+                  <i class="bi {{ 'bi-person-badge-fill' if is_service else 'bi-box-fill' }} me-1"></i>
+                  {{ product.stock }} {{ 'Slot/Hari' if is_service else 'Unit' }}
+                </span>
+                {% else %}
+                <span class="badge bg-danger-subtle text-danger border px-2.5 py-1.5 rounded-pill">
+                  <i class="bi bi-exclamation-triangle-fill me-1"></i> Habis
+                </span>
+                {% endif %}
+              </td>
+              <td>
+                {% if product.status == 'Active' %}
+                <span class="badge bg-success px-2.5 py-1.5 rounded-pill small">Aktif</span>
+                {% else %}
+                <span class="badge bg-danger px-2.5 py-1.5 rounded-pill small">Nonaktif</span>
+                {% endif %}
+              </td>
+              <td class="text-end pe-4">
+                <div class="d-inline-flex gap-2">
+                  <!-- Edit Button -->
+                  <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#editProductModal" data-product-id="{{ product.id }}"
+                    data-product-name="{{ product.name }}" data-product-category="{{ product.category_id }}"
+                    data-product-price="{{ product.price }}" data-product-stock="{{ product.stock }}"
+                    data-product-desc="{{ product.description or '' }}" data-product-status="{{ product.status }}"
+                    data-product-image="{% if product.image_path %}{{ url_for('static', filename='uploads/products/' ~ product.image_path) }}{% endif %}"
+                    title="Edit Barang" style="border-radius: 6px;">
+                    <i class="bi bi-pencil-square"></i>
+                    <span class="small ms-1 d-none d-lg-inline">Edit</span>
+                  </button>
+
+                  <!-- Delete Button -->
+                  {% set order_count = product.order_items.count() %}
+                  {% if order_count > 0 %}
+                  <button type="button" class="btn btn-sm btn-outline-secondary" disabled data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Tidak dapat dihapus karena telah digunakan dalam {{ order_count }} transaksi sewa"
+                    style="border-radius: 6px; opacity: 0.6; cursor: not-allowed;">
+                    <i class="bi bi-trash3-fill"></i>
+                    <span class="small ms-1 d-none d-lg-inline">Hapus</span>
+                  </button>
+                  {% else %}
+                  <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal"
+                    data-bs-target="#deleteProductModal" data-product-id="{{ product.id }}"
+                    data-product-name="{{ product.name }}" title="Hapus Barang" style="border-radius: 6px;">
+                    <i class="bi bi-trash3-fill"></i>
+                    <span class="small ms-1 d-none d-lg-inline">Hapus</span>
+                  </button>
+                  {% endif %}
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-5">
+                <i class="bi bi-box-seam text-muted" style="font-size: 3rem;"></i>
+                <h6 class="mt-3 text-muted">Belum ada barang atau layanan terdaftar</h6>
+              </td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 1. Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius: 12px; border: none;">
+      <form action="{{ url_for('admin.product_add') }}" method="POST" enctype="multipart/form-data" class="m-0">
+        <div class="modal-header bg-primary text-white"
+          style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+          <h6 class="modal-title fw-bold" id="addProductModalLabel"><i class="bi bi-plus-circle-fill me-2"></i>Tambah
+            Barang / Jasa Baru</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="addName" class="form-label fw-semibold text-dark-slate">Nama Barang / Jasa <span
+                  class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="addName" name="name" required
+                placeholder="Contoh: Kursi Futura, Rias Pengantin..." style="border-radius: 8px;" />
+            </div>
+            <div class="col-md-6">
+              <label for="addCategory" class="form-label fw-semibold text-dark-slate">Kategori <span
+                  class="text-danger">*</span></label>
+              <select class="form-select" id="addCategory" name="category_id" required style="border-radius: 8px;">
+                <option value="" disabled selected>Pilih Kategori...</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="addPrice" class="form-label fw-semibold text-dark-slate">Harga Sewa per Hari (Rp) <span
+                  class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="addPrice" name="price" required placeholder="Contoh: 15000"
+                style="border-radius: 8px;" />
+            </div>
+            <div class="col-md-6">
+              <label for="addStock" class="form-label fw-semibold text-dark-slate">Stok Awal / Kapasitas Harian Jasa
+                <span class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="addStock" name="stock" required
+                placeholder="Contoh: 100 unit atau 2 slot makeup/hari" style="border-radius: 8px;" />
+            </div>
+            <div class="col-md-6">
+              <label for="addStatus" class="form-label fw-semibold text-dark-slate">Status Keaktifan</label>
+              <select class="form-select" id="addStatus" name="status" style="border-radius: 8px;">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="addImage" class="form-label fw-semibold text-dark-slate">Foto Produk</label>
+              <input type="file" class="form-control" id="addImage" name="image" accept="image/*"
+                style="border-radius: 8px;" onchange="previewAddImage(this);" />
+              <div class="mt-2 text-center d-none" id="addImgPreviewContainer">
+                <img id="addImgPreview" src="#" alt="Preview" class="img-thumbnail"
+                  style="max-height: 120px; object-fit: contain;" />
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="addDesc" class="form-label fw-semibold text-dark-slate">Deskripsi Lengkap</label>
+              <textarea class="form-control" id="addDesc" name="description" rows="3"
+                placeholder="Deskripsi mengenai detail, kelengkapan, atau syarat barang/jasa..."
+                style="border-radius: 8px;"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
+          <div class="row w-100 px-2 g-2">
+            <div class="col-6">
+              <button type="button" class="btn btn-light w-100 py-2" data-bs-dismiss="modal"
+                style="border-radius: 8px;">Batal</button>
+            </div>
+            <div class="col-6">
+              <button type="submit" class="btn btn-primary w-100 py-2" style="border-radius: 8px;">Simpan
+                Barang</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Edit Product Modal -->
+<div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius: 12px; border: none;">
+      <form id="editProductForm" action="" method="POST" enctype="multipart/form-data" class="m-0">
+        <div class="modal-header bg-primary text-white"
+          style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+          <h6 class="modal-title fw-bold" id="editProductModalLabel"><i class="bi bi-pencil-square me-2"></i>Ubah
+            Informasi Barang / Jasa</h6>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="editName" class="form-label fw-semibold text-dark-slate">Nama Barang / Jasa <span
+                  class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="editName" name="name" required style="border-radius: 8px;" />
+            </div>
+            <div class="col-md-6">
+              <label for="editCategory" class="form-label fw-semibold text-dark-slate">Kategori <span
+                  class="text-danger">*</span></label>
+              <select class="form-select" id="editCategory" name="category_id" required style="border-radius: 8px;">
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="editPrice" class="form-label fw-semibold text-dark-slate">Harga Sewa per Hari (Rp) <span
+                  class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="editPrice" name="price" required
+                style="border-radius: 8px;" />
+            </div>
+            <div class="col-md-6">
+              <label for="editStock" class="form-label fw-semibold text-dark-slate">Stok / Kapasitas Harian Jasa <span
+                  class="text-danger">*</span></label>
+              <input type="number" class="form-control" id="editStock" name="stock" required
+                style="border-radius: 8px;" />
+            </div>
+            <div class="col-md-6">
+              <label for="editStatus" class="form-label fw-semibold text-dark-slate">Status Keaktifan</label>
+              <select class="form-select" id="editStatus" name="status" style="border-radius: 8px;">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="editImage" class="form-label fw-semibold text-dark-slate">Ganti Foto Produk</label>
+              <input type="file" class="form-control" id="editImage" name="image" accept="image/*"
+                style="border-radius: 8px;" onchange="previewEditImage(this);" />
+              <div class="mt-2 text-center" id="editImgPreviewContainer">
+                <span class="text-muted small d-block mb-1">Foto Saat Ini:</span>
+                <img id="editImgPreview" src="#" alt="Preview" class="img-thumbnail"
+                  style="max-height: 120px; object-fit: contain;" />
+              </div>
+            </div>
+            <div class="col-12">
+              <label for="editDesc" class="form-label fw-semibold text-dark-slate">Deskripsi Lengkap</label>
+              <textarea class="form-control" id="editDesc" name="description" rows="3"
+                style="border-radius: 8px;"></textarea>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
+          <div class="row w-100 px-2 g-2">
+            <div class="col-6">
+              <button type="button" class="btn btn-light w-100 py-2" data-bs-dismiss="modal"
+                style="border-radius: 8px;">Batal</button>
+            </div>
+            <div class="col-6">
+              <button type="submit" class="btn btn-primary w-100 py-2" style="border-radius: 8px;">Simpan
+                Perubahan</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Delete Product Confirmation Modal -->
+<div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius: 12px; border: none;">
+      <div class="modal-header bg-danger text-white"
+        style="border-top-left-radius: 12px; border-top-right-radius: 12px;">
+        <h6 class="modal-title fw-bold" id="deleteProductModalLabel"><i
+            class="bi bi-exclamation-triangle-fill me-2"></i>Konfirmasi Hapus Barang/Jasa</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <i class="bi bi-box-seam-fill text-danger" style="font-size: 3rem;"></i>
+        <h5 class="fw-bold mt-3 text-dark-slate">Hapus Barang Dari Sistem?</h5>
+        <p class="text-muted small mb-0 mt-2">
+          Apakah Anda yakin ingin menghapus barang <strong id="deleteProductName"></strong>?<br>
+          <span class="text-danger fw-semibold">Tindakan ini akan menghapus data barang beserta berkas gambarnya secara
+            permanen.</span>
+        </p>
+      </div>
+      <div class="modal-footer border-0 pb-4 justify-content-center">
+        <form id="deleteProductForm" action="" method="POST" class="m-0 w-100 px-3">
+          <div class="row g-2">
+            <div class="col-6">
+              <button type="button" class="btn btn-light w-100 py-2" data-bs-dismiss="modal"
+                style="border-radius: 8px;">Batal</button>
+            </div>
+            <div class="col-6">
+              <button type="submit" class="btn btn-danger w-100 py-2" style="border-radius: 8px;">Hapus
+                Permanen</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts Live Search, Preview Image & Modal Data Bindings -->
+<script>
+  // A. Preview Gambar di Modal Tambah
+  function previewAddImage(input) {
+    const previewContainer = document.getElementById('addImgPreviewContainer');
+    const previewImg = document.getElementById('addImgPreview');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImg.src = e.target.result;
+        previewContainer.classList.remove('d-none');
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // B. Preview Gambar di Modal Edit
+  function previewEditImage(input) {
+    const previewImg = document.getElementById('editImgPreview');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        previewImg.src = e.target.result;
+      }
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // C. Inisialisasi Tooltip Bootstrap (tombol Hapus disabled)
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // D. Live Search Tabel Barang
+    const searchInput = document.getElementById("productSearch");
+    const table = document.getElementById("productsTable");
+    const rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
+
+    if (searchInput) {
+      searchInput.addEventListener("keyup", function () {
+        const filter = searchInput.value.toLowerCase();
+        for (let i = 0; i < rows.length; i++) {
+          const cells = rows[i].getElementsByTagName("td");
+          if (cells.length > 1) {
+            const productName = cells[1].textContent.toLowerCase();
+            const productCategory = cells[2].textContent.toLowerCase();
+
+            if (productName.includes(filter) || productCategory.includes(filter)) {
+              rows[i].style.display = "";
+            } else {
+              rows[i].style.display = "none";
+            }
+          }
+        }
+      });
+    }
+
+    // E. Setup Edit Product Modal Data Bindings
+    const editModal = document.getElementById("editProductModal");
+    if (editModal) {
+      editModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const productId = button.getAttribute("data-product-id");
+        const productName = button.getAttribute("data-product-name");
+        const productCategory = button.getAttribute("data-product-category");
+        const productPrice = button.getAttribute("data-product-price");
+        const productStock = button.getAttribute("data-product-stock");
+        const productDesc = button.getAttribute("data-product-desc");
+        const productStatus = button.getAttribute("data-product-status");
+        const productImgUrl = button.getAttribute("data-product-image");
+
+        const form = editModal.querySelector("#editProductForm");
+        const nameInput = editModal.querySelector("#editName");
+        const categoryInput = editModal.querySelector("#editCategory");
+        const priceInput = editModal.querySelector("#editPrice");
+        const stockInput = editModal.querySelector("#editStock");
+        const statusInput = editModal.querySelector("#editStatus");
+        const descInput = editModal.querySelector("#editDesc");
+        const previewImg = editModal.querySelector("#editImgPreview");
+
+        if (form) {
+          form.action = `/admin/product/${productId}/edit`;
+        }
+        if (nameInput) nameInput.value = productName;
+        if (categoryInput) categoryInput.value = productCategory;
+        if (priceInput) priceInput.value = parseInt(productPrice);
+        if (stockInput) stockInput.value = productStock;
+        if (statusInput) statusInput.value = productStatus;
+        if (descInput) descInput.value = productDesc;
+
+        if (previewImg) {
+          if (productImgUrl) {
+            previewImg.src = productImgUrl;
+            previewImg.style.display = "inline-block";
+          } else {
+            previewImg.src = "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=150&q=80";
+          }
+        }
+      });
+    }
+
+    // F. Setup Delete Product Modal Data Bindings
+    const deleteModal = document.getElementById("deleteProductModal");
+    if (deleteModal) {
+      deleteModal.addEventListener("show.bs.modal", function (event) {
+        const button = event.relatedTarget;
+        const productId = button.getAttribute("data-product-id");
+        const productName = button.getAttribute("data-product-name");
+
+        const form = deleteModal.querySelector("#deleteProductForm");
+        const nameEl = deleteModal.querySelector("#deleteProductName");
+
+        if (form) {
+          form.action = `/admin/product/${productId}/delete`;
+        }
+        if (nameEl) {
+          nameEl.textContent = productName;
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

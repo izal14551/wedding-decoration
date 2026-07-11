@@ -124,6 +124,7 @@ class Product(db.Model):
     stock = db.Column(db.Integer, default=0)
     description = db.Column(db.Text)
     status = db.Column(db.String(50), default='Active')
+    image_path = db.Column(db.String(255), nullable=True)
     
     order_items = db.relationship('OrderItem', backref='product', lazy='dynamic')
     schedules = db.relationship('Schedule', backref='product', lazy='dynamic')

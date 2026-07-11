@@ -1,10 +1,12 @@
+import os
+import uuid
 from datetime import date, datetime, timedelta
 from collections import defaultdict
 from flask import render_template, redirect, url_for, flash, request, abort
 from sqlalchemy import func
 from app import db
 from app.admin import bp
-from app.models import Customer, Product, Order, OrderItem, Payment, Schedule, User
+from app.models import Customer, Product, Order, OrderItem, Payment, Schedule, User, Category
 from flask_login import login_required, current_user
 from functools import wraps
 
@@ -206,3 +208,257 @@ def customer_delete(customer_id):
     db.session.commit()
     flash(f'Akun pelanggan {name} berhasil dihapus permanen.', 'success')
     return redirect(url_for('admin.customers'))
+
+@bp.route('/categories')
+@login_required
+@admin_required
+def categories():
+    categories_list = Category.query.all()
+    return render_template(
+        'admin/categories.html',
+        title='Kelola Kategori',
+        categories=categories_list
+    )
+
+@bp.route('/category/add', methods=['POST'])
+@login_required
+@admin_required
+def category_add():
+    name = request.form.get('name', '').strip()
+    description = request.form.get('description', '').strip()
+    
+    if not name:
+        flash('Nama kategori wajib diisi.', 'danger')
+        return redirect(url_for('admin.categories'))
+        
+    # Periksa keunikan nama kategori
+    existing_category = Category.query.filter_by(name=name).first()
+    if existing_category:
+        flash(f'Kategori dengan nama "{name}" sudah ada.', 'danger')
+        return redirect(url_for('admin.categories'))
+        
+    new_category = Category(name=name, description=description)
+    db.session.add(new_category)
+    db.session.commit()
+    
+    flash(f'Kategori "{name}" berhasil ditambahkan.', 'success')
+    return redirect(url_for('admin.categories'))
+
+@bp.route('/category/<int:category_id>/edit', methods=['POST'])
+@login_required
+@admin_required
+def category_edit(category_id):
+    category = db.session.get(Category, category_id)
+    if not category:
+        flash('Kategori tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.categories'))
+        
+    name = request.form.get('name', '').strip()
+    description = request.form.get('description', '').strip()
+    
+    if not name:
+        flash('Nama kategori wajib diisi.', 'danger')
+        return redirect(url_for('admin.categories'))
+        
+    # Periksa keunikan nama kategori jika nama diubah
+    if name != category.name:
+        existing_category = Category.query.filter_by(name=name).first()
+        if existing_category:
+            flash(f'Kategori dengan nama "{name}" sudah ada.', 'danger')
+            return redirect(url_for('admin.categories'))
+            
+    old_name = category.name
+    category.name = name
+    category.description = description
+    db.session.commit()
+    
+    flash(f'Kategori "{old_name}" berhasil diubah menjadi "{name}".', 'success')
+    return redirect(url_for('admin.categories'))
+
+@bp.route('/category/<int:category_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def category_delete(category_id):
+    category = db.session.get(Category, category_id)
+    if not category:
+        flash('Kategori tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.categories'))
+        
+    # Aturan Bisnis: Kategori yang memiliki produk terkait tidak boleh dihapus
+    product_count = category.products.count()
+    if product_count > 0:
+        flash(f'Kategori "{category.name}" tidak dapat dihapus karena masih digunakan oleh {product_count} produk.', 'danger')
+        return redirect(url_for('admin.categories'))
+        
+    name = category.name
+    db.session.delete(category)
+    db.session.commit()
+    
+    flash(f'Kategori "{name}" berhasil dihapus.', 'success')
+    return redirect(url_for('admin.categories'))
+
+# Definisikan UPLOAD_FOLDER dan ALLOWED_EXTENSIONS
+UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads', 'products')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@bp.route('/products')
+@login_required
+@admin_required
+def products():
+    products_list = Product.query.all()
+    categories_list = Category.query.all()
+    return render_template(
+        'admin/products.html',
+        title='Kelola Barang & Jasa',
+        products=products_list,
+        categories=categories_list
+    )
+
+@bp.route('/product/add', methods=['POST'])
+@login_required
+@admin_required
+def product_add():
+    name = request.form.get('name', '').strip()
+    category_id = request.form.get('category_id')
+    price_raw = request.form.get('price', '0')
+    stock_raw = request.form.get('stock', '0')
+    description = request.form.get('description', '').strip()
+    status = request.form.get('status', 'Active')
+    
+    if not name or not category_id:
+        flash('Nama barang dan Kategori wajib diisi.', 'danger')
+        return redirect(url_for('admin.products'))
+        
+    try:
+        price = float(price_raw)
+        stock = int(stock_raw)
+    except ValueError:
+        flash('Harga sewa harus angka dan Stok/Slot harus bilangan bulat.', 'danger')
+        return redirect(url_for('admin.products'))
+        
+    # Proses Upload Foto
+    image_file = request.files.get('image')
+    filename_saved = None
+    
+    if image_file and image_file.filename != '':
+        if allowed_file(image_file.filename):
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            # Buat nama file unik
+            ext = image_file.filename.rsplit('.', 1)[1].lower()
+            filename_saved = f"{uuid.uuid4().hex}.{ext}"
+            file_path = os.path.join(UPLOAD_FOLDER, filename_saved)
+            image_file.save(file_path)
+        else:
+            flash('Tipe file tidak didukung. Hanya diperbolehkan png, jpg, jpeg, webp.', 'danger')
+            return redirect(url_for('admin.products'))
+            
+    new_product = Product(
+        name=name,
+        category_id=int(category_id),
+        price=price,
+        stock=stock,
+        description=description,
+        status=status,
+        image_path=filename_saved
+    )
+    db.session.add(new_product)
+    db.session.commit()
+    
+    flash(f'Barang "{name}" berhasil ditambahkan.', 'success')
+    return redirect(url_for('admin.products'))
+
+@bp.route('/product/<int:product_id>/edit', methods=['POST'])
+@login_required
+@admin_required
+def product_edit(product_id):
+    product = db.session.get(Product, product_id)
+    if not product:
+        flash('Barang tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.products'))
+        
+    name = request.form.get('name', '').strip()
+    category_id = request.form.get('category_id')
+    price_raw = request.form.get('price', '0')
+    stock_raw = request.form.get('stock', '0')
+    description = request.form.get('description', '').strip()
+    status = request.form.get('status', 'Active')
+    
+    if not name or not category_id:
+        flash('Nama barang dan Kategori wajib diisi.', 'danger')
+        return redirect(url_for('admin.products'))
+        
+    try:
+        price = float(price_raw)
+        stock = int(stock_raw)
+    except ValueError:
+        flash('Harga sewa harus angka dan Stok/Slot harus bilangan bulat.', 'danger')
+        return redirect(url_for('admin.products'))
+        
+    # Proses Upload Foto Baru
+    image_file = request.files.get('image')
+    if image_file and image_file.filename != '':
+        if allowed_file(image_file.filename):
+            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+            # Hapus file gambar lama jika ada
+            if product.image_path:
+                old_file_path = os.path.join(UPLOAD_FOLDER, product.image_path)
+                if os.path.exists(old_file_path):
+                    try:
+                        os.remove(old_file_path)
+                    except OSError:
+                        pass
+            
+            # Simpan file baru
+            ext = image_file.filename.rsplit('.', 1)[1].lower()
+            filename_saved = f"{uuid.uuid4().hex}.{ext}"
+            file_path = os.path.join(UPLOAD_FOLDER, filename_saved)
+            image_file.save(file_path)
+            product.image_path = filename_saved
+        else:
+            flash('Tipe file tidak didukung. Hanya diperbolehkan png, jpg, jpeg, webp.', 'danger')
+            return redirect(url_for('admin.products'))
+            
+    product.name = name
+    product.category_id = int(category_id)
+    product.price = price
+    product.stock = stock
+    product.description = description
+    product.status = status
+    db.session.commit()
+    
+    flash(f'Informasi barang "{name}" berhasil diperbarui.', 'success')
+    return redirect(url_for('admin.products'))
+
+@bp.route('/product/<int:product_id>/delete', methods=['POST'])
+@login_required
+@admin_required
+def product_delete(product_id):
+    product = db.session.get(Product, product_id)
+    if not product:
+        flash('Barang tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.products'))
+        
+    # Periksa apakah barang sudah disewa oleh order tertentu
+    order_count = product.order_items.count()
+    if order_count > 0:
+        flash(f'Barang "{product.name}" tidak dapat dihapus karena telah disewa dalam {order_count} transaksi.', 'danger')
+        return redirect(url_for('admin.products'))
+        
+    name = product.name
+    # Hapus file gambar dari server
+    if product.image_path:
+        file_path = os.path.join(UPLOAD_FOLDER, product.image_path)
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except OSError:
+                pass
+                
+    db.session.delete(product)
+    db.session.commit()
+    
+    flash(f'Barang "{name}" berhasil dihapus dari sistem.', 'success')
+    return redirect(url_for('admin.products'))

@@ -71,7 +71,8 @@ with app.app_context():
         price=12200000.00,
         stock=5,
         description='Paket dekorasi pernikahan silver yang mencakup rias pengantin (1x ganti), rias orang tua, penerima tamu, tarub, dokumentasi foto, aksesoris, dekorasi kamar, henna, dan MC.',
-        status='Active'
+        status='Active',
+        image_path='silver_package.jpg'
     )
     gold_pkg = Product(
         category_id=category_pkg.id,
@@ -79,7 +80,8 @@ with app.app_context():
         price=15300000.00,
         stock=5,
         description='Paket dekorasi pernikahan gold yang lengkap dengan rias pengantin (3x ganti), rias orang tua, penerima tamu, pagar ayu, manggolo, tarub premium, foto, aksesoris melati asli, kamar, henna, MC, tari pengiring, sound system, dan kursi futura.',
-        status='Active'
+        status='Active',
+        image_path='gold_package.jpg'
     )
     platinum_pkg = Product(
         category_id=category_pkg.id,
@@ -87,7 +89,8 @@ with app.app_context():
         price=17400000.00,
         stock=3,
         description='Paket dekorasi pernikahan platinum super mewah dengan rias pengantin (3x ganti), keluarga lengkap, tarub besar, foto cetak magnetik, organ tunggal & singer, dekorasi kamar premium, henna putih, tari panggih adat, free makeup pre-wedding, dan karpet merah.',
-        status='Active'
+        status='Active',
+        image_path='platinum_package.jpg'
     )
     db.session.add_all([silver_pkg, gold_pkg, platinum_pkg])
     db.session.flush()
