@@ -1,285 +1,259 @@
-{% extends "base.html" %} {% block content %}
-<div class="container my-5">
-  <div class="row g-4">
-    <!-- Sidebar User Quick Info -->
-    <div class="col-lg-4">
-      <div class="card shadow-sm p-4 text-center" style="
-          background-color: #ffffff;
-          border-radius: 15px;
-          border: 1px solid rgba(197, 168, 128, 0.15);
-        ">
-        <div class="rounded-circle bg-dark text-warning d-flex justify-content-center align-items-center mx-auto mb-3"
-          style="
-            width: 80px;
-            height: 80px;
-            border: 2px solid var(--primary-gold);
-          ">
-          <i class="bi bi-person-fill fs-1"></i>
-        </div>
-        <h4 class="serif-font mb-1">{{ current_user.name }}</h4>
-        <p class="text-muted small mb-3">{{ current_user.email }}</p>
-        <span class="badge bg-light text-dark p-2 px-3 border" style="font-size: 0.8rem; border-radius: 20px">
-          Pelanggan Griya Rias Saraswati
-        </span>
-        <hr class="my-4" />
-        <div class="text-start">
-          <p class="small mb-1 text-muted uppercase fw-bold">Nomor HP</p>
-          <p class="fw-semibold mb-3">{{ current_user.phone or '-' }}</p>
+{% extends "base.html" %}
 
-          <p class="small mb-1 text-muted uppercase fw-bold">Alamat Utama</p>
-          <p class="fw-semibold mb-0" style="font-size: 0.9rem">
-            {{ current_user.address or '-' }}
-          </p>
-        </div>
-      </div>
+{% block styles %}
+<link href="{{ url_for('static', filename='css/customer/profile.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main class="profile-page py-5">
+  <div class="container">
+    <div class="profile-header mb-4">
+      <p class="profile-eyebrow text-uppercase fw-bold mb-2">Akun Pelanggan</p>
+      <h1 class="serif-font profile-title mb-2">Profil & Riwayat Pesanan</h1>
+      <p class="text-muted mb-0">Kelola data kontak, pantau pesanan, dan unggah bukti pembayaran Anda.</p>
     </div>
 
-    <!-- Main Content Tabs -->
-    <div class="col-lg-8">
-      <div class="card shadow-sm p-4 h-100" style="
-          background-color: #ffffff;
-          border-radius: 15px;
-          border: 1px solid rgba(197, 168, 128, 0.15);
-        ">
-        <!-- Navigation Tabs -->
-        <ul class="nav nav-pills mb-4 pb-3" id="profileTabs" role="tablist"
-          style="border-bottom: 1px solid rgba(0, 0, 0, 0.06)">
-          <li class="nav-item" role="presentation">
-            <button class="nav-link active me-2" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane"
-              type="button" role="tab" aria-controls="orders-pane" aria-selected="true" style="border-radius: 20px">
-              <i class="bi bi-clock-history me-1"></i> Riwayat Pesanan
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit-pane" type="button"
-              role="tab" aria-controls="edit-pane" aria-selected="false" style="border-radius: 20px">
-              <i class="bi bi-pencil-square me-1"></i> Ubah Profil
-            </button>
-          </li>
-        </ul>
+    <div class="row g-4 align-items-start">
+      <aside class="col-lg-4">
+        <section class="profile-card profile-summary text-center">
+          <div class="profile-avatar mx-auto mb-3">
+            <i class="bi bi-person-fill"></i>
+          </div>
+          <h2 class="serif-font h4 text-dark mb-1">{{ current_user.name }}</h2>
+          <p class="text-muted small mb-3">{{ current_user.email }}</p>
+          <span class="profile-badge">Pelanggan Griya Rias Saraswati</span>
 
-        <div class="tab-content" id="profileTabsContent">
-          <!-- Tab 1: Orders History -->
-          <div class="tab-pane fade show active" id="orders-pane" role="tabpanel" aria-labelledby="orders-tab"
-            tabindex="0">
-            {% if orders %} {% for order in orders %}
-            <div class="card mb-3 border" style="border-radius: 10px; overflow: hidden">
-              <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
-                <div>
-                  <span class="fw-bold text-dark">Order #{{ order.id }}</span>
-                  <span class="text-muted mx-2">|</span>
-                  <small class="text-muted">{{ order.order_date.strftime('%d %B %Y') }}</small>
-                </div>
+          <div class="profile-info-list text-start mt-4">
+            <div class="profile-info-item">
+              <span>Nomor HP</span>
+              <strong>{{ current_user.phone or '-' }}</strong>
+            </div>
+            <div class="profile-info-item">
+              <span>Alamat Utama</span>
+              <strong>{{ current_user.address or '-' }}</strong>
+            </div>
+            <div class="profile-info-item">
+              <span>Total Pesanan</span>
+              <strong>{{ orders|length }} transaksi</strong>
+            </div>
+          </div>
+        </section>
+      </aside>
 
-                <!-- Order Status Badge -->
-                <div>
-                  {% if order.status == 'Pending' %} {% if order.payment %} {%
-                  if order.payment.status == 'Pending' %}
-                  <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Verifikasi</span>
-                  {% elif order.payment.status == 'Rejected' %}
-                  <span class="badge bg-danger text-white px-3 py-2 rounded-pill">Pembayaran Ditolak</span>
-                  {% endif %} {% else %}
-                  <span class="badge bg-secondary text-white px-3 py-2 rounded-pill">Belum Bayar</span>
-                  {% endif %} {% elif order.status == 'Processing' %}
-                  <span class="badge bg-info text-white px-3 py-2 rounded-pill">Diproses</span>
-                  {% elif order.status == 'Completed' %}
-                  <span class="badge bg-success text-white px-3 py-2 rounded-pill">Selesai</span>
-                  {% elif order.status == 'Cancelled' %}
-                  <span class="badge bg-danger text-white px-3 py-2 rounded-pill">Dibatalkan</span>
-                  {% endif %}
-                </div>
-              </div>
+      <section class="col-lg-8">
+        <div class="profile-card profile-main">
+          <ul class="nav profile-tabs mb-4" id="profileTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="orders-tab" data-bs-toggle="tab" data-bs-target="#orders-pane"
+                type="button" role="tab" aria-controls="orders-pane" aria-selected="true">
+                <i class="bi bi-clock-history"></i>
+                <span>Riwayat Pesanan</span>
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="edit-tab" data-bs-toggle="tab" data-bs-target="#edit-pane" type="button"
+                role="tab" aria-controls="edit-pane" aria-selected="false">
+                <i class="bi bi-pencil-square"></i>
+                <span>Ubah Profil</span>
+              </button>
+            </li>
+          </ul>
 
-              <div class="card-body p-4">
-                <!-- Order Details List -->
-                <div class="row mb-3">
-                  <div class="col-md-7">
-                    <h6 class="text-muted small uppercase fw-bold">
-                      Dekorasi / Paket yang Disewa
-                    </h6>
-                    <ul class="list-unstyled mb-0">
-                      {% for item in order.order_items %}
-                      <li class="fw-bold mb-1">
-                        <i class="bi bi-check2-circle text-success me-1"></i>
-                        {{ item.product.name }} (x{{ item.quantity }})
-                      </li>
-                      {% endfor %}
-                    </ul>
-                    <p class="text-muted small mt-2 mb-0">
-                      <i class="bi bi-geo-alt-fill me-1"></i> {{
-                      order.event_address }}
+          <div class="tab-content" id="profileTabsContent">
+            <div class="tab-pane fade show active" id="orders-pane" role="tabpanel" aria-labelledby="orders-tab" tabindex="0">
+              {% if orders %}
+              <div class="order-list">
+                {% for order in orders %}
+                <article class="order-card">
+                  <div class="order-card-header">
+                    <div>
+                      <p class="profile-eyebrow text-uppercase fw-bold mb-1">Order #{{ order.id }}</p>
+                      <span class="text-muted small">{{ order.order_date.strftime('%d %B %Y') }}</span>
+                    </div>
+
+                    {% if order.status == 'Pending' %}
+                      {% if order.payment %}
+                        {% if order.payment.status == 'Pending' %}
+                        <span class="status-badge status-warning">Menunggu Verifikasi</span>
+                        {% elif order.payment.status == 'Rejected' %}
+                        <span class="status-badge status-danger">Pembayaran Ditolak</span>
+                        {% else %}
+                        <span class="status-badge status-muted">Belum Bayar</span>
+                        {% endif %}
+                      {% else %}
+                      <span class="status-badge status-muted">Belum Bayar</span>
+                      {% endif %}
+                    {% elif order.status == 'Processing' %}
+                    <span class="status-badge status-info">Diproses</span>
+                    {% elif order.status == 'Completed' %}
+                    <span class="status-badge status-success">Selesai</span>
+                    {% elif order.status == 'Cancelled' %}
+                    <span class="status-badge status-danger">Dibatalkan</span>
+                    {% endif %}
+                  </div>
+
+                  <div class="order-card-body">
+                    <div class="order-items">
+                      <h3 class="order-section-title">Dekorasi / Paket yang Disewa</h3>
+                      <ul class="list-unstyled mb-0">
+                        {% for item in order.order_items %}
+                        <li>
+                          <i class="bi bi-check2-circle"></i>
+                          <span>{{ item.product.name }} (x{{ item.quantity }})</span>
+                        </li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+
+                    <div class="order-total-box">
+                      <span>Durasi Sewa</span>
+                      <strong>{{ order.start_date.strftime('%d %b') }} s/d {{ order.end_date.strftime('%d %b %Y') }}</strong>
+                      <span class="mt-3">Total Pembayaran</span>
+                      <strong class="order-total">Rp {{ "{:,.0f}".format(order.total_price).replace(',', '.') }}</strong>
+                    </div>
+                  </div>
+
+                  <div class="order-address">
+                    <p class="mb-1">
+                      <i class="bi bi-geo-alt-fill"></i>
+                      <span>{{ order.event_address }}</span>
                     </p>
                     {% if order.notes %}
-                    <p class="text-muted small mb-0">
-                      <i class="bi bi-chat-left-dots-fill me-1"></i> Catatan:
-                      "{{ order.notes }}"
+                    <p class="mb-0">
+                      <i class="bi bi-chat-left-dots-fill"></i>
+                      <span>Catatan: "{{ order.notes }}"</span>
                     </p>
                     {% endif %}
                   </div>
 
-                  <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                    <span class="text-muted small d-block">Durasi Sewa: {{ order.start_date.strftime('%d %b') }} s/d
-                      {{ order.end_date.strftime('%d %b %Y') }}</span>
-                    <h5 class="text-dark fw-bold mt-1 mb-0" style="color: var(--primary-gold-dark) !important">
-                      Total: Rp {{
-                      "{:,.0f}".format(order.total_price).replace(',', '.') }}
-                    </h5>
+                  <div class="order-actions">
+                    <div class="order-payment-note">
+                      {% if order.status == 'Pending' and not order.payment %}
+                      <i class="bi bi-info-circle-fill"></i>
+                      <span>Silakan transfer dan unggah bukti pembayaran.</span>
+                      {% elif order.status == 'Pending' and order.payment and order.payment.status == 'Pending' %}
+                      <i class="bi bi-hourglass-split"></i>
+                      <span>Pembayaran dalam proses verifikasi oleh admin.</span>
+                      {% elif order.status == 'Pending' and order.payment and order.payment.status == 'Rejected' %}
+                      <i class="bi bi-exclamation-triangle-fill"></i>
+                      <span>Pembayaran ditolak. Silakan unggah bukti yang valid.</span>
+                      {% elif order.status == 'Processing' or order.status == 'Completed' %}
+                      <i class="bi bi-check-circle-fill"></i>
+                      <span>Pembayaran lunas dan terverifikasi.</span>
+                      {% endif %}
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 justify-content-end">
+                      {% if order.payment and order.payment.status == 'Approved' or order.status == 'Processing' or order.status == 'Completed' %}
+                      <a href="{{ url_for('customer.invoice', order_id=order.id) }}" class="btn btn-profile-outline" target="_blank">
+                        <i class="bi bi-file-earmark-pdf-fill"></i>
+                        <span>Cetak Invoice</span>
+                      </a>
+                      {% endif %}
+
+                      {% if order.status == 'Pending' and (not order.payment or order.payment.status == 'Rejected') %}
+                      <button class="btn btn-profile-primary" data-bs-toggle="modal" data-bs-target="#uploadModal"
+                        data-order-id="{{ order.id }}">
+                        <i class="bi bi-upload"></i>
+                        <span>Unggah Bukti</span>
+                      </button>
+                      {% endif %}
+                    </div>
+                  </div>
+                </article>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="profile-empty text-center">
+                <i class="bi bi-receipt-cutoff"></i>
+                <h2 class="serif-font h4 text-dark mt-3">Belum ada pesanan</h2>
+                <p class="text-muted mb-4">Riwayat transaksi pemesanan Anda akan muncul di sini.</p>
+                <a href="{{ url_for('customer.decorations') }}" class="btn btn-profile-primary px-4">
+                  Pesan Sekarang
+                </a>
+              </div>
+              {% endif %}
+            </div>
+
+            <div class="tab-pane fade" id="edit-pane" role="tabpanel" aria-labelledby="edit-tab" tabindex="0">
+              <form action="{{ url_for('customer.profile_update') }}" method="POST" class="profile-form">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <label for="profile-name" class="form-label fw-semibold">Nama Lengkap</label>
+                    <input type="text" class="form-control profile-control" id="profile-name" name="name"
+                      value="{{ current_user.name }}" required>
+                  </div>
+
+                  <div class="col-md-6">
+                    <label for="profile-email" class="form-label fw-semibold">Alamat Email</label>
+                    <input type="email" class="form-control profile-control" id="profile-email" name="email"
+                      value="{{ current_user.email }}" required>
+                  </div>
+
+                  <div class="col-12">
+                    <label for="profile-phone" class="form-label fw-semibold">Nomor HP / WhatsApp</label>
+                    <input type="text" class="form-control profile-control" id="profile-phone" name="phone"
+                      value="{{ current_user.phone or '' }}" placeholder="Contoh: 081234567890">
+                  </div>
+
+                  <div class="col-12">
+                    <label for="profile-address" class="form-label fw-semibold">Alamat Lengkap</label>
+                    <textarea class="form-control profile-control" id="profile-address" name="address" rows="3"
+                      placeholder="Masukkan alamat lengkap...">{{ current_user.address or '' }}</textarea>
                   </div>
                 </div>
 
-                <!-- Payment Flow / Actions -->
-                <div class="d-flex justify-content-between align-items-center pt-3 border-top"
-                  style="border-style: dashed !important">
-                  <div>
-                    {% if order.status == 'Pending' and not order.payment %}
-                    <!-- Payment instructions -->
-                    <span class="text-danger small fw-semibold"><i class="bi bi-info-circle-fill me-1"></i> Silakan
-                      transfer dan unggah bukti pembayaran</span>
-                    {% elif order.status == 'Pending' and order.payment and
-                    order.payment.status == 'Pending' %}
-                    <span class="text-warning small fw-semibold"><i class="bi bi-hourglass-split me-1"></i> Pembayaran
-                      dalam proses verifikasi oleh Admin</span>
-                    {% elif order.status == 'Pending' and order.payment and
-                    order.payment.status == 'Rejected' %}
-                    <span class="text-danger small fw-semibold"><i class="bi bi-exclamation-triangle-fill me-1"></i>
-                      Pembayaran ditolak. Silakan unggah bukti yang valid</span>
-                    {% elif order.status == 'Processing' or order.status ==
-                    'Completed' %}
-                    <span class="text-success small fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Pembayaran
-                      Lunas & Terverifikasi</span>
-                    {% endif %}
-                  </div>
+                <div class="profile-security">
+                  <p class="profile-eyebrow text-uppercase fw-bold mb-1">Keamanan</p>
+                  <h3 class="serif-font h5 text-dark mb-3">Password</h3>
 
-                  <div class="d-flex gap-2">
-                    <!-- Invoice Button -->
-                    {% if order.payment and order.payment.status == 'Approved'
-                    or order.status == 'Processing' or order.status ==
-                    'Completed' %}
-                    <a href="{{ url_for('customer.invoice', order_id=order.id) }}" class="btn btn-sm btn-outline-dark"
-                      target="_blank" style="border-radius: 20px">
-                      <i class="bi bi-file-earmark-pdf-fill me-1"></i> Cetak
-                      Invoice
-                    </a>
-                    {% endif %}
-
-                    <!-- Upload Proof Button -->
-                    {% if order.status == 'Pending' and (not order.payment or
-                    order.payment.status == 'Rejected') %}
-                    <button class="btn btn-sm btn-gold-cta" data-bs-toggle="modal" data-bs-target="#uploadModal"
-                      data-order-id="{{ order.id }}" style="border-radius: 20px">
-                      <i class="bi bi-upload me-1"></i> Unggah Bukti Transfer
+                  <label for="profile-password" class="form-label fw-semibold">
+                    Ubah Password <span class="text-muted">(Kosongkan jika tidak ingin diubah)</span>
+                  </label>
+                  <div class="profile-password-field">
+                    <input type="password" class="form-control profile-control" id="profile-password" name="password"
+                      placeholder="Masukkan password baru...">
+                    <button type="button" id="toggleProfilePassword" class="btn password-toggle" aria-label="Tampilkan password">
+                      <i class="bi bi-eye"></i>
                     </button>
-                    {% endif %}
                   </div>
                 </div>
-              </div>
-            </div>
-            {% endfor %} {% else %}
-            <div class="text-center py-5">
-              <i class="bi bi-receipt-cutoff text-muted" style="font-size: 4rem"></i>
-              <h5 class="serif-font mt-3">Belum ada pesanan</h5>
-              <p class="text-muted">
-                Riwayat transaksi pemesanan Anda akan muncul di sini.
-              </p>
-              <a href="{{ url_for('customer.decorations') }}" class="btn btn-gold-cta btn-sm mt-1 px-4"
-                style="border-radius: 20px">
-                Pesan Sekarang
-              </a>
-            </div>
-            {% endif %}
-          </div>
 
-          <!-- Tab 2: Edit Profile -->
-          <div class="tab-pane fade" id="edit-pane" role="tabpanel" aria-labelledby="edit-tab" tabindex="0">
-            <form action="{{ url_for('customer.profile_update') }}" method="POST">
-              <div class="row">
-                <div class="col-md-6 mb-3">
-                  <label for="profile-name" class="form-label fw-semibold">Nama Lengkap</label>
-                  <input type="text" class="form-control" id="profile-name" name="name" value="{{ current_user.name }}"
-                    required style="border-radius: 8px" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                  <label for="profile-email" class="form-label fw-semibold">Alamat Email</label>
-                  <input type="email" class="form-control" id="profile-email" name="email"
-                    value="{{ current_user.email }}" required style="border-radius: 8px" />
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label for="profile-phone" class="form-label fw-semibold">Nomor HP / WhatsApp</label>
-                <input type="text" class="form-control" id="profile-phone" name="phone"
-                  value="{{ current_user.phone or '' }}" placeholder="Contoh: 081234567890"
-                  style="border-radius: 8px" />
-              </div>
-
-              <div class="mb-3">
-                <label for="profile-address" class="form-label fw-semibold">Alamat Lengkap</label>
-                <textarea class="form-control" id="profile-address" name="address" rows="3"
-                  placeholder="Masukkan alamat lengkap..." style="border-radius: 8px">
-{{ current_user.address or '' }}</textarea>
-              </div>
-
-              <hr class="my-4" />
-              <h5 class="serif-font mb-3 text-gold-accent" style="color: var(--primary-gold-dark)">
-                Keamanan & Password
-              </h5>
-
-              <div class="mb-4">
-                <label for="profile-password" class="form-label fw-semibold">Ubah Password (Kosongkan jika tidak ingin
-                  diubah)</label>
-                <div class="relative position-relative">
-                  <input type="password" class="form-control" id="profile-password" name="password"
-                    placeholder="Masukkan password baru..." style="border-radius: 8px; padding-right: 40px;" />
-                  <button type="button" id="toggleProfilePassword"
-                    class="position-absolute end-0 top-50 translate-middle-y me-3 btn p-0 border-0 text-muted hover:text-dark focus:outline-none"
-                    style="z-index: 10;">
-                    <i class="bi bi-eye fs-5"></i>
-                  </button>
-                </div>
-              </div>
-
-              <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-gold-cta py-2.5" style="border-radius: 30px">
-                  <i class="bi bi-save2-fill me-2"></i> Simpan Perubahan Profil
+                <button type="submit" class="btn btn-profile-primary w-100 mt-4">
+                  <i class="bi bi-save2-fill"></i>
+                  <span>Simpan Perubahan Profil</span>
                 </button>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
-</div>
+</main>
 
 <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 15px; border: 1px solid rgba(197, 168, 128, 0.25)">
-      <div class="modal-header bg-dark text-white" style="
-          border-top-left-radius: 14px;
-          border-top-right-radius: 14px;
-          border-bottom: 2px solid var(--primary-gold);
-        ">
+    <div class="modal-content profile-modal">
+      <div class="modal-header profile-modal-header">
         <h5 class="modal-title" id="uploadModalLabel">
-          <i class="bi bi-credit-card text-warning me-2"></i> Unggah Bukti
-          Pembayaran
+          <i class="bi bi-credit-card"></i>
+          Unggah Bukti Pembayaran
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body p-4">
-        <div class="p-3 bg-light rounded mb-4" style="border-left: 4px solid var(--primary-gold); font-size: 0.9rem">
-          <h6 class="fw-bold mb-2">Instruksi Transfer:</h6>
-          <p class="mb-1">
-            Silakan transfer sesuai total tagihan pesanan Anda ke salah satu
-            rekening berikut:
-          </p>
-          <ul class="list-unstyled mb-0 mt-2">
+        <div class="payment-instruction mb-4">
+          <h6 class="fw-bold mb-2">Instruksi Transfer</h6>
+          <p class="mb-2">Silakan transfer sesuai total tagihan pesanan Anda ke salah satu rekening berikut:</p>
+          <ul class="list-unstyled mb-0">
             <li>
-              <strong>Bank BCA:</strong> 037-1234-567 <br /><span class="text-muted">a.n. Griya Rias Saraswati</span>
+              <strong>Bank BCA:</strong> 037-1234-567<br>
+              <span class="text-muted">a.n. Griya Rias Saraswati</span>
             </li>
             <li class="mt-2">
-              <strong>Bank Mandiri:</strong> 137-00-1234567-8 <br /><span class="text-muted">a.n. Griya Rias
-                Saraswati</span>
+              <strong>Bank Mandiri:</strong> 137-00-1234567-8<br>
+              <span class="text-muted">a.n. Griya Rias Saraswati</span>
             </li>
           </ul>
         </div>
@@ -287,27 +261,24 @@
         <form id="uploadForm" action="" method="POST" enctype="multipart/form-data">
           <div class="mb-3">
             <label for="payment_method" class="form-label fw-semibold">Metode Pembayaran</label>
-            <select class="form-select" id="payment_method" name="payment_method" required style="border-radius: 8px">
+            <select class="form-select profile-control" id="payment_method" name="payment_method" required>
               <option value="">-- Pilih Bank --</option>
               <option value="Transfer Bank BCA">Transfer Bank BCA</option>
-              <option value="Transfer Bank Mandiri">
-                Transfer Bank Mandiri
-              </option>
+              <option value="Transfer Bank Mandiri">Transfer Bank Mandiri</option>
             </select>
           </div>
 
           <div class="mb-4">
-            <label for="payment_proof" class="form-label fw-semibold">Berkas Bukti Transfer (Format Gambar: PNG, JPG,
-              JPEG)</label>
-            <input type="file" class="form-control" id="payment_proof" name="payment_proof" accept="image/*" required
-              style="border-radius: 8px" />
+            <label for="payment_proof" class="form-label fw-semibold">
+              Berkas Bukti Transfer <span class="text-muted">(PNG, JPG, JPEG)</span>
+            </label>
+            <input type="file" class="form-control profile-control" id="payment_proof" name="payment_proof"
+              accept="image/*" required>
           </div>
 
-          <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-gold-cta py-2.5">
-              Kirim Bukti Pembayaran
-            </button>
-          </div>
+          <button type="submit" class="btn btn-profile-primary w-100">
+            Kirim Bukti Pembayaran
+          </button>
         </form>
       </div>
     </div>
@@ -329,8 +300,7 @@
       });
     }
 
-    const hash = window.location.hash;
-    if (hash === "#edit") {
+    if (window.location.hash === "#edit") {
       const editTab = document.getElementById("edit-tab");
       if (editTab) editTab.click();
     }
@@ -343,13 +313,8 @@
         profilePasswordInput.setAttribute("type", type);
 
         const icon = this.querySelector("i");
-        if (type === "text") {
-          icon.classList.remove("bi-eye");
-          icon.classList.add("bi-eye-slash");
-        } else {
-          icon.classList.remove("bi-eye-slash");
-          icon.classList.add("bi-eye");
-        }
+        icon.classList.toggle("bi-eye", type !== "text");
+        icon.classList.toggle("bi-eye-slash", type === "text");
       });
     }
   });
