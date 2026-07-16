@@ -118,11 +118,19 @@
           <div class="package-footer-area">
             <div class="package-price">Rp. 12.200.000</div>
             {% if silver %}
+            {% if current_user.is_authenticated %}
             <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
               data-product-id="{{ silver.id }}" data-product-name="{{ silver.name }}"
               data-product-price="Rp. 12.200.000" aria-label="Book Silver Package">
               <i class="bi bi-cart3"></i>
             </button>
+            {% else %}
+            <a href="{{ url_for('auth.login', next=url_for('customer.index') ~ '#catalog') }}"
+              class="btn btn-cart-bronze d-inline-flex align-items-center justify-content-center text-decoration-none"
+              aria-label="Book Silver Package" style="width: 40px; height: 40px; border-radius: 50%;">
+              <i class="bi bi-cart3"></i>
+            </a>
+            {% endif %}
             {% else %}
             <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
                 class="bi bi-cart3"></i></button>
@@ -156,11 +164,19 @@
           <div class="package-footer-area">
             <div class="package-price">Rp. 15.300.000</div>
             {% if gold %}
+            {% if current_user.is_authenticated %}
             <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
               data-product-id="{{ gold.id }}" data-product-name="{{ gold.name }}" data-product-price="Rp. 15.300.000"
               aria-label="Book Gold Package">
               <i class="bi bi-cart3"></i>
             </button>
+            {% else %}
+            <a href="{{ url_for('auth.login', next=url_for('customer.index') ~ '#catalog') }}"
+              class="btn btn-cart-bronze d-inline-flex align-items-center justify-content-center text-decoration-none"
+              aria-label="Book Gold Package" style="width: 40px; height: 40px; border-radius: 50%;">
+              <i class="bi bi-cart3"></i>
+            </a>
+            {% endif %}
             {% else %}
             <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
                 class="bi bi-cart3"></i></button>
@@ -194,11 +210,19 @@
           <div class="package-footer-area">
             <div class="package-price">Rp. 17.400.000</div>
             {% if platinum %}
+            {% if current_user.is_authenticated %}
             <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
               data-product-id="{{ platinum.id }}" data-product-name="{{ platinum.name }}"
               data-product-price="Rp. 17.400.000" aria-label="Book Platinum Package">
               <i class="bi bi-cart3"></i>
             </button>
+            {% else %}
+            <a href="{{ url_for('auth.login', next=url_for('customer.index') ~ '#catalog') }}"
+              class="btn btn-cart-bronze d-inline-flex align-items-center justify-content-center text-decoration-none"
+              aria-label="Book Platinum Package" style="width: 40px; height: 40px; border-radius: 50%;">
+              <i class="bi bi-cart3"></i>
+            </a>
+            {% endif %}
             {% else %}
             <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
                 class="bi bi-cart3"></i></button>

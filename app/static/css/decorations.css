@@ -1,0 +1,76 @@
+/* 
+  Griya Rias Saraswati - Decorations Page Mobile Overrides
+  File ini hanya menimpa gaya desktop ketika berada pada layar mobile/tablet.
+*/
+
+@media (max-width: 767.98px) {
+  /* Banner Responsiveness */
+  .banner-title {
+    font-size: 2rem !important;
+  }
+  .banner-subtitle {
+    font-size: 0.95rem !important;
+  }
+
+  /* Filter Card Responsiveness */
+  .filter-card {
+    padding: 1.25rem !important;
+  }
+
+  /* Product Card Image & Body Responsiveness */
+  .product-img-container {
+    height: 200px !important;
+  }
+  .product-card-body {
+    padding: 1.25rem !important;
+  }
+}
+
+/* Hover effects & basic styling that doesn't conflict with layout */
+.decor-item-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 32px rgba(197, 168, 128, 0.18) !important;
+  border-color: rgba(197, 168, 128, 0.4) !important;
+}
+
+.decor-item-card:hover .product-card-img {
+  transform: scale(1.06);
+}
+
+.btn-gold-cta {
+  background-color: var(--primary-gold);
+  color: #fff;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-gold-cta:hover {
+  background-color: var(--primary-gold-dark);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(197, 168, 128, 0.3);
+}
+
+.text-gold-accent {
+  color: var(--primary-gold);
+}
+
+.btn-decor-action,
+.btn-decor-action:hover,
+.btn-decor-action:focus,
+.btn-decor-action:active {
+  padding: 8px 20px !important;
+  font-size: 0.9rem !important;
+  border-radius: 20px !important;
+  height: 40px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+.product-card-body {
+  padding: 1.75rem 1.75rem 2.25rem 1.75rem !important;
+}

@@ -1,6 +1,6 @@
 import unittest
 from app import create_app, db
-from app.models import User, Role, Customer, Admin
+from app.models import User, Role, Customer, Admin, Category, Product
 from config import Config
 
 class TestConfig(Config):
@@ -396,6 +396,62 @@ class AuthTestCase(unittest.TestCase):
         deleted_user = db.session.get(User, u_cust.id)
         self.assertIsNone(deleted_cust)
         self.assertIsNone(deleted_user)
+
+    def test_customer_decorations_catalog_and_filtering(self):
+        """Uji akses katalog dekorasi pelanggan beserta pencarian dan filter kategori"""
+        # Buat Kategori & Produk Aktif
+        cat1 = Category(name='Tenda Mewah', description='Kategori tenda')
+        cat2 = Category(name='Rias Wajah', description='Makeup')
+        db.session.add_all([cat1, cat2])
+        db.session.flush()
+
+        prod1 = Product(category_id=cat1.id, name='Tenda Pernikahan Gold', price=1000000.0, stock=2, description='Tenda dekorasi gold', status='Active')
+        prod2 = Product(category_id=cat2.id, name='Makeup Pengantin Modern', price=500000.0, stock=1, description='Rias wajah modern', status='Active')
+        prod_inactive = Product(category_id=cat1.id, name='Barang Nonaktif', price=300000.0, stock=5, description='Tidak aktif', status='Inactive')
+        db.session.add_all([prod1, prod2, prod_inactive])
+        db.session.commit()
+
+        # 1. Uji akses tanpa login (katalog publik)
+        response = self.client.get('/decorations')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Tenda Pernikahan Gold', response.data)
+        self.assertIn(b'Makeup Pengantin Modern', response.data)
+        # Barang nonaktif tidak boleh muncul
+        self.assertNotIn(b'Barang Nonaktif', response.data)
+
+        # 2. Uji filter pencarian kata kunci (?search=Gold)
+        response_search = self.client.get('/decorations?search=Gold')
+        self.assertEqual(response_search.status_code, 200)
+        self.assertIn(b'Tenda Pernikahan Gold', response_search.data)
+        self.assertNotIn(b'Makeup Pengantin Modern', response_search.data)
+
+        # 3. Uji filter kategori (?category_id={cat2.id})
+        response_filter = self.client.get(f'/decorations?category_id={cat2.id}')
+        self.assertEqual(response_filter.status_code, 200)
+        self.assertIn(b'Makeup Pengantin Modern', response_filter.data)
+        self.assertNotIn(b'Tenda Pernikahan Gold', response_filter.data)
+
+    def test_customer_product_detail_and_availability(self):
+        """Uji akses halaman detail barang beserta kalender ketersediaan"""
+        cat = Category(name='Tenda', description='Kategori tenda')
+        db.session.add(cat)
+        db.session.flush()
+
+        prod = Product(category_id=cat.id, name='Tenda Pernikahan Gold', price=1000000.0, stock=2, description='Tenda dekorasi gold mewah', status='Active')
+        db.session.add(prod)
+        db.session.commit()
+
+        # 1. Uji akses sukses detail barang aktif
+        response = self.client.get(f'/decoration/{prod.id}')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Tenda Pernikahan Gold', response.data)
+        self.assertIn(b'Jadwal', response.data)
+        self.assertIn(b'Ketersediaan', response.data)
+        self.assertIn(b'Tersedia: 2', response.data)
+
+        # 2. Uji akses gagal 404 produk tidak ditemukan/tidak ada
+        response_404 = self.client.get('/decoration/99999')
+        self.assertEqual(response_404.status_code, 404)
 
 if __name__ == '__main__':
     unittest.main()

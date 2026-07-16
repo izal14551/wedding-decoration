@@ -1,229 +1,196 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+
+{% block styles %}
+<link href="{{ url_for('static', filename='css/decorations.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
 <!-- Header Banner -->
-<div
-  class="decorations-banner py-5 text-center text-white"
-  style="
+<div class="decorations-banner py-5 text-center text-white" style="
     background:
       linear-gradient(rgba(31, 39, 42, 0.85), rgba(31, 39, 42, 0.85)),
       url(&quot;https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&quot;)
         no-repeat center center;
     background-size: cover;
     border-bottom: 2px solid var(--primary-gold);
-  "
->
+  ">
   <div class="container py-4">
-    <h1
-      class="serif-font mb-2 text-gold-accent"
-      style="color: var(--primary-gold); font-size: 2.8rem"
-    >
+    <h1 class="serif-font mb-2 text-gold-accent banner-title" style="color: var(--primary-gold); font-size: 2.8rem">
       Our Wedding Decoration
     </h1>
-    <p class="lead text-white-50">
-      Temukan paket dekorasi dan peralatan pernikahan terbaik untuk hari
-      istimewa Anda
+    <p class="lead text-white-50 banner-subtitle" style="max-width: 600px; margin: 0 auto">
+      Temukan koleksi alat dekorasi eksklusif serta layanan rias wajah
+      professional terbaik untuk mewujudkan pernikahan impian Anda.
     </p>
   </div>
 </div>
 
 <div class="container my-5">
-  <!-- Search and Filter Bar -->
+  <!-- Search and Filter Bar (Premium UI) -->
   <div class="row mb-5 justify-content-center">
     <div class="col-lg-10">
-      <div
-        class="card shadow-sm p-4"
-        style="
+      <div class="card shadow-sm p-4 border-0 filter-card" style="
           background-color: #ffffff;
-          border-radius: 15px;
-          border: 1px solid rgba(197, 168, 128, 0.15);
-        "
-      >
-        <form
-          method="GET"
-          action="{{ url_for('customer.decorations') }}"
-          class="row g-3"
-        >
-          <!-- Search -->
-          <div class="col-md-5">
-            <div class="input-group">
-              <span
-                class="input-group-text bg-white border-end-0 text-muted"
-                style="border-radius: 10px 0 0 10px"
-                ><i class="bi bi-search"></i
-              ></span>
-              <input
-                type="text"
-                class="form-control border-start-0 ps-0"
-                name="search"
-                placeholder="Cari nama dekorasi..."
-                value="{{ search }}"
-                style="border-radius: 0 10px 10px 0"
-              />
+          border-radius: 16px;
+          border: 1px solid rgba(197, 168, 128, 0.2);
+        ">
+        <form method="GET" action="{{ url_for('customer.decorations') }}" class="row g-3">
+          <!-- Search Input -->
+          <div class="col-md-8">
+            <label class="form-label small fw-bold text-dark-slate mb-1">Cari Dekorasi</label>
+            <div class="input-group bg-light"
+              style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; height: 38px;">
+              <span class="input-group-text bg-transparent border-0 text-muted ps-3 pe-3">
+                <i class="bi bi-search"></i>
+              </span>
+              <input type="text" class="form-control bg-transparent border-0 ps-1" name="search" id="searchInput"
+                placeholder="Masukkan nama barang atau layanan..." value="{{ search }}" style="box-shadow: none;" />
+              <button type="button" id="clearSearchBtn" class="btn bg-transparent border-0 text-muted px-3 d-none"
+                style="box-shadow: none;">
+                <i class="bi bi-x-lg" style="font-size: 0.85rem;"></i>
+              </button>
             </div>
           </div>
 
-          <!-- Category Filter -->
+          <!-- Category Dropdown with Checklist -->
           <div class="col-md-4">
-            <select
-              class="form-select"
-              name="category_id"
-              style="border-radius: 10px"
-            >
-              <option value="">Semua Kategori</option>
-              {% for cat in categories %}
-              <option
-                value="{{ cat.id }}"
-                {%
-                if
-                selected_category=""
-                ="cat.id|string"
-                %}selected{%
-                endif
-                %}
-              >
-                {{ cat.name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <!-- Submit & Reset Buttons -->
-          <div class="col-md-3 d-grid gap-2 d-md-flex">
-            <button
-              type="submit"
-              class="btn btn-gold-cta flex-grow-1"
-              style="border-radius: 10px"
-            >
-              Filter
-            </button>
-            {% if search or selected_category %}
-            <a
-              href="{{ url_for('customer.decorations') }}"
-              class="btn btn-outline-secondary"
-              style="border-radius: 10px"
-              ><i class="bi bi-arrow-clockwise"></i
-            ></a>
-            {% endif %}
+            <label class="form-label small fw-bold text-dark-slate mb-1">Kategori Produk</label>
+            <div class="dropdown">
+              <button
+                class="btn bg-light w-100 text-start d-flex justify-content-between align-items-center form-select"
+                type="button" id="categoryDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                aria-expanded="false"
+                style="border-radius: 10px; border: 1px solid #e2e8f0; height: 38px; box-shadow: none;">
+                <span class="small fw-semibold text-dark-slate" id="selected-categories-label">Pilih Kategori</span>
+              </button>
+              <ul class="dropdown-menu w-100 py-2 px-0 shadow border" aria-labelledby="categoryDropdown"
+                style="border-radius: 10px;">
+                {% for cat in categories %}
+                <li class="mb-1">
+                  <div class="dropdown-item d-flex align-items-center py-2 px-3 position-relative"
+                    style="cursor: pointer;">
+                    <input class="form-check-input check-gold m-0" type="checkbox" name="category_ids"
+                      id="cat_{{ cat.id }}" value="{{ cat.id }}" {% if selected_categories and cat.id|string in
+                      selected_categories %}checked{% endif %} style="pointer-events: none;">
+                    <label class="form-check-label small fw-semibold text-dark-slate ms-2 stretched-link"
+                      for="cat_{{ cat.id }}" style="cursor: pointer; user-select: none;">
+                      {{ cat.name }}
+                    </label>
+                  </div>
+                </li>
+                {% endfor %}
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li class="px-3 mt-2">
+                  <div class="d-flex gap-2">
+                    <button type="button" id="clear-categories-btn"
+                      class="btn btn-sm btn-outline-secondary w-50 py-1.5 fw-semibold" style="border-radius: 8px;">
+                      Clear
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-gold-cta w-50 py-1.5 fw-semibold"
+                      style="border-radius: 8px;">
+                      Apply
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </div>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- Product Listing -->
-  <div class="row g-4 justify-content-center">
-    {% if products %} {% for prod in products %}
+  <!-- Product Listing Grid -->
+  <div class="row g-4">
+    {% if products %}
+    {% for prod in products %}
     <div class="col-lg-4 col-md-6">
-      <div
-        class="card h-100 shadow-sm decor-item-card"
-        style="
-          border-radius: 15px;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          overflow: hidden;
-          transition: all 0.3s ease;
-        "
-      >
-        <!-- Product Image -->
-        <div style="height: 240px; overflow: hidden; position: relative">
-          {% if prod.category.name == 'Package' %}
-          <img
-            src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=600&q=80"
-            class="card-img-top w-100 h-100"
-            style="object-fit: cover"
-            alt="{{ prod.name }}"
-          />
-          {% elif prod.category.name == 'Makeup' %}
-          <img
-            src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80"
-            class="card-img-top w-100 h-100"
-            style="object-fit: cover"
-            alt="{{ prod.name }}"
-          />
-          {% else %}
-          <img
-            src="https://images.unsplash.com/photo-1478812954026-9c750f0e89fc?auto=format&fit=crop&w=600&q=80"
-            class="card-img-top w-100 h-100"
-            style="object-fit: cover"
-            alt="{{ prod.name }}"
-          />
-          {% endif %}
-          <span
-            class="badge bg-dark text-warning position-absolute top-0 end-0 m-3 px-3 py-2"
-            style="
-              font-size: 0.8rem;
-              border-radius: 20px;
-              font-weight: 600;
-              border: 1px solid var(--primary-gold);
-            "
-          >
-            {{ prod.category.name|upper }}
-          </span>
-        </div>
-
-        <!-- Card Body -->
-        <div class="card-body d-flex flex-column p-4">
-          <h4 class="card-title serif-font text-dark mb-2">{{ prod.name }}</h4>
-          <p
-            class="card-text text-muted flex-grow-1"
-            style="font-size: 0.9rem; line-height: 1.6"
-          >
-            {{ prod.description|truncate(150) }}
-          </p>
-
-          <div
-            class="d-flex justify-content-between align-items-center mt-3 pt-3"
-            style="border-top: 1px solid rgba(0, 0, 0, 0.06)"
-          >
-            <div>
-              <span class="text-muted small d-block">Harga Sewa / Hari</span>
-              <span
-                class="text-dark fw-bold fs-5"
-                style="color: var(--primary-gold-dark) !important"
-              >
-                Rp {{ "{:,.0f}".format(prod.price).replace(',', '.') }}
-              </span>
-            </div>
-
-            <!-- Cart Action -->
-            <form
-              action="{{ url_for('customer.cart_add', product_id=prod.id) }}"
-              method="POST"
-            >
-              <button
-                type="submit"
-                class="btn btn-gold-cta px-3 py-2"
-                style="border-radius: 30px"
-                title="Tambah ke Keranjang"
-              >
-                <i class="bi bi-cart-plus-fill me-1"></i> + Cart
-              </button>
-            </form>
-          </div>
-        </div>
-      </div>
+      {% include 'shared/_decor_card.html' %}
     </div>
-    {% endfor %} {% else %}
+    {% endfor %}
+    {% else %}
     <div class="col-12 text-center py-5">
-      <i class="bi bi-box-seam text-muted" style="font-size: 4rem"></i>
-      <h4 class="mt-3 serif-font">Tidak ada dekorasi ditemukan</h4>
-      <p class="text-muted">
-        Coba ubah kata kunci pencarian atau pilih kategori lain.
-      </p>
-      <a
-        href="{{ url_for('customer.decorations') }}"
-        class="btn btn-gold-cta mt-2"
-        style="border-radius: 20px"
-        >Tampilkan Semua</a
-      >
+      <div class="py-5" style="background: #f8fafc; border-radius: 16px; border: 1px dashed #e2e8f0;">
+        <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+        <h4 class="mt-3 serif-font text-dark-slate fw-bold">Tidak ada dekorasi/jasa ditemukan</h4>
+        <p class="text-muted small">
+          Coba ubah kata kunci pencarian Anda atau pilih kategori penyaringan lainnya.
+        </p>
+        <a href="{{ url_for('customer.decorations') }}" class="btn btn-gold-cta mt-3 px-4 py-2"
+          style="border-radius: 20px;">
+          <i class="bi bi-arrow-clockwise me-1"></i> Tampilkan Semua
+        </a>
+      </div>
     </div>
     {% endif %}
   </div>
 </div>
 
-<style>
-  .decor-item-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(197, 168, 128, 0.15) !important;
-    border-color: var(--primary-gold) !important;
-  }
-</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const checkboxes = document.querySelectorAll('input[name="category_ids"]');
+    const label = document.getElementById("selected-categories-label");
+    const clearBtn = document.getElementById("clear-categories-btn");
+    const searchInput = document.getElementById("searchInput");
+    const clearSearchBtn = document.getElementById("clearSearchBtn");
+
+    function updateLabel() {
+      const checked = Array.from(checkboxes).filter(cb => cb.checked);
+      if (checked.length === 0) {
+        label.textContent = "Pilih Kategori";
+      } else if (checked.length === 1) {
+        label.textContent = checked[0].nextElementSibling.textContent.trim();
+      } else {
+        label.textContent = checked.length + " Kategori Terpilih";
+      }
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener("change", updateLabel));
+    updateLabel();
+
+    if (clearBtn) {
+      clearBtn.addEventListener("click", function () {
+        checkboxes.forEach(cb => cb.checked = false);
+        updateLabel();
+        clearBtn.closest("form").submit();
+      });
+    }
+
+    if (searchInput && clearSearchBtn) {
+      function toggleClearBtn() {
+        if (searchInput.value.trim() !== "") {
+          clearSearchBtn.classList.remove("d-none");
+        } else {
+          clearSearchBtn.classList.add("d-none");
+        }
+      }
+
+      let debounceTimer;
+      searchInput.addEventListener("input", function () {
+        toggleClearBtn();
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () {
+          searchInput.closest("form").submit();
+        }, 500);
+      });
+
+      toggleClearBtn();
+
+      if (searchInput.value.trim() !== "") {
+        searchInput.focus();
+        const val = searchInput.value;
+        searchInput.value = "";
+        searchInput.value = val;
+      }
+
+      clearSearchBtn.addEventListener("click", function () {
+        searchInput.value = "";
+        toggleClearBtn();
+        searchInput.closest("form").submit();
+      });
+    }
+  });
+</script>
 {% endblock %}

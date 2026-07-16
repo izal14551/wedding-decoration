@@ -35,10 +35,10 @@ Fokus pada manajemen inventaris dekorasi yang disewakan oleh Admin dan tampilann
   - Fitur tambah barang baru (mengaitkan kategori, mengisi nama, harga sewa per hari, stok awal/kapasitas slot harian untuk jasa, deskripsi lengkap, upload foto barang).
   - Fitur edit informasi barang dan hapus barang.
   - Pembeda perlakuan stok (Kuantitas fisik untuk alat dekor, Kapasitas slot harian untuk jasa/makeup).
-- [ ] **2.3 Katalog (Pelanggan)**
+- [x] **2.3 Katalog (Pelanggan)**
   - Halaman beranda untuk menampilkan daftar dekorasi aktif berdasarkan kategori (tab filter).
   - Fitur pencarian barang dan filter berdasarkan kategori.
-- [ ] **2.4 Detail Barang (Pelanggan)**
+- [x] **2.4 Detail Barang (Pelanggan)**
   - Halaman detail untuk setiap barang/jasa dekorasi (menampilkan foto, deskripsi lengkap, harga, sisa stok/kapasitas slot harian, dan kalender status ketersediaan).
 
 ---
@@ -47,14 +47,14 @@ Fokus pada manajemen inventaris dekorasi yang disewakan oleh Admin dan tampilann
 
 Menjembatani pemilihan barang hingga persiapan sebelum pemesanan tanpa ada jadwal bentrok.
 
-- [ ] **3.1 Fitur Keranjang Belanja (Add to Cart)**
+- [x] **3.1 Fitur Keranjang Belanja (Add to Cart)**
   - Menyimpan barang pilihan pelanggan ke dalam session cart atau tabel database sementara.
   - Validasi kuantitas sewa agar tidak melebihi stok barang yang tersedia.
-- [ ] **3.2 Manajemen Keranjang Belanja**
+- [x] **3.2 Manajemen Keranjang Belanja**
   - Halaman keranjang untuk meninjau barang yang dipilih.
   - Fitur ubah kuantitas (tambah/kurang) barang dan hapus item dari keranjang.
   - Perhitungan total harga sementara secara otomatis.
-- [ ] **3.3 Sistem Validasi Jadwal Penyewaan**
+- [x] **3.3 Sistem Validasi Jadwal Penyewaan**
   - Validasi tanggal sewa saat barang dimasukkan ke keranjang/checkout.
   - Sistem memeriksa tabel `jadwal` untuk mendeteksi apakah barang tersebut sudah disewa oleh pelanggan lain pada tanggal yang sama untuk menghindari _double booking_.
 

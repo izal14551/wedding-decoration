@@ -6,14 +6,14 @@ app = create_app()
 with app.app_context():
     # Pastikan Kategori "Package" ada
     category_name = "Package"
-    kategori = Kategori.query.filter_by(nama_kategori=category_name).first()
+    kategori = Kategori.query.filter_by(name=category_name).first()
     if not kategori:
         kategori = Kategori(
-            nama_kategori=category_name,
-            deskripsi="Paket dekorasi pernikahan lengkap"
+            name=category_name,
+            description="Paket dekorasi pernikahan lengkap"
         )
         db.session.add(kategori)
-        db.session.flush() # Mendapatkan kategori_id sebelum commit
+        db.session.flush() # Mendapatkan id sebelum commit
         print(f"Kategori '{category_name}' berhasil ditambahkan.")
     
     # Daftar paket dekorasi pernikahan sesuai mockup
@@ -39,24 +39,23 @@ with app.app_context():
     ]
 
     for pkg_data in packages:
-        existing_barang = Barang.query.filter_by(nama_barang=pkg_data["name"]).first()
+        existing_barang = Barang.query.filter_by(name=pkg_data["name"]).first()
         if not existing_barang:
             barang = Barang(
-                kategori_id=kategori.kategori_id,
-                nama_barang=pkg_data["name"],
-                harga=pkg_data["price_per_day"],
-                deskripsi=pkg_data["description"],
-                stok=pkg_data["stock"],
-                status="Aktif"
+                category_id=kategori.id,
+                name=pkg_data["name"],
+                price=pkg_data["price_per_day"],
+                description=pkg_data["description"],
+                stock=pkg_data["stock"],
+                status="Active"
             )
             db.session.add(barang)
             print(f"Barang '{pkg_data['name']}' berhasil ditambahkan.")
         else:
             # Update harga jika ada perubahan
-            existing_barang.harga = pkg_data["price_per_day"]
-            existing_barang.deskripsi = pkg_data["description"]
+            existing_barang.price = pkg_data["price_per_day"]
+            existing_barang.description = pkg_data["description"]
             print(f"Barang '{pkg_data['name']}' sudah ada. Memperbarui informasi.")
 
     db.session.commit()
     print("Seeding paket pernikahan selesai!")
-

@@ -223,10 +223,14 @@ class Schedule(db.Model):
     __tablename__ = 'schedule'
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id', ondelete='CASCADE'), nullable=True)
     date = db.Column(db.Date, nullable=False)
     start_time = db.Column(db.Time, nullable=False)
     end_time = db.Column(db.Time, nullable=False)
     status = db.Column(db.String(50), default='Available')
+
+    # Relationship with Order
+    order = db.relationship('Order', backref=db.backref('schedules', lazy='dynamic', cascade='all, delete-orphan'))
 
     def __repr__(self):
         return f'<Schedule {self.id}>'
