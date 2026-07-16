@@ -1,254 +1,125 @@
 {% extends "base.html" %}
 
+{% block styles %}
+<link href="{{ url_for('static', filename='css/customer/product_detail.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/shared/availability_calendar.css') }}" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-<div class="container my-5">
-  <!-- Back Button & Breadcrumbs -->
-  <div class="mb-4">
-    <a href="{{ url_for('customer.decorations') }}"
-      class="btn btn-outline-secondary d-inline-flex align-items-center gap-2"
-      style="border-radius: 20px; font-size: 0.9rem;">
-      <i class="bi bi-arrow-left"></i> Kembali ke Katalog
-    </a>
-  </div>
-
-  <!-- Flash Messages -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <div class="mb-4">
-    {% for category, message in messages %}
-    <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show"
-      role="alert" style="border-radius: 8px;">
-      <i class="bi {{ 'bi-check-circle-fill' if category == 'success' else 'bi-exclamation-triangle-fill' }} me-2"></i>
-      {{ message }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<main class="product-detail-page py-5">
+  <div class="container">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+      <a href="{{ url_for('customer.decorations') }}" class="detail-crumb d-inline-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i>
+        <span class="fw-semibold small">Kembali ke Katalog</span>
+      </a>
+      <span class="text-muted small d-inline-flex align-items-center gap-2">
+        <i class="bi bi-shield-check"></i>
+        Stok dicek berdasarkan tanggal acara
+      </span>
     </div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  {% endwith %}
 
-  <!-- Main Product Detail Card -->
-  <div class="card border-0 shadow-sm mb-5"
-    style="border-radius: 16px; overflow: hidden; border: 1px solid rgba(0,0,0,0.05);">
-    <div class="row g-0">
-      <!-- Left Column: Product Image -->
-      <div class="col-md-6" style="background-color: #f8fafc; position: relative; overflow: hidden; min-height: 400px;">
+    <section class="detail-hero mb-5">
+      <div class="detail-media">
         {% if product.image_path %}
         <img src="{{ url_for('static', filename='uploads/products/' ~ product.image_path) }}" alt="{{ product.name }}"
-          class="w-100 h-100 product-detail-img" style="object-fit: cover; transition: transform 0.5s ease;"
-          onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80';" />
+          onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1100&q=80';" />
         {% else %}
         {% if 'package' in product.category.name|lower or 'paket' in product.category.name|lower %}
-        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=800&q=80"
-          class="w-100 h-100 product-detail-img" style="object-fit: cover; transition: transform 0.5s ease;"
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1100&q=80"
           alt="{{ product.name }}" />
         {% elif 'makeup' in product.category.name|lower or 'rias' in product.category.name|lower %}
-        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80"
-          class="w-100 h-100 product-detail-img" style="object-fit: cover; transition: transform 0.5s ease;"
+        <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1100&q=80"
           alt="{{ product.name }}" />
         {% else %}
-        <img src="https://images.unsplash.com/photo-1478812954026-9c750f0e89fc?auto=format&fit=crop&w=800&q=80"
-          class="w-100 h-100 product-detail-img" style="object-fit: cover; transition: transform 0.5s ease;"
+        <img src="https://images.unsplash.com/photo-1478812954026-9c750f0e89fc?auto=format&fit=crop&w=1100&q=80"
           alt="{{ product.name }}" />
         {% endif %}
         {% endif %}
-        <span class="badge position-absolute top-0 end-0 m-3 px-3 py-2"
-          style="font-size: 0.75rem; border-radius: 20px; font-weight: 600; background-color: var(--primary-gold-dark); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px);">
-          {{ product.category.name|upper }}
-        </span>
+
+        <span class="detail-category">{{ product.category.name|upper }}</span>
+        <div class="detail-caption">
+          <p class="mb-1 small text-white-50 fw-semibold">Griya Rias Saraswati</p>
+          <h1 class="serif-font h2 mb-0">{{ product.name }}</h1>
+        </div>
       </div>
 
-      <!-- Right Column: Product Info -->
-      <div class="col-md-6 d-flex flex-column p-4 p-lg-5">
-        <div>
-          <h2 class="serif-font text-dark fw-bold mb-3" style="font-size: 2.2rem; letter-spacing: 0.5px;">{{
-            product.name }}</h2>
-
-          <div class="d-flex align-items-center gap-3 mb-4">
-            <span class="fs-3 fw-bold text-gold-accent" style="color: var(--primary-gold-dark) !important;">
-              Rp {{ "{:,.0f}".format(product.price).replace(',', '.') }} <span class="fs-6 text-muted fw-normal">/
-                Hari</span>
-            </span>
-            <span class="badge bg-secondary-subtle text-secondary border px-2.5 py-1.5 rounded-pill small">
-              <i class="bi {{ 'bi-person-badge-fill' if is_service else 'bi-box-fill' }} me-1"></i>
-              Kapasitas: {{ product.stock }} {{ 'Slot/Hari' if is_service else 'Unit' }}
-            </span>
+      <aside class="detail-panel d-flex flex-column">
+        <div class="mb-4">
+          <p class="detail-eyebrow text-uppercase small fw-bold mb-2">
+            Detail Dekorasi
+          </p>
+          <h2 class="detail-title serif-font mb-3">{{ product.name }}</h2>
+          <div class="d-flex flex-wrap align-items-end gap-2 mb-4">
+            <span class="detail-price">Rp {{ "{:,.0f}".format(product.price).replace(',', '.') }}</span>
+            <span class="text-muted mb-2">/ Hari</span>
           </div>
 
-          <hr style="opacity: 0.1;" class="my-4" />
+          <div class="detail-fact-grid mb-4">
+            <div class="detail-fact">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi {{ 'bi-person-badge-fill' if is_service else 'bi-box-seam-fill' }}"></i>
+                <span class="small text-muted fw-semibold">Kapasitas</span>
+              </div>
+              <div class="fw-bold text-dark">
+                {{ product.stock }} {{ 'Slot per Hari' if is_service else 'Unit Tersedia' }}
+              </div>
+            </div>
+            <div class="detail-fact">
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-calendar2-check-fill"></i>
+                <span class="small text-muted fw-semibold">Jenis Sewa</span>
+              </div>
+              <div class="fw-bold text-dark">
+                {{ 'Layanan Harian' if is_service else 'Barang Fisik' }}
+              </div>
+            </div>
+          </div>
 
-          <h6 class="fw-bold text-dark-slate mb-2">Deskripsi Produk & Layanan</h6>
-          <p class="text-muted" style="line-height: 1.7; font-size: 0.95rem; white-space: pre-line;">
+          <h3 class="h6 fw-bold text-dark mb-2">Deskripsi Produk & Layanan</h3>
+          <p class="detail-description mb-0">
             {{ product.description or 'Tidak ada deskripsi detail untuk produk ini.' }}
           </p>
         </div>
 
-        <div class="mt-auto pt-4">
-          <!-- Add to Cart Form -->
+        <div class="booking-box mt-auto">
           {% if current_user.is_authenticated %}
           <form action="{{ url_for('customer.cart_add', product_id=product.id) }}" method="POST"
-            class="row g-2 align-items-center">
-            <div class="col-4 col-sm-3">
-              <label class="form-label small fw-semibold text-muted d-block mb-1">Jumlah</label>
-              <input type="number" name="quantity" class="form-control text-center" value="1" min="1"
-                max="{{ product.stock }}" style="border-radius: 10px;" />
+            class="d-flex flex-wrap gap-3 align-items-end">
+            <div class="flex-grow-1">
+              <label class="form-label small fw-bold text-dark mb-1">Jumlah</label>
+              <input type="number" name="quantity" class="form-control quantity-input text-center" value="1" min="1"
+                max="{{ product.stock }}" {% if product.stock <= 0 %}disabled{% endif %} />
             </div>
-            <div class="col-8 col-sm-9 d-flex align-items-end" style="height: 62px;">
-              <button type="submit"
-                class="btn btn-gold-cta w-100 py-2.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-2"
-                style="border-radius: 12px; height: 38px;">
-                <i class="bi bi-cart-plus-fill fs-5"></i>
-                <span>Sewa Sekarang</span>
-              </button>
-            </div>
+            <button type="submit"
+              class="btn btn-detail-cta flex-grow-1 d-inline-flex align-items-center justify-content-center gap-2 px-4"
+              {% if product.stock <= 0 %}disabled{% endif %}>
+              <i class="bi bi-cart-plus-fill"></i>
+              <span>{{ 'Stok Tidak Tersedia' if product.stock <= 0 else 'Tambah ke Keranjang' }}</span>
+            </button>
           </form>
           {% else %}
-          <div class="row g-2 align-items-center">
-            <div class="col-4 col-sm-3">
-              <label class="form-label small fw-semibold text-muted d-block mb-1">Jumlah</label>
-              <input type="number" class="form-control text-center" value="1" disabled style="border-radius: 10px;" />
+          <div class="booking-login-grid d-flex flex-wrap gap-3 align-items-end">
+            <div class="flex-grow-1">
+              <label class="form-label small fw-bold text-dark mb-1">Jumlah</label>
+              <input type="number" class="form-control quantity-input text-center" value="1" disabled />
             </div>
-            <div class="col-8 col-sm-9 d-flex align-items-end" style="height: 62px;">
-              <a href="{{ url_for('auth.login', next=url_for('customer.product_detail', product_id=product.id)) }}"
-                class="btn btn-gold-cta w-100 py-2.5 fw-semibold d-inline-flex align-items-center justify-content-center gap-2 text-decoration-none"
-                style="border-radius: 12px; height: 38px; line-height: 1.8;">
-                <i class="bi bi-cart-plus-fill fs-5"></i>
-                <span>Sewa Sekarang</span>
-              </a>
-            </div>
+            <a href="{{ url_for('auth.login', next=url_for('customer.product_detail', product_id=product.id)) }}"
+              class="btn btn-detail-cta flex-grow-1 d-inline-flex align-items-center justify-content-center gap-2 px-4 text-decoration-none">
+              <i class="bi bi-box-arrow-in-right"></i>
+              <span>Login untuk Menyewa</span>
+            </a>
           </div>
           {% endif %}
+          <p class="small text-muted mt-3 mb-0">
+            Pilih tanggal acara saat checkout. Sistem akan menolak pesanan jika kapasitas pada tanggal tersebut sudah
+            penuh.
+          </p>
         </div>
-      </div>
-    </div>
+      </aside>
+    </section>
+
+    {% include 'shared/availability_calendar/_calendar.html' %}
   </div>
-
-  <!-- Availability Calendar Section -->
-  <div class="card border-0 shadow-sm p-4 p-lg-5"
-    style="border-radius: 16px; border: 1px solid rgba(197, 168, 128, 0.25);">
-
-    <!-- Header Navigasi Kalender -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
-      <div class="d-flex align-items-center gap-3">
-        {% if is_prev_past %}
-        <button class="btn btn-sm btn-outline-secondary" disabled style="border-radius: 8px;">
-          <i class="bi bi-chevron-left"></i>
-        </button>
-        {% else %}
-        <a href="{{ url_for('customer.product_detail', product_id=product.id, month=prev_month, year=prev_year) }}"
-          class="btn btn-sm btn-outline-gold"
-          style="border-radius: 8px; border: 1px solid var(--primary-gold); color: var(--primary-gold-dark);">
-          <i class="bi bi-chevron-left"></i>
-        </a>
-        {% endif %}
-
-        <h4 class="serif-font fw-bold m-0 text-dark-slate" style="min-width: 180px; text-align: center;">
-          {{ month_name }} {{ current_year }}
-        </h4>
-
-        <a href="{{ url_for('customer.product_detail', product_id=product.id, month=next_month, year=next_year) }}"
-          class="btn btn-sm btn-outline-gold"
-          style="border-radius: 8px; border: 1px solid var(--primary-gold); color: var(--primary-gold-dark);">
-          <i class="bi bi-chevron-right"></i>
-        </a>
-      </div>
-
-      <!-- Legend -->
-      <div class="d-flex gap-3 align-items-center small">
-        <span class="d-inline-flex align-items-center gap-2">
-          <span class="rounded-circle"
-            style="width: 10px; height: 10px; background-color: #28a745; display: inline-block; box-shadow: 0 0 8px rgba(40,167,69,0.5);"></span>
-          Tersedia
-        </span>
-        <span class="d-inline-flex align-items-center gap-2">
-          <span class="rounded-circle"
-            style="width: 10px; height: 10px; background-color: #dc3545; display: inline-block; box-shadow: 0 0 8px rgba(220,53,69,0.5);"></span>
-          Penuh
-        </span>
-        <span class="d-inline-flex align-items-center gap-2">
-          <span class="rounded-circle"
-            style="width: 10px; height: 10px; background-color: #ffc107; display: inline-block; box-shadow: 0 0 8px rgba(255,193,7,0.5);"></span>
-          Perawatan
-        </span>
-      </div>
-    </div>
-
-    <!-- Calendar Grid (Monthly View) -->
-    <div class="calendar-grid">
-      <!-- Days of Week Header -->
-      <div class="d-flex text-center fw-bold text-muted small mb-2 py-2"
-        style="border-bottom: 1px solid rgba(0,0,0,0.05);">
-        {% for day_name in day_names %}
-        <div style="width: 14.285%">{{ day_name }}</div>
-        {% endfor %}
-      </div>
-
-      <!-- Calendar Weeks -->
-      {% for week in calendar_weeks %}
-      <div class="d-flex text-center mb-2">
-        {% for day in week %}
-        <div style="width: 14.285%; padding: 3px;">
-          {% if day.status == 'Empty' %}
-          <div class="h-100 border-0 p-2 bg-transparent text-muted" style="min-height: 85px;"></div>
-          {% else %}
-          <div class="card h-100 border p-2 transition-hover d-flex flex-column justify-content-between" style="
-                min-height: 85px;
-                border-radius: 12px;
-                background-color: var(--bg-warm-white);
-                border-color: rgba(197, 168, 128, 0.2);
-                transition: all 0.3s ease;
-              ">
-            <div class="text-start w-100 mb-1">
-              <span class="fw-bold small text-dark-slate ps-1" style="font-size: 0.85rem;">{{ day.day_num }}</span>
-            </div>
-
-            {% if day.status == 'Past' %}
-            <span
-              class="badge bg-secondary-subtle text-secondary border border-secondary-subtle py-1 rounded-pill small w-100"
-              style="font-size: 0.65rem; opacity: 0.75;">
-              {{ day.note }}
-            </span>
-            {% else %}
-            <span class="badge {{ day.badge_class }} py-1 rounded-pill small w-100" style="font-size: 0.65rem;">
-              {{ day.note }}
-            </span>
-            {% endif %}
-          </div>
-          {% endif %}
-        </div>
-        {% endfor %}
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</div>
-
-<style>
-  .product-detail-img:hover {
-    transform: scale(1.03);
-  }
-
-  .transition-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-    border-color: var(--primary-gold) !important;
-  }
-
-  .btn-gold-cta {
-    background-color: var(--primary-gold);
-    color: #fff;
-    border: none;
-    transition: none !important;
-  }
-
-  .btn-gold-cta:hover {
-    background-color: var(--primary-gold-dark);
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(197, 168, 128, 0.3);
-  }
-
-  .text-gold-accent {
-    color: var(--primary-gold);
-  }
-</style>
+</main>
 {% endblock %}

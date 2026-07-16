@@ -5,128 +5,135 @@
 {% endblock %}
 
 {% block content %}
-<!-- Header Banner -->
-<div class="decorations-banner py-5 text-center text-white" style="
-    background:
-      linear-gradient(rgba(31, 39, 42, 0.85), rgba(31, 39, 42, 0.85)),
-      url(&quot;https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=80&quot;)
-        no-repeat center center;
-    background-size: cover;
-    border-bottom: 2px solid var(--primary-gold);
-  ">
-  <div class="container py-4">
-    <h1 class="serif-font mb-2 text-gold-accent banner-title" style="color: var(--primary-gold); font-size: 2.8rem">
-      Our Wedding Decoration
-    </h1>
-    <p class="lead text-white-50 banner-subtitle" style="max-width: 600px; margin: 0 auto">
-      Temukan koleksi alat dekorasi eksklusif serta layanan rias wajah
-      professional terbaik untuk mewujudkan pernikahan impian Anda.
-    </p>
-  </div>
-</div>
+<main class="decorations-page">
+  <section class="decorations-hero">
+    <img
+      src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1600&q=80"
+      alt="Dekorasi pernikahan Griya Rias Saraswati"
+    />
+    <div class="decorations-hero-overlay"></div>
+    <div class="container decorations-hero-content">
+      <p class="decorations-eyebrow text-uppercase fw-bold mb-2">Katalog Dekorasi</p>
+      <h1 class="serif-font decorations-title mb-3">Wedding Decoration</h1>
+      <p class="decorations-subtitle mb-0">
+        Pilih dekorasi, paket, dan layanan rias untuk acara pernikahan Anda dengan jadwal yang bisa dicek langsung.
+      </p>
+    </div>
+  </section>
 
-<div class="container my-5">
-  <!-- Search and Filter Bar (Premium UI) -->
-  <div class="row mb-5 justify-content-center">
-    <div class="col-lg-10">
-      <div class="card shadow-sm p-4 border-0 filter-card" style="
-          background-color: #ffffff;
-          border-radius: 16px;
-          border: 1px solid rgba(197, 168, 128, 0.2);
-        ">
-        <form method="GET" action="{{ url_for('customer.decorations') }}" class="row g-3">
-          <!-- Search Input -->
-          <div class="col-md-8">
-            <label class="form-label small fw-bold text-dark-slate mb-1">Cari Dekorasi</label>
-            <div class="input-group bg-light"
-              style="border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; height: 38px;">
-              <span class="input-group-text bg-transparent border-0 text-muted ps-3 pe-3">
-                <i class="bi bi-search"></i>
-              </span>
-              <input type="text" class="form-control bg-transparent border-0 ps-1" name="search" id="searchInput"
-                placeholder="Masukkan nama barang atau layanan..." value="{{ search }}" style="box-shadow: none;" />
-              <button type="button" id="clearSearchBtn" class="btn bg-transparent border-0 text-muted px-3 d-none"
-                style="box-shadow: none;">
-                <i class="bi bi-x-lg" style="font-size: 0.85rem;"></i>
-              </button>
-            </div>
+  <section class="container decorations-content">
+    <div class="decorations-filter">
+      <form method="GET" action="{{ url_for('customer.decorations') }}" class="row g-3 align-items-end">
+        <div class="col-lg-7">
+          <label class="form-label small fw-bold text-dark mb-1">Cari Dekorasi</label>
+          <div class="catalog-input">
+            <span class="catalog-input-icon">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              class="form-control"
+              name="search"
+              id="searchInput"
+              placeholder="Cari nama barang, paket, atau layanan..."
+              value="{{ search }}"
+            />
+            <button type="button" id="clearSearchBtn" class="btn catalog-clear-btn d-none" aria-label="Bersihkan pencarian">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
+        </div>
 
-          <!-- Category Dropdown with Checklist -->
-          <div class="col-md-4">
-            <label class="form-label small fw-bold text-dark-slate mb-1">Kategori Produk</label>
-            <div class="dropdown">
-              <button
-                class="btn bg-light w-100 text-start d-flex justify-content-between align-items-center form-select"
-                type="button" id="categoryDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside"
-                aria-expanded="false"
-                style="border-radius: 10px; border: 1px solid #e2e8f0; height: 38px; box-shadow: none;">
-                <span class="small fw-semibold text-dark-slate" id="selected-categories-label">Pilih Kategori</span>
-              </button>
-              <ul class="dropdown-menu w-100 py-2 px-0 shadow border" aria-labelledby="categoryDropdown"
-                style="border-radius: 10px;">
-                {% for cat in categories %}
-                <li class="mb-1">
-                  <div class="dropdown-item d-flex align-items-center py-2 px-3 position-relative"
-                    style="cursor: pointer;">
-                    <input class="form-check-input check-gold m-0" type="checkbox" name="category_ids"
-                      id="cat_{{ cat.id }}" value="{{ cat.id }}" {% if selected_categories and cat.id|string in
-                      selected_categories %}checked{% endif %} style="pointer-events: none;">
-                    <label class="form-check-label small fw-semibold text-dark-slate ms-2 stretched-link"
-                      for="cat_{{ cat.id }}" style="cursor: pointer; user-select: none;">
-                      {{ cat.name }}
-                    </label>
-                  </div>
-                </li>
-                {% endfor %}
-                <li>
-                  <hr class="dropdown-divider">
-                </li>
-                <li class="px-3 mt-2">
-                  <div class="d-flex gap-2">
-                    <button type="button" id="clear-categories-btn"
-                      class="btn btn-sm btn-outline-secondary w-50 py-1.5 fw-semibold" style="border-radius: 8px;">
-                      Clear
-                    </button>
-                    <button type="submit" class="btn btn-sm btn-gold-cta w-50 py-1.5 fw-semibold"
-                      style="border-radius: 8px;">
-                      Apply
-                    </button>
-                  </div>
-                </li>
-              </ul>
-            </div>
+        <div class="col-lg-3 col-md-7">
+          <label class="form-label small fw-bold text-dark mb-1">Kategori Produk</label>
+          <div class="dropdown">
+            <button
+              class="btn catalog-category-btn w-100 text-start d-flex justify-content-between align-items-center"
+              type="button"
+              id="categoryDropdown"
+              data-bs-toggle="dropdown"
+              data-bs-auto-close="outside"
+              aria-expanded="false"
+            >
+              <span id="selected-categories-label">Pilih Kategori</span>
+              <i class="bi bi-chevron-down"></i>
+            </button>
+            <ul class="dropdown-menu catalog-category-menu w-100" aria-labelledby="categoryDropdown">
+              {% for cat in categories %}
+              <li>
+                <div class="dropdown-item catalog-category-item d-flex align-items-center position-relative">
+                  <input
+                    class="form-check-input check-gold m-0"
+                    type="checkbox"
+                    name="category_ids"
+                    id="cat_{{ cat.id }}"
+                    value="{{ cat.id }}"
+                    {% if selected_categories and cat.id|string in selected_categories %}checked{% endif %}
+                  >
+                  <label class="form-check-label small fw-semibold text-dark ms-2 stretched-link" for="cat_{{ cat.id }}">
+                    {{ cat.name }}
+                  </label>
+                </div>
+              </li>
+              {% endfor %}
+              <li><hr class="dropdown-divider"></li>
+              <li class="px-3 pb-2">
+                <div class="d-flex gap-2">
+                  <button type="button" id="clear-categories-btn" class="btn btn-sm btn-outline-secondary w-50 fw-semibold">
+                    Clear
+                  </button>
+                  <button type="submit" class="btn btn-sm btn-gold-cta w-50 fw-semibold">
+                    Apply
+                  </button>
+                </div>
+              </li>
+            </ul>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
     </div>
-  </div>
 
-  <!-- Product Listing Grid -->
-  <div class="row g-4">
-    {% if products %}
-    {% for prod in products %}
-    <div class="col-lg-4 col-md-6">
-      {% include 'shared/_decor_card.html' %}
-    </div>
-    {% endfor %}
-    {% else %}
-    <div class="col-12 text-center py-5">
-      <div class="py-5" style="background: #f8fafc; border-radius: 16px; border: 1px dashed #e2e8f0;">
-        <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
-        <h4 class="mt-3 serif-font text-dark-slate fw-bold">Tidak ada dekorasi/jasa ditemukan</h4>
-        <p class="text-muted small">
-          Coba ubah kata kunci pencarian Anda atau pilih kategori penyaringan lainnya.
-        </p>
-        <a href="{{ url_for('customer.decorations') }}" class="btn btn-gold-cta mt-3 px-4 py-2"
-          style="border-radius: 20px;">
-          <i class="bi bi-arrow-clockwise me-1"></i> Tampilkan Semua
-        </a>
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
+      <div>
+        <p class="decorations-eyebrow text-uppercase fw-bold mb-1">Pilihan Tersedia</p>
+        <h2 class="serif-font h3 text-dark mb-0">
+          {% if search or selected_categories %}
+          Hasil Pencarian
+          {% else %}
+          Semua Dekorasi
+          {% endif %}
+        </h2>
       </div>
+      <span class="catalog-count d-inline-flex align-items-center gap-2">
+        <i class="bi bi-grid-3x3-gap"></i>
+        {{ products|length }} item
+      </span>
     </div>
-    {% endif %}
-  </div>
-</div>
+
+    <div class="row g-4">
+      {% if products %}
+      {% for prod in products %}
+      <div class="col-xl-4 col-md-6">
+        {% include 'shared/_decor_card.html' %}
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="col-12">
+        <div class="catalog-empty text-center">
+          <i class="bi bi-search"></i>
+          <h3 class="serif-font h4 text-dark fw-bold mt-3">Tidak ada dekorasi/jasa ditemukan</h3>
+          <p class="text-muted small mb-4">
+            Coba ubah kata kunci pencarian atau pilih kategori penyaringan lainnya.
+          </p>
+          <a href="{{ url_for('customer.decorations') }}" class="btn btn-gold-cta px-4">
+            <i class="bi bi-arrow-clockwise me-1"></i> Tampilkan Semua
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </section>
+</main>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -160,11 +167,7 @@
 
     if (searchInput && clearSearchBtn) {
       function toggleClearBtn() {
-        if (searchInput.value.trim() !== "") {
-          clearSearchBtn.classList.remove("d-none");
-        } else {
-          clearSearchBtn.classList.add("d-none");
-        }
+        clearSearchBtn.classList.toggle("d-none", searchInput.value.trim() === "");
       }
 
       let debounceTimer;

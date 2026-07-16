@@ -1,76 +1,350 @@
-/* 
-  Griya Rias Saraswati - Decorations Page Mobile Overrides
-  File ini hanya menimpa gaya desktop ketika berada pada layar mobile/tablet.
-*/
-
-@media (max-width: 767.98px) {
-  /* Banner Responsiveness */
-  .banner-title {
-    font-size: 2rem !important;
-  }
-  .banner-subtitle {
-    font-size: 0.95rem !important;
-  }
-
-  /* Filter Card Responsiveness */
-  .filter-card {
-    padding: 1.25rem !important;
-  }
-
-  /* Product Card Image & Body Responsiveness */
-  .product-img-container {
-    height: 200px !important;
-  }
-  .product-card-body {
-    padding: 1.25rem !important;
-  }
+.decorations-page {
+  background:
+    linear-gradient(180deg, rgba(252, 251, 249, 0.96) 0%, #ffffff 44%, var(--bg-warm-white) 100%);
+  min-height: calc(100vh - 70px);
 }
 
-/* Hover effects & basic styling that doesn't conflict with layout */
+.decorations-hero {
+  position: relative;
+  min-height: 430px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  border-bottom: 2px solid var(--primary-gold);
+}
+
+.decorations-hero img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.decorations-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(31, 39, 42, 0.92) 0%, rgba(31, 39, 42, 0.66) 48%, rgba(31, 39, 42, 0.28) 100%),
+    linear-gradient(180deg, rgba(31, 39, 42, 0.08) 0%, rgba(31, 39, 42, 0.76) 100%);
+}
+
+.decorations-hero-content {
+  position: relative;
+  z-index: 1;
+  color: #ffffff;
+  padding-top: 5rem;
+  padding-bottom: 4rem;
+}
+
+.decorations-eyebrow {
+  color: var(--primary-gold-dark);
+  letter-spacing: 0.12em;
+}
+
+.decorations-hero .decorations-eyebrow {
+  color: var(--primary-gold);
+}
+
+.decorations-title {
+  font-size: clamp(2.4rem, 6vw, 4.8rem);
+  line-height: 0.98;
+}
+
+.decorations-subtitle {
+  max-width: 620px;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.decorations-content {
+  padding-top: 3rem;
+  padding-bottom: 5rem;
+}
+
+.decorations-filter {
+  border: 1px solid rgba(197, 168, 128, 0.22);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-premium);
+  padding: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.catalog-input {
+  display: flex;
+  align-items: center;
+  min-height: 46px;
+  border: 1px solid rgba(31, 39, 42, 0.12);
+  border-radius: 8px;
+  background: #fbfaf7;
+  overflow: hidden;
+}
+
+.catalog-input-icon {
+  color: var(--text-muted);
+  padding-left: 1rem;
+  padding-right: 0.75rem;
+}
+
+.catalog-input .form-control {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 46px;
+  padding-left: 0;
+}
+
+.catalog-clear-btn {
+  color: var(--text-muted);
+  border: 0;
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+}
+
+.catalog-category-btn,
+.btn-dark-filter {
+  min-height: 46px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.catalog-category-btn {
+  border: 1px solid rgba(31, 39, 42, 0.12);
+  background: #fbfaf7;
+  color: var(--dark-slate);
+}
+
+.catalog-category-btn:hover,
+.catalog-category-btn:focus {
+  border-color: var(--primary-gold);
+  color: var(--primary-gold-dark);
+}
+
+.catalog-category-menu {
+  border: 1px solid rgba(197, 168, 128, 0.24);
+  border-radius: 8px;
+  padding: 0.5rem 0;
+  box-shadow: var(--shadow-premium);
+}
+
+.catalog-category-item {
+  cursor: pointer;
+  padding: 0.65rem 1rem;
+}
+
+.catalog-category-item .form-check-input {
+  pointer-events: none;
+}
+
+.catalog-category-item label {
+  cursor: pointer;
+  user-select: none;
+}
+
+.catalog-category-menu .btn {
+  border-radius: 8px;
+}
+
+.btn-dark-filter {
+  background: var(--dark-slate);
+  border: 1px solid var(--dark-slate);
+  color: #ffffff;
+}
+
+.btn-dark-filter:hover,
+.btn-dark-filter:focus {
+  background: var(--dark-slate-card);
+  border-color: var(--dark-slate-card);
+  color: #ffffff;
+}
+
+.catalog-count {
+  border: 1px solid rgba(197, 168, 128, 0.26);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--dark-slate);
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.55rem 0.9rem;
+}
+
+.decor-item-card {
+  border: 1px solid rgba(31, 39, 42, 0.07);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: var(--shadow-premium);
+  transition: all 0.25s ease;
+}
+
 .decor-item-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 16px 32px rgba(197, 168, 128, 0.18) !important;
-  border-color: rgba(197, 168, 128, 0.4) !important;
+  transform: translateY(-6px);
+  box-shadow: 0 16px 32px rgba(197, 168, 128, 0.18);
+  border-color: rgba(197, 168, 128, 0.46);
+}
+
+.product-img-container {
+  height: 260px;
+  overflow: hidden;
+  position: relative;
+  background: #eef0ed;
+}
+
+.product-img-container::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(31, 39, 42, 0.02) 0%, rgba(31, 39, 42, 0.34) 100%);
+  pointer-events: none;
+}
+
+.product-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s ease;
 }
 
 .decor-item-card:hover .product-card-img {
-  transform: scale(1.06);
+  transform: scale(1.045);
+}
+
+.decor-category-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1;
+  border-radius: 999px;
+  background: rgba(31, 39, 42, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.5rem 0.8rem;
+}
+
+.product-card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 1.45rem;
+}
+
+.product-card-title {
+  color: var(--dark-slate);
+  font-size: 1.28rem;
+}
+
+.product-card-description {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.65;
+  min-height: 72px;
+  margin-bottom: 0;
+}
+
+.product-card-footer {
+  border-top: 1px solid rgba(31, 39, 42, 0.08);
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+}
+
+.product-card-price {
+  color: var(--primary-gold-dark);
+  font-size: 1.18rem;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .btn-gold-cta {
   background-color: var(--primary-gold);
-  color: #fff;
+  color: #ffffff;
   border: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
-.btn-gold-cta:hover {
+.btn-gold-cta:hover,
+.btn-gold-cta:focus {
   background-color: var(--primary-gold-dark);
-  color: #fff;
+  color: #ffffff;
   box-shadow: 0 4px 10px rgba(197, 168, 128, 0.3);
-}
-
-.text-gold-accent {
-  color: var(--primary-gold);
 }
 
 .btn-decor-action,
 .btn-decor-action:hover,
 .btn-decor-action:focus,
 .btn-decor-action:active {
-  padding: 8px 20px !important;
-  font-size: 0.9rem !important;
-  border-radius: 20px !important;
-  height: 40px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  line-height: 1 !important;
-  transition: none !important;
-  animation: none !important;
-  transform: none !important;
+  min-height: 40px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 0.6rem 0.8rem;
 }
 
-.product-card-body {
-  padding: 1.75rem 1.75rem 2.25rem 1.75rem !important;
+.btn-decor-action.btn-gold-cta,
+.btn-decor-action.btn-gold-cta:hover,
+.btn-decor-action.btn-gold-cta:focus,
+.btn-decor-action.btn-gold-cta:active {
+  transition: none;
+  animation: none;
+  transform: none;
+}
+
+.catalog-empty {
+  border: 1px dashed rgba(31, 39, 42, 0.18);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 4rem 1.5rem;
+  box-shadow: var(--shadow-premium);
+}
+
+.catalog-empty > i {
+  color: var(--primary-gold-dark);
+  font-size: 3.4rem;
+}
+
+@media (max-width: 991.98px) {
+  .decorations-hero {
+    min-height: 360px;
+  }
+
+  .decorations-content {
+    padding-top: 2rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .decorations-hero {
+    min-height: 330px;
+  }
+
+  .decorations-hero-content {
+    padding-bottom: 2.5rem;
+  }
+
+  .decorations-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .decorations-filter {
+    padding: 1rem;
+  }
+
+  .product-img-container {
+    height: 220px;
+  }
+
+  .product-card-body {
+    padding: 1.2rem;
+  }
+
+  .product-card-description {
+    min-height: auto;
+  }
 }
