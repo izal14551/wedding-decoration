@@ -181,3 +181,51 @@ class CartTestCase(unittest.TestCase):
             'address': 'Gedung B'
         }, follow_redirects=True)
         self.assertIn(b'Pemesanan dekorasi berhasil dibuat', response.data)
+
+    def test_checkout_edge_cases(self):
+        """Uji berbagai skenario kegagalan checkout (edge cases)"""
+        # Login Pelanggan 1
+        self.client.post('/auth/login', data={
+            'email': 'budi@example.com',
+            'password': 'budi123'
+        }, follow_redirects=True)
+
+        # Kasus 1: Checkout saat keranjang kosong
+        response_empty_cart = self.client.post('/checkout', data={
+            'start_date': '2026-09-01',
+            'end_date': '2026-09-03',
+            'phone': '081234567890',
+            'address': 'Gedung A'
+        }, follow_redirects=True)
+        self.assertIn(b'Keranjang Anda kosong.', response_empty_cart.data)
+
+        # Tambahkan produk ke keranjang untuk kasus berikutnya
+        self.client.post(f'/cart/add/{self.product.id}', data={'quantity': 1})
+
+        # Kasus 2: Checkout dengan form tidak lengkap (tanpa alamat)
+        response_missing_form = self.client.post('/checkout', data={
+            'start_date': '2026-09-01',
+            'end_date': '2026-09-03',
+            'phone': '081234567890',
+            'address': '' # Alamat kosong
+        }, follow_redirects=True)
+        self.assertIn(b'Silakan isi tanggal sewa dan alamat acara.', response_missing_form.data)
+
+        # Kasus 3: Checkout dengan format tanggal tidak valid
+        response_invalid_date = self.client.post('/checkout', data={
+            'start_date': '2026-09-01',
+            'end_date': 'invalid-date-format',
+            'phone': '081234567890',
+            'address': 'Gedung A'
+        }, follow_redirects=True)
+        self.assertIn(b'Format tanggal tidak valid.', response_invalid_date.data)
+
+        # Kasus 4: Checkout dengan tanggal selesai mendahului tanggal mulai
+        response_wrong_order = self.client.post('/checkout', data={
+            'start_date': '2026-09-03',
+            'end_date': '2026-09-01', # end_date < start_date
+            'phone': '081234567890',
+            'address': 'Gedung A'
+        }, follow_redirects=True)
+        self.assertIn(b'Tanggal selesai sewa harus setelah atau sama dengan tanggal mulai sewa.', response_wrong_order.data)
+

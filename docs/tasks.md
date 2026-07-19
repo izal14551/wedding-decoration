@@ -64,11 +64,11 @@ Menjembatani pemilihan barang hingga persiapan sebelum pemesanan tanpa ada jadwa
 
 Proses penyewaan resmi dari keranjang belanja menjadi pesanan yang tercatat dalam sistem.
 
-- [ ] **4.1 Fitur Checkout Pesanan (Pelanggan)**
+- [x] **4.1 Fitur Checkout Pesanan (Pelanggan)**
   - Pelanggan menentukan tanggal sewa (mulai s/d selesai), jam acara, alamat lengkap pengiriman dekorasi, dan catatan tambahan.
   - Sistem membuat data transaksi baru di tabel `pesanan` dan rincian barang di `detail_pesanan`.
   - Sistem secara otomatis mengisi tabel `jadwal` dengan status `Disewa` untuk barang terkait pada rentang tanggal sewa tersebut.
-- [ ] **4.2 Invoice & Riwayat Pesanan (Pelanggan)**
+- [x] **4.2 Invoice & Riwayat Pesanan (Pelanggan)**
   - Tampilan halaman riwayat pesanan pelanggan beserta status transaksinya.
   - Halaman rincian invoice pemesanan sementara dengan status "Menunggu Pembayaran".
 - [ ] **4.3 Manajemen Pesanan (Admin)**
