@@ -1,6 +1,10 @@
 .profile-page {
-  background:
-    linear-gradient(180deg, rgba(252, 251, 249, 0.96) 0%, #ffffff 42%, var(--bg-warm-white) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(252, 251, 249, 0.96) 0%,
+    #ffffff 42%,
+    var(--bg-warm-white) 100%
+  );
   min-height: calc(100vh - 70px);
 }
 
@@ -80,12 +84,29 @@
 }
 
 .profile-tabs .nav-link {
+  color: var(--dark-slate);
+  border: 1px solid rgba(31, 39, 42, 0.12);
+  background-color: #fbfaf7;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   font-weight: 800;
   min-height: 42px;
+  transition: all 0.3s ease;
+}
+
+.profile-tabs .nav-link:hover {
+  color: var(--primary-gold-dark);
+  border-color: var(--primary-gold);
+  background-color: rgba(197, 168, 128, 0.08);
+}
+
+.profile-tabs .nav-link.active {
+  background-color: var(--primary-gold) !important;
+  color: #ffffff !important;
+  border-color: var(--primary-gold) !important;
+  box-shadow: 0 4px 10px rgba(197, 168, 128, 0.18);
 }
 
 .order-list {
