@@ -2,6 +2,7 @@
 
 {% block styles %}
 <link href="{{ url_for('static', filename='css/customer/cart.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='css/shared/availability_calendar.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
@@ -9,7 +10,8 @@
   <div class="container">
     <div class="cart-header d-flex flex-wrap justify-content-between align-items-end gap-3 mb-4">
       <div>
-        <a href="{{ url_for('customer.decorations') }}" class="cart-back-link d-inline-flex align-items-center gap-2 mb-3">
+        <a href="{{ url_for('customer.decorations') }}"
+          class="cart-back-link d-inline-flex align-items-center gap-2 mb-3">
           <i class="bi bi-arrow-left"></i>
           <span>Kembali ke Katalog</span>
         </a>
@@ -56,7 +58,8 @@
                     <span class="cart-category-badge">{{ item.product.category.name }}</span>
                   </div>
                   <form action="{{ url_for('customer.cart_remove', product_id=item.product.id) }}" method="POST">
-                    <button type="submit" class="btn cart-remove-btn" title="Hapus Barang" aria-label="Hapus {{ item.product.name }}">
+                    <button type="submit" class="btn cart-remove-btn" title="Hapus Barang"
+                      aria-label="Hapus {{ item.product.name }}">
                       <i class="bi bi-trash3"></i>
                     </button>
                   </form>
@@ -103,44 +106,39 @@
             <div class="row g-3">
               <div class="col-12">
                 <label for="start_date" class="form-label fw-semibold">Tanggal Mulai Sewa</label>
-                <input type="date" class="form-control cart-control" id="start_date" name="start_date" required>
+                <input type="date" class="form-control cart-control" id="start_date" name="start_date"
+                  style="cursor: pointer; background-color: #fff;" readonly required>
               </div>
               <div class="col-12">
                 <label for="end_date" class="form-label fw-semibold">Tanggal Selesai Sewa</label>
-                <input type="date" class="form-control cart-control" id="end_date" name="end_date" required>
+                <input type="date" class="form-control cart-control" id="end_date" name="end_date"
+                  style="cursor: pointer; background-color: #fff;" readonly required>
+              </div>
+
+              <!-- Real-time Date Validation Error Container -->
+              <div class="col-12 d-none" id="date-validation-container">
+                <div class="alert alert-danger d-flex align-items-start gap-2 py-2 px-3 mb-0 border-0"
+                  style="border-radius: 8px; font-size: 0.85rem;">
+                  <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                  <span id="date-validation-message"></span>
+                </div>
               </div>
               <div class="col-12">
                 <label for="phone" class="form-label fw-semibold">Nomor HP / WhatsApp</label>
-                <input
-                  type="text"
-                  class="form-control cart-control"
-                  id="phone"
-                  name="phone"
-                  placeholder="Contoh: 081234567890"
-                  value="{{ current_user.phone or '' }}"
-                  required
-                >
+                <input type="text" class="form-control cart-control" id="phone" name="phone"
+                  placeholder="Contoh: 081234567890" value="{{ current_user.phone or '' }}" required>
               </div>
               <div class="col-12">
                 <label for="address" class="form-label fw-semibold">Alamat Lokasi Acara</label>
-                <textarea
-                  class="form-control cart-control"
-                  id="address"
-                  name="address"
-                  rows="3"
+                <textarea class="form-control cart-control" id="address" name="address" rows="3"
                   placeholder="Alamat lengkap tempat pemasangan dekorasi..."
-                  required
-                >{{ current_user.address or '' }}</textarea>
+                  required>{{ current_user.address or '' }}</textarea>
               </div>
               <div class="col-12">
-                <label for="notes" class="form-label fw-semibold">Catatan Acara <span class="text-muted">(Opsional)</span></label>
-                <textarea
-                  class="form-control cart-control"
-                  id="notes"
-                  name="notes"
-                  rows="2"
-                  placeholder="Warna tema, permintaan khusus, dll..."
-                ></textarea>
+                <label for="notes" class="form-label fw-semibold">Catatan Acara <span
+                    class="text-muted">(Opsional)</span></label>
+                <textarea class="form-control cart-control" id="notes" name="notes" rows="2"
+                  placeholder="Warna tema, permintaan khusus, dll..."></textarea>
               </div>
             </div>
 
@@ -162,7 +160,8 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-cart-checkout w-100 mt-4 d-inline-flex align-items-center justify-content-center gap-2">
+            <button type="submit"
+              class="btn btn-cart-checkout w-100 mt-4 d-inline-flex align-items-center justify-content-center gap-2">
               <i class="bi bi-shield-check"></i>
               <span>Konfirmasi Sewa & Checkout</span>
             </button>
@@ -175,12 +174,79 @@
       <i class="bi bi-cart-x"></i>
       <h2 class="serif-font h3 text-dark mt-4">Keranjang sewa Anda kosong</h2>
       <p class="text-muted mb-4">Jelajahi dekorasi dan layanan yang cocok untuk acara spesial Anda.</p>
-      <a href="{{ url_for('customer.decorations') }}" class="btn btn-cart-checkout px-4 d-inline-flex align-items-center gap-2">
+      <a href="{{ url_for('customer.decorations') }}"
+        class="btn btn-cart-checkout px-4 d-inline-flex align-items-center gap-2">
         <i class="bi bi-grid-3x3-gap"></i>
         <span>Jelajahi Dekorasi</span>
       </a>
     </section>
     {% endif %}
+  </div>
+
+  <!-- Modal Kalender Ketersediaan (Widget Calendar) -->
+  <div class="modal fade" id="cartCalendarModal" tabindex="-1" aria-labelledby="cartCalendarModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+        <div class="modal-header border-0 py-3 px-4" style="background-color: #f8f9fa;">
+          <div>
+            <h5 class="modal-title fw-bold serif-font text-dark-slate mb-1" id="cartCalendarModalLabel">Pilih Tanggal
+              Sewa</h5>
+            <p class="text-muted small mb-0">Klik tanggal berwarna hijau (Tersedia) untuk memilih. Tanggal
+              perawatan/penuh tidak dapat diklik.</p>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <!-- Tab Pemilih Produk -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold text-muted small text-uppercase">Jadwal Ketersediaan Untuk
+              Barang:</label>
+            <ul class="nav nav-pills gap-2" id="modalProductTabs" role="tablist">
+              {% for item in cart_items %}
+              <li class="nav-item" role="presentation">
+                <button
+                  class="btn btn-sm btn-outline-dark rounded-pill px-3 modal-product-tab-btn {% if loop.first %}active{% endif %}"
+                  data-product-id="{{ item.product.id }}" id="modal-tab-prod-{{ item.product.id }}" type="button">
+                  {{ item.product.name }}
+                </button>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <!-- Kontainer Kalender di Modal -->
+          <div id="modal-calendar-loading" class="text-center py-5 d-none">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Memuat...</span>
+            </div>
+            <p class="text-muted small mt-2">Memuat kalender ketersediaan...</p>
+          </div>
+          <div id="modal-calendar-view" class="position-relative">
+            <!-- Kalender dinamis dimuat di sini -->
+          </div>
+
+          <!-- Legenda Status Kalender -->
+          <div class="d-flex flex-wrap justify-content-center gap-3 mt-4 pt-3 border-top" style="font-size: 0.85rem;">
+            <div class="d-flex align-items-center gap-1">
+              <span class="d-inline-block rounded-circle"
+                style="width: 12px; height: 12px; background-color: #d1e7dd; border: 1px solid #a3cfbb;"></span>
+              <span class="text-muted">Tersedia (Bisa Dipilih)</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <span class="d-inline-block rounded-circle"
+                style="width: 12px; height: 12px; background-color: #f8d7da; border: 1px solid #f1aeb5;"></span>
+              <span class="text-muted">Penuh (Fully Booked)</span>
+            </div>
+            <div class="d-flex align-items-center gap-1">
+              <span class="d-inline-block rounded-circle"
+                style="width: 12px; height: 12px; background-color: #fff3cd; border: 1px solid #ffe69c;"></span>
+              <span class="text-muted">Perawatan (Maintenance)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </main>
 
@@ -193,18 +259,179 @@
     const grandTotalEl = document.getElementById("grand-total");
     const baseTotal = parseFloat(grandTotalEl ? grandTotalEl.getAttribute("data-base-total") : 0) || 0;
 
-    if (startDateInput && endDateInput) {
+    // Elements for real-time validation
+    const errorContainer = document.getElementById("date-validation-container");
+    const errorMessage = document.getElementById("date-validation-message");
+    const checkoutSubmitBtn = document.querySelector("button[type='submit']");
+
+    // Modal Elements
+    const calendarModalEl = document.getElementById("cartCalendarModal");
+    let calendarModal = null;
+    if (calendarModalEl) {
+      calendarModal = new bootstrap.Modal(calendarModalEl);
+    }
+    const modalTitle = document.getElementById("cartCalendarModalLabel");
+    const modalCalendarView = document.getElementById("modal-calendar-view");
+    const modalCalendarLoading = document.getElementById("modal-calendar-loading");
+    const modalTabButtons = document.querySelectorAll(".modal-product-tab-btn");
+
+    let activeInputTarget = null; // 'start' or 'end'
+
+    if (startDateInput && endDateInput && calendarModal) {
       startDateInput.min = today;
 
-      startDateInput.addEventListener("change", function () {
-        endDateInput.min = this.value;
-        if (!endDateInput.value || endDateInput.value < this.value) {
-          endDateInput.value = this.value;
-        }
-        calculateTotal();
+      // Pemicu Klik Input Tanggal Sewa
+      startDateInput.addEventListener("click", function () {
+        activeInputTarget = 'start';
+        modalTitle.textContent = "Pilih Tanggal Mulai Sewa";
+        calendarModal.show();
       });
 
-      endDateInput.addEventListener("change", calculateTotal);
+      endDateInput.addEventListener("click", function () {
+        if (!startDateInput.value) {
+          alert("Silakan pilih Tanggal Mulai Sewa terlebih dahulu.");
+          startDateInput.click();
+          return;
+        }
+        activeInputTarget = 'end';
+        modalTitle.textContent = "Pilih Tanggal Selesai Sewa";
+        calendarModal.show();
+      });
+
+      // Ketika modal ditampilkan, muat produk aktif
+      calendarModalEl.addEventListener("show.bs.modal", function () {
+        const activeModalTab = document.querySelector(".modal-product-tab-btn.active");
+        if (activeModalTab) {
+          loadModalProductCalendar(activeModalTab.getAttribute("data-product-id"));
+        }
+      });
+    }
+
+    // Modal Tab Handler
+    modalTabButtons.forEach(btn => {
+      btn.addEventListener("click", function () {
+        modalTabButtons.forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+        const productId = this.getAttribute("data-product-id");
+        loadModalProductCalendar(productId);
+      });
+    });
+
+    function loadModalProductCalendar(productId, month = '', year = '') {
+      if (!modalCalendarView || !modalCalendarLoading) return;
+
+      modalCalendarView.classList.add("d-none");
+      modalCalendarLoading.classList.remove("d-none");
+
+      let url = `/api/product/${productId}/calendar`;
+      if (month && year) {
+        url += `?month=${month}&year=${year}`;
+      }
+
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error("Gagal mengambil kalender");
+          return response.text();
+        })
+        .then(html => {
+          modalCalendarLoading.classList.add("d-none");
+          modalCalendarView.innerHTML = html;
+          modalCalendarView.classList.remove("d-none");
+
+          // Format & Pasang Logika Pilihan Tanggal pada Kalender Modal
+          processModalCalendarDays(productId);
+
+          // Bind AJAX navigation di modal
+          bindModalCalendarNav(productId);
+        })
+        .catch(err => {
+          console.error(err);
+          modalCalendarLoading.classList.add("d-none");
+          modalCalendarView.innerHTML = `<div class="alert alert-danger py-2">Gagal memuat kalender ketersediaan.</div>`;
+          modalCalendarView.classList.remove("d-none");
+        });
+    }
+
+    function processModalCalendarDays(productId) {
+      const dayTiles = modalCalendarView.querySelectorAll(".day-tile");
+      dayTiles.forEach(tile => {
+        const dateStr = tile.getAttribute("data-date");
+        if (!dateStr) return; // Hari kosong
+
+        const isPast = tile.classList.contains("status-past");
+        const isMaintenance = tile.classList.contains("status-maintenance");
+        const isFullyBooked = tile.classList.contains("status-fully booked");
+        const isAvailable = tile.classList.contains("status-available");
+
+        // Tentukan kelayakan tanggal untuk dipilih
+        let isSelectable = isAvailable;
+
+        if (activeInputTarget === 'end' && startDateInput.value) {
+          // Tanggal selesai harus >= tanggal mulai
+          if (dateStr < startDateInput.value) {
+            isSelectable = false;
+          }
+        }
+
+        if (isSelectable) {
+          // Styling interaktif tanggal yang bisa diklik
+          tile.style.cursor = "pointer";
+          tile.style.transition = "transform 0.15s ease, box-shadow 0.15s ease";
+          tile.style.borderRadius = "8px";
+
+          // Efek hover custom
+          tile.addEventListener("mouseenter", () => {
+            tile.style.transform = "translateY(-3px)";
+            tile.style.boxShadow = "0 6px 12px rgba(0,0,0,0.1)";
+          });
+          tile.addEventListener("mouseleave", () => {
+            tile.style.transform = "translateY(0)";
+            tile.style.boxShadow = "none";
+          });
+
+          // Pilihan tanggal ketika diklik
+          tile.addEventListener("click", function () {
+            if (activeInputTarget === 'start') {
+              startDateInput.value = dateStr;
+              endDateInput.min = dateStr;
+              // Jika tanggal selesai kosong atau kurang dari tanggal mulai baru, samakan
+              if (!endDateInput.value || endDateInput.value < dateStr) {
+                endDateInput.value = dateStr;
+              }
+            } else if (activeInputTarget === 'end') {
+              endDateInput.value = dateStr;
+            }
+
+            // Tutup modal
+            calendarModal.hide();
+
+            // Jalankan kalkulasi total & validasi
+            calculateTotal();
+            validateDatesAPI();
+          });
+        } else {
+          // Disable tanggal yang tidak memenuhi syarat (Maintenance, Fully Booked, Past, atau sebelum startDate)
+          tile.style.opacity = "0.3";
+          tile.style.pointerEvents = "none";
+          tile.style.cursor = "not-allowed";
+        }
+      });
+    }
+
+    function bindModalCalendarNav(productId) {
+      const navLinks = modalCalendarView.querySelectorAll("a.btn-outline-secondary");
+      navLinks.forEach(link => {
+        const href = link.getAttribute("href");
+        if (href && href !== "#" && !link.hasAttribute("disabled")) {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            const urlObj = new URL(href, window.location.origin);
+            const m = urlObj.searchParams.get("month");
+            const y = urlObj.searchParams.get("year");
+            loadModalProductCalendar(productId, m, y);
+          });
+        }
+      });
     }
 
     function calculateTotal() {
@@ -221,6 +448,105 @@
         durationEl.textContent = "1 Hari";
         grandTotalEl.textContent = "Rp " + baseTotal.toLocaleString("id-ID");
       }
+    }
+
+    function validateDatesAPI() {
+      if (!startDateInput || !endDateInput || !startDateInput.value || !endDateInput.value) return;
+
+      fetch('/cart/validate-dates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          start_date: startDateInput.value,
+          end_date: endDateInput.value
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.valid === false) {
+            errorMessage.textContent = data.message;
+            errorContainer.classList.remove('d-none');
+            if (checkoutSubmitBtn) {
+              checkoutSubmitBtn.disabled = true;
+            }
+          } else {
+            errorContainer.classList.add('d-none');
+            if (checkoutSubmitBtn) {
+              checkoutSubmitBtn.disabled = false;
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error validating dates:', error);
+        });
+    }
+
+    const calendarView = document.getElementById("cart-calendar-view");
+    const calendarLoading = document.getElementById("cart-calendar-loading");
+    const tabButtons = document.querySelectorAll(".cart-product-tab-btn");
+
+    if (calendarView && calendarLoading) {
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+          tabButtons.forEach(b => b.classList.remove("active"));
+          this.classList.add("active");
+          const productId = this.getAttribute("data-product-id");
+          loadProductCalendar(productId);
+        });
+      });
+
+      const activeTab = document.querySelector(".cart-product-tab-btn.active");
+      if (activeTab) {
+        loadProductCalendar(activeTab.getAttribute("data-product-id"));
+      }
+    }
+
+    function loadProductCalendar(productId, month = '', year = '') {
+      if (!calendarView || !calendarLoading) return;
+
+      calendarView.classList.add("d-none");
+      calendarLoading.classList.remove("d-none");
+
+      let url = `/api/product/${productId}/calendar`;
+      if (month && year) {
+        url += `?month=${month}&year=${year}`;
+      }
+
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error("Gagal mengambil kalender");
+          return response.text();
+        })
+        .then(html => {
+          calendarLoading.classList.add("d-none");
+          calendarView.innerHTML = html;
+          calendarView.classList.remove("d-none");
+          bindCalendarNav(productId);
+        })
+        .catch(err => {
+          console.error(err);
+          calendarLoading.classList.add("d-none");
+          calendarView.innerHTML = `<div class="alert alert-danger py-2">Gagal memuat kalender ketersediaan.</div>`;
+          calendarView.classList.remove("d-none");
+        });
+    }
+
+    function bindCalendarNav(productId) {
+      const navLinks = calendarView.querySelectorAll("a.btn-outline-secondary");
+      navLinks.forEach(link => {
+        const href = link.getAttribute("href");
+        if (href && href !== "#" && !link.hasAttribute("disabled")) {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            const urlObj = new URL(href, window.location.origin);
+            const m = urlObj.searchParams.get("month");
+            const y = urlObj.searchParams.get("year");
+            loadProductCalendar(productId, m, y);
+          });
+        }
+      });
     }
   });
 </script>

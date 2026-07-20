@@ -59,7 +59,7 @@
         {% if day.status == 'Empty' %}
         <div class="day-tile is-empty" aria-hidden="true"></div>
         {% else %}
-        <div class="day-tile">
+        <div class="day-tile status-{{ day.status | lower }}" {% if day.date %}data-date="{{ day.date }}" {% endif %}>
           <div class="d-flex justify-content-between align-items-start gap-2">
             <span class="day-number">{{ day.day_num }}</span>
             {% if day.status == 'Available' %}

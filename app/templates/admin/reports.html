@@ -1,0 +1,473 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<!-- Impor Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  /* Styling Premium */
+  .card-stat {
+    border: none;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .card-stat:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .card-report {
+    border: none;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.5rem;
+  }
+
+  .card-report-header {
+    background: transparent;
+    border-bottom: 1px solid #f1f2f6;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-report-body {
+    padding: 1.5rem;
+  }
+
+  .stat-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .table-custom th {
+    font-weight: 600;
+    color: #7f8c8d;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    border-top: none;
+    background-color: #fafbfc;
+    padding: 12px 16px;
+  }
+
+  .table-custom td {
+    padding: 16px;
+    vertical-align: middle;
+    color: #2c3e50;
+    border-bottom: 1px solid #f1f2f6;
+    font-size: 0.9rem;
+  }
+
+  .btn-period {
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+    border: 1.5px solid #2c3e50;
+    color: #2c3e50;
+    background-color: transparent;
+    text-decoration: none;
+  }
+
+  .btn-period:hover {
+    background-color: #2c3e50;
+    color: #ffffff;
+  }
+
+  .btn-period.active {
+    background-color: #c5a880 !important;
+    border-color: #c5a880 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 10px rgba(197, 168, 128, 0.25);
+  }
+
+  .progress-bar-custom {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #f1f2f6;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background-color: #c5a880;
+  }
+</style>
+
+<!-- Header -->
+<div class="row align-items-center mb-4">
+  <div class="col-md-6">
+    <h2 class="fw-bold text-dark-slate mb-1">Laporan Keuangan & Statistik</h2>
+    <p class="text-muted mb-0">Analisis performa pendapatan dan tren penyewaan Griya Rias Saraswati.</p>
+  </div>
+  <div class="col-md-6 text-md-end mt-3 mt-md-0">
+    <div class="d-flex flex-wrap gap-2 justify-content-md-end">
+      <a href="{{ url_for('admin.export_excel', periode=current_periode) }}"
+        class="btn btn-outline-success btn-sm rounded-pill px-3">
+        <i class="bi bi-file-earmark-excel-fill me-1"></i> Ekspor Excel
+      </a>
+      <a href="{{ url_for('admin.export_pdf', periode=current_periode) }}"
+        class="btn btn-outline-danger btn-sm rounded-pill px-3">
+        <i class="bi bi-file-earmark-pdf-fill me-1"></i> Ekspor PDF
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Periode Filter -->
+<div class="card card-report border-0 mb-4 shadow-sm">
+  <div class="card-body py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+    <span class="fw-semibold text-dark-slate"><i class="bi bi-funnel-fill text-primary me-1"></i> Filter Periode
+      Laporan:</span>
+    <div class="btn-group shadow-sm" role="group" aria-label="Filter Periode">
+      <a href="{{ url_for('admin.reports', periode='daily') }}"
+        class="btn btn-period {% if current_periode == 'daily' %}active{% endif %}">Harian</a>
+      <a href="{{ url_for('admin.reports', periode='weekly') }}"
+        class="btn btn-period {% if current_periode == 'weekly' %}active{% endif %}">Mingguan</a>
+      <a href="{{ url_for('admin.reports', periode='monthly') }}"
+        class="btn btn-period {% if current_periode == 'monthly' %}active{% endif %}">Bulanan</a>
+      <a href="{{ url_for('admin.reports', periode='yearly') }}"
+        class="btn btn-period {% if current_periode == 'yearly' %}active{% endif %}">Tahunan</a>
+    </div>
+  </div>
+</div>
+
+<!-- 1. Summary Cards -->
+<div class="row mb-4">
+  <!-- Card Pendapatan -->
+  <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+    <div class="card card-stat shadow-sm h-100 bg-white">
+      <div class="card-body p-4 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-success-subtle text-success me-3">
+          <i class="bi bi-cash-coin"></i>
+        </div>
+        <div>
+          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Total Pendapatan</p>
+          <h3 class="fw-bold text-dark-slate mb-0">Rp {{ "{:,.0f}".format(total_revenue).replace(',', '.') }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Jumlah Pesanan -->
+  <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
+    <div class="card card-stat shadow-sm h-100 bg-white">
+      <div class="card-body p-4 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-primary-subtle text-primary me-3">
+          <i class="bi bi-receipt"></i>
+        </div>
+        <div>
+          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Total Pesanan</p>
+          <h3 class="fw-bold text-dark-slate mb-0">{{ total_orders }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Rata-rata Transaksi -->
+  <div class="col-xl-3 col-md-6 mb-4 mb-md-0">
+    <div class="card card-stat shadow-sm h-100 bg-white">
+      <div class="card-body p-4 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-info-subtle text-info me-3">
+          <i class="bi bi-calculator"></i>
+        </div>
+        <div>
+          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Rata-rata Transaksi</p>
+          <h3 class="fw-bold text-dark-slate mb-0">Rp {{ "{:,.0f}".format(avg_transaction).replace(',', '.') }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card Pesanan Sukses -->
+  <div class="col-xl-3 col-md-6">
+    <div class="card card-stat shadow-sm h-100 bg-white">
+      <div class="card-body p-4 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-warning-subtle text-warning me-3">
+          <i class="bi bi-check2-circle"></i>
+        </div>
+        <div>
+          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Pesanan Sukses</p>
+          <h3 class="fw-bold text-dark-slate mb-0">{{ successful_orders }}</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 2. Charts Section -->
+<div class="row mb-4">
+  <!-- Grafik Tren Pendapatan -->
+  <div class="col-lg-8 mb-4 mb-lg-0">
+    <div class="card card-report shadow-sm h-100">
+      <div class="card-report-header">
+        <span><i class="bi bi-graph-up text-primary me-2"></i> Tren Pendapatan & Pesanan</span>
+        <span class="badge bg-light text-dark-slate">Filter: {{ current_periode|capitalize }}</span>
+      </div>
+      <div class="card-report-body">
+        <div style="position: relative; height: 320px; width: 100%;">
+          <canvas id="revenueTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kontribusi Kategori -->
+  <div class="col-lg-4">
+    <div class="card card-report shadow-sm h-100">
+      <div class="card-report-header">
+        <span><i class="bi bi-pie-chart-fill text-primary me-2"></i> Porsi Kategori Terlaris</span>
+      </div>
+      <div class="card-report-body d-flex flex-column align-items-center justify-content-center">
+        {% if category_data.labels %}
+        <div style="position: relative; height: 220px; width: 100%;" class="mb-3">
+          <canvas id="categoryContributionChart"></canvas>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-pie-chart text-muted display-4"></i>
+          <p class="text-muted mt-2 small">Tidak ada data untuk periode ini.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <!-- Top 5 Best Sellers -->
+  <div class="col-lg-5 mb-4 mb-lg-0">
+    <div class="card card-report shadow-sm h-100">
+      <div class="card-report-header">
+        <span><i class="bi bi-trophy-fill text-warning me-2"></i> Top 5 Dekorasi / Layanan Terlaris</span>
+      </div>
+      <div class="card-report-body">
+        {% if best_sellers %}
+        <div class="table-responsive">
+          <table class="table table-borderless table-custom mb-0">
+            <thead>
+              <tr>
+                <th style="padding-left: 0;">Barang / Layanan</th>
+                <th class="text-center">Tersewa</th>
+                <th class="text-end" style="padding-right: 0;">Total Pendapatan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in best_sellers %}
+              <tr>
+                <td style="padding-left: 0;">
+                  <span class="fw-bold">{{ item[0] }}</span><br>
+                  <small class="text-muted">{{ item[1] }}</small>
+                </td>
+                <td class="text-center fw-semibold text-primary">{{ item[2] }} unit</td>
+                <td class="text-end fw-bold text-success" style="padding-right: 0;">
+                  Rp {{ "{:,.0f}".format(item[3]).replace(',', '.') }}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-box-seam text-muted display-4"></i>
+          <p class="text-muted mt-2">Belum ada barang tersewa pada periode ini.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Rincian Transaksi -->
+  <div class="col-lg-7">
+    <div class="card card-report shadow-sm h-100">
+      <div class="card-report-header">
+        <span><i class="bi bi-list-stars text-primary me-2"></i> Rincian Transaksi Masuk</span>
+        <span class="badge rounded-pill" style="background-color: #2c3e50;">{{ transactions|length }} Transaksi</span>
+      </div>
+      <div class="card-report-body p-0">
+        {% if transactions %}
+        <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+          <table class="table table-hover table-custom mb-0">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Pelanggan</th>
+                <th>Tanggal</th>
+                <th class="text-end">Total Pembayaran</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for tx in transactions %}
+              <tr style="cursor: pointer;"
+                onclick="window.location='{{ url_for('admin.order_detail', order_id=tx.id) }}'">
+                <td><strong>#{{ tx.id }}</strong></td>
+                <td>
+                  <span class="fw-semibold">{{ tx.customer.name }}</span>
+                </td>
+                <td>{{ tx.order_date.strftime('%d/%m/%Y') }}</td>
+                <td class="text-end fw-bold text-dark-slate">
+                  Rp {{ "{:,.0f}".format(tx.total_price).replace(',', '.') }}
+                </td>
+                <td class="text-center">
+                  {% if tx.status == 'Pending' %}
+                  <span class="badge rounded-pill badge-pending px-2 py-1 fs-8">Pending</span>
+                  {% elif tx.status == 'Processing' %}
+                  <span class="badge rounded-pill bg-info-subtle text-info px-2 py-1 fs-8">Processing</span>
+                  {% elif tx.status == 'Completed' %}
+                  <span class="badge rounded-pill bg-success-subtle text-success px-2 py-1 fs-8">Completed</span>
+                  {% else %}
+                  <span class="badge rounded-pill bg-danger-subtle text-danger px-2 py-1 fs-8">Cancelled</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+          <i class="bi bi-receipt-cutoff text-muted display-4"></i>
+          <p class="text-muted mt-2">Tidak ada transaksi tercatat pada periode ini.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Script Chart.js -->
+<script>
+  // 1. Revenue & Order Volume Chart
+  const trendCtx = document.getElementById('revenueTrendChart').getContext('2d');
+  const trendLabels = {{ trend_data.labels| tojson }};
+  const revenueData = {{ trend_data.revenue| tojson }};
+  const orderCountData = {{ trend_data.orders| tojson }};
+
+  new Chart(trendCtx, {
+    type: 'bar',
+    data: {
+      labels: trendLabels,
+      datasets: [
+        {
+          label: 'Pendapatan (Rp)',
+          data: revenueData,
+          backgroundColor: 'rgba(197, 168, 128, 0.65)',
+          borderColor: 'rgba(197, 168, 128, 1)',
+          borderWidth: 1,
+          yAxisID: 'yRevenue',
+          borderRadius: 4
+        },
+        {
+          label: 'Jumlah Pesanan',
+          data: orderCountData,
+          type: 'line',
+          fill: false,
+          borderColor: '#2c3e50',
+          backgroundColor: '#2c3e50',
+          tension: 0.1,
+          yAxisID: 'yOrders'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            boxWidth: 12,
+            font: { size: 11, family: 'Inter' }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false }
+        },
+        yRevenue: {
+          type: 'linear',
+          position: 'left',
+          title: {
+            display: true,
+            text: 'Pendapatan (Rupiah)',
+            font: { size: 11, weight: 'bold' }
+          },
+          ticks: {
+            callback: function (value) {
+              return 'Rp ' + value.toLocaleString('id-ID');
+            }
+          }
+        },
+        yOrders: {
+          type: 'linear',
+          position: 'right',
+          title: {
+            display: true,
+            text: 'Jumlah Pesanan',
+            font: { size: 11, weight: 'bold' }
+          },
+          grid: { drawOnChartArea: false },
+          ticks: {
+            stepSize: 1,
+            precision: 0
+          }
+        }
+      }
+    }
+  });
+
+  // 2. Category Contribution Chart
+  {% if category_data.labels %}
+  const categoryCtx = document.getElementById('categoryContributionChart').getContext('2d');
+  new Chart(categoryCtx, {
+    type: 'doughnut',
+    data: {
+      labels: {{ category_data.labels | tojson }},
+    datasets: [{
+      data: {{ category_data.data | tojson }},
+    backgroundColor: [
+      '#2c3e50',
+      '#c5a880',
+      '#2e7d32',
+      '#0288d1',
+      '#d32f2f',
+      '#fbc02d',
+      '#7b1fa2'
+    ],
+    borderWidth: 2,
+    borderColor: '#ffffff'
+      }]
+    },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          boxWidth: 10,
+          font: { size: 10 }
+        }
+      }
+    },
+    cutout: '65%'
+  }
+  });
+  {% endif %}
+</script>
+{% endblock %}

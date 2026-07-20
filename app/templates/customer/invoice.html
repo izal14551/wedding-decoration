@@ -1,215 +1,210 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Invoice #{{ order.id }} | Griya Rias Saraswati</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <style>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoice #{{ order.id }} | Griya Rias Saraswati</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: "Inter", sans-serif;
+      padding: 30px;
+    }
+
+    .invoice-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 15px;
+      padding: 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .invoice-title {
+      font-family: "Playfair Display", Georgia, serif;
+      color: #c5a880;
+      font-weight: 700;
+    }
+
+    .table-custom th {
+      background-color: #1f272a;
+      color: #ffffff;
+    }
+
+    @media print {
       body {
-        background-color: #f8f9fa;
-        font-family: "Inter", sans-serif;
-        padding: 30px;
+        background-color: #ffffff;
+        padding: 0;
       }
+
       .invoice-card {
-        background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        border-radius: 15px;
-        padding: 40px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
-        max-width: 800px;
-        margin: 0 auto;
+        border: none;
+        box-shadow: none;
+        padding: 0;
       }
-      .invoice-title {
-        font-family: "Playfair Display", Georgia, serif;
-        color: #c5a880;
-        font-weight: 700;
+
+      .no-print {
+        display: none !important;
       }
-      .table-custom th {
-        background-color: #1f272a;
-        color: #ffffff;
-      }
-      @media print {
-        body {
-          background-color: #ffffff;
-          padding: 0;
-        }
-        .invoice-card {
-          border: none;
-          box-shadow: none;
-          padding: 0;
-        }
-        .no-print {
-          display: none !important;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="invoice-card">
-      <!-- Invoice Action Buttons -->
-      <div class="d-flex justify-content-between mb-4 no-print">
-        <a
-          href="{{ url_for('customer.profile') }}"
-          class="btn btn-outline-secondary btn-sm rounded-pill"
-        >
-          <i class="bi bi-arrow-left"></i> Kembali ke Profil
+    }
+  </style>
+</head>
+
+<body>
+  <div class="invoice-card">
+    <!-- Invoice Action Buttons -->
+    <div class="d-flex justify-content-between mb-4 no-print">
+      <a href="{{ url_for('customer.profile') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
+        <i class="bi bi-arrow-left"></i> Kembali ke Profil
+      </a>
+      <div class="d-flex gap-2">
+        {% if order.payment and order.payment.status == 'Approved' or order.status in ['Processing', 'Completed'] %}
+        <a href="{{ url_for('customer.download_invoice_pdf', order_id=order.id) }}"
+          class="btn btn-sm btn-primary rounded-pill px-3"
+          style="background-color: #c5a880; border-color: #c5a880; color: #ffffff;">
+          <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh PDF Resmi
         </a>
-        <button
-          onclick="window.print()"
-          class="btn btn-sm btn-dark rounded-pill px-3"
-          style="background-color: #1f272a; border-color: #1f272a"
-        >
+        {% endif %}
+        <button onclick="window.print()" class="btn btn-sm btn-dark rounded-pill px-3"
+          style="background-color: #1f272a; border-color: #1f272a">
           <i class="bi bi-printer-fill me-1"></i> Cetak Invoice
         </button>
       </div>
+    </div>
 
-      <!-- Header Info -->
-      <div class="row align-items-center mb-5">
-        <div class="col-sm-6 text-center text-sm-start">
-          <h3 class="invoice-title mb-1">
-            <i class="bi bi-flower1"></i> Griya Rias Saraswati
-          </h3>
-          <p class="text-muted small mb-0">
-            Beauty, Elegance, and Wedding Needs
-          </p>
-          <p class="text-muted small">
-            Sleman, Yogyakarta | Telp: 081234567890
-          </p>
-        </div>
-        <div class="col-sm-6 text-center text-sm-end mt-3 mt-sm-0">
-          <h2 class="h4 text-uppercase fw-bold text-muted mb-1">INVOICE</h2>
-          <h4 class="h5 fw-bold text-dark mb-1">#INV-{{ order.id }}</h4>
-          <p class="text-muted small mb-0">
-            Tanggal Pemesanan: {{ order.order_date.strftime('%d %B %Y') }}
-          </p>
-          <p class="text-muted small">
-            Status Pembayaran: <span class="badge bg-success">LUNAS</span>
-          </p>
-        </div>
-      </div>
-
-      <hr class="my-4" />
-
-      <!-- Billing Info -->
-      <div class="row mb-5">
-        <div class="col-sm-6 mb-3 mb-sm-0">
-          <h6 class="text-muted small uppercase fw-bold mb-2">
-            Ditagih Kepada:
-          </h6>
-          <h5 class="fw-bold mb-1">{{ order.customer.name }}</h5>
-          <p class="text-muted small mb-1">
-            <i class="bi bi-envelope"></i> {{ order.customer.email }}
-          </p>
-          <p class="text-muted small mb-1">
-            <i class="bi bi-telephone"></i> {{ order.customer.phone or '-' }}
-          </p>
-        </div>
-        <div class="col-sm-6">
-          <h6 class="text-muted small uppercase fw-bold mb-2">
-            Detail Acara & Sewa:
-          </h6>
-          <p class="text-muted small mb-1">
-            <strong>Rentang Tanggal:</strong> {{ order.start_date.strftime('%d
-            %B %Y') }} s/d {{ order.end_date.strftime('%d %B %Y') }}
-          </p>
-          <p class="text-muted small mb-1">
-            <strong>Durasi Sewa:</strong> {{ duration }} Hari
-          </p>
-          <p class="text-muted small mb-0">
-            <strong>Lokasi Acara:</strong> {{ order.event_address }}
-          </p>
-        </div>
-      </div>
-
-      <!-- Items Table -->
-      <h6 class="text-muted small uppercase fw-bold mb-3">
-        Daftar Barang & Rincian Harga
-      </h6>
-      <div class="table-responsive mb-4">
-        <table
-          class="table table-bordered table-striped align-middle table-custom"
-        >
-          <thead>
-            <tr>
-              <th>Nama Barang / Paket Dekorasi</th>
-              <th class="text-center" style="width: 120px">Kuantitas</th>
-              <th class="text-end" style="width: 160px">Harga Sewa / Hari</th>
-              <th class="text-end" style="width: 160px">Total / Hari</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in order.order_items %}
-            <tr>
-              <td>
-                <span class="fw-bold">{{ item.product.name }}</span><br />
-                <small class="text-muted"
-                  >{{ item.product.category.name }}</small
-                >
-              </td>
-              <td class="text-center">{{ item.quantity }}</td>
-              <td class="text-end">
-                Rp {{ "{:,.0f}".format(item.price).replace(',', '.') }}
-              </td>
-              <td class="text-end fw-semibold">
-                Rp {{ "{:,.0f}".format(item.price * item.quantity).replace(',',
-                '.') }}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Price Summary -->
-      <div class="row justify-content-end">
-        <div class="col-md-6 col-lg-5">
-          <div
-            class="p-3 bg-light rounded"
-            style="border-right: 4px solid #c5a880"
-          >
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted small">Total / Hari:</span>
-              <span class="fw-bold small"
-                >Rp {{ "{:,.0f}".format(order.total_price /
-                duration).replace(',', '.') }}</span
-              >
-            </div>
-            <div class="d-flex justify-content-between mb-2">
-              <span class="text-muted small">Durasi Sewa:</span>
-              <span class="fw-bold small">{{ duration }} Hari</span>
-            </div>
-            <hr class="my-2" />
-            <div class="d-flex justify-content-between">
-              <span class="fw-bold text-dark">Total Pembayaran:</span>
-              <span class="fw-bold text-success"
-                >Rp {{ "{:,.0f}".format(order.total_price).replace(',', '.')
-                }}</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <hr class="my-5" />
-
-      <!-- Footer Thank You Note -->
-      <div class="text-center">
-        <p class="mb-1 text-dark fw-semibold">
-          Terima Kasih Telah Mempercayakan Pernikahan Anda Bersama Kami!
-        </p>
+    <!-- Header Info -->
+    <div class="row align-items-center mb-5">
+      <div class="col-sm-6 text-center text-sm-start">
+        <h3 class="invoice-title mb-1">
+          <i class="bi bi-flower1"></i> Griya Rias Saraswati
+        </h3>
         <p class="text-muted small mb-0">
-          Jika Anda memiliki pertanyaan mengenai invoice ini, silakan hubungi
-          tim CS kami.
+          Beauty, Elegance, and Wedding Needs
+        </p>
+        <p class="text-muted small">
+          Sleman, Yogyakarta | Telp: 081234567890
+        </p>
+      </div>
+      <div class="col-sm-6 text-center text-sm-end mt-3 mt-sm-0">
+        <h2 class="h4 text-uppercase fw-bold text-muted mb-1">INVOICE</h2>
+        <h4 class="h5 fw-bold text-dark mb-1">#INV-{{ order.id }}</h4>
+        <p class="text-muted small mb-0">
+          Tanggal Pemesanan: {{ order.order_date.strftime('%d %B %Y') }}
+        </p>
+        <p class="text-muted small">
+          Status Pembayaran: <span class="badge bg-success">LUNAS</span>
         </p>
       </div>
     </div>
-  </body>
+
+    <hr class="my-4" />
+
+    <!-- Billing Info -->
+    <div class="row mb-5">
+      <div class="col-sm-6 mb-3 mb-sm-0">
+        <h6 class="text-muted small uppercase fw-bold mb-2">
+          Ditagih Kepada:
+        </h6>
+        <h5 class="fw-bold mb-1">{{ order.customer.name }}</h5>
+        <p class="text-muted small mb-1">
+          <i class="bi bi-envelope"></i> {{ order.customer.email }}
+        </p>
+        <p class="text-muted small mb-1">
+          <i class="bi bi-telephone"></i> {{ order.customer.phone or '-' }}
+        </p>
+      </div>
+      <div class="col-sm-6">
+        <h6 class="text-muted small uppercase fw-bold mb-2">
+          Detail Acara & Sewa:
+        </h6>
+        <p class="text-muted small mb-1">
+          <strong>Rentang Tanggal:</strong> {{ order.start_date.strftime('%d
+          %B %Y') }} s/d {{ order.end_date.strftime('%d %B %Y') }}
+        </p>
+        <p class="text-muted small mb-1">
+          <strong>Durasi Sewa:</strong> {{ duration }} Hari
+        </p>
+        <p class="text-muted small mb-0">
+          <strong>Lokasi Acara:</strong> {{ order.event_address }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Items Table -->
+    <h6 class="text-muted small uppercase fw-bold mb-3">
+      Daftar Barang & Rincian Harga
+    </h6>
+    <div class="table-responsive mb-4">
+      <table class="table table-bordered table-striped align-middle table-custom">
+        <thead>
+          <tr>
+            <th>Nama Barang / Paket Dekorasi</th>
+            <th class="text-center" style="width: 120px">Kuantitas</th>
+            <th class="text-end" style="width: 160px">Harga Sewa / Hari</th>
+            <th class="text-end" style="width: 160px">Total / Hari</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in order.order_items %}
+          <tr>
+            <td>
+              <span class="fw-bold">{{ item.product.name }}</span><br />
+              <small class="text-muted">{{ item.product.category.name }}</small>
+            </td>
+            <td class="text-center">{{ item.quantity }}</td>
+            <td class="text-end">
+              Rp {{ "{:,.0f}".format(item.price).replace(',', '.') }}
+            </td>
+            <td class="text-end fw-semibold">
+              Rp {{ "{:,.0f}".format(item.price * item.quantity).replace(',',
+              '.') }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Price Summary -->
+    <div class="row justify-content-end">
+      <div class="col-md-6 col-lg-5">
+        <div class="p-3 bg-light rounded" style="border-right: 4px solid #c5a880">
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted small">Total / Hari:</span>
+            <span class="fw-bold small">Rp {{ "{:,.0f}".format(order.total_price /
+              duration).replace(',', '.') }}</span>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted small">Durasi Sewa:</span>
+            <span class="fw-bold small">{{ duration }} Hari</span>
+          </div>
+          <hr class="my-2" />
+          <div class="d-flex justify-content-between">
+            <span class="fw-bold text-dark">Total Pembayaran:</span>
+            <span class="fw-bold text-success">Rp {{ "{:,.0f}".format(order.total_price).replace(',', '.')
+              }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-5" />
+
+    <!-- Footer Thank You Note -->
+    <div class="text-center">
+      <p class="mb-1 text-dark fw-semibold">
+        Terima Kasih Telah Mempercayakan Pernikahan Anda Bersama Kami!
+      </p>
+      <p class="text-muted small mb-0">
+        Jika Anda memiliki pertanyaan mengenai invoice ini, silakan hubungi
+        tim CS kami.
+      </p>
+    </div>
+  </div>
+</body>
+
 </html>

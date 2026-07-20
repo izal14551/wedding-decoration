@@ -2,7 +2,7 @@ import unittest
 import io
 from datetime import date
 from app import create_app, db
-from app.models import User, Role, Customer, Admin, Category, Product, Order, OrderItem
+from app.models import User, Role, Customer, Admin, Category, Product, Order, OrderItem, Schedule, Payment
 from config import Config
 
 class TestConfig(Config):
@@ -328,6 +328,301 @@ class AdminTestCase(unittest.TestCase):
         # Periksa di DB (harus tetap ada)
         db_prod = db.session.get(Product, prod.id)
         self.assertIsNotNone(db_prod)
+
+    def test_admin_orders_list_access(self):
+        """Uji akses daftar pesanan admin dilindungi dan menolak pelanggan biasa"""
+        # 1. Buat Pelanggan biasa
+        u_cust = User(email='cust_orders@example.com')
+        u_cust.set_password('cust123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        cust = Customer(user_id=u_cust.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(cust)
+        db.session.commit()
+
+        # Login Pelanggan
+        self.client.post('/auth/login', data={'email': 'cust_orders@example.com', 'password': 'cust123'}, follow_redirects=True)
+
+        # Akses /admin/orders (harus ditolak/diredirect)
+        response = self.client.get('/admin/orders', follow_redirects=True)
+        self.assertNotIn(b'Manajemen Pesanan', response.data)
+
+        # Logout pelanggan terlebih dahulu
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        # 2. Login Admin
+        u_admin = User(email='admin_orders@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+        db.session.commit()
+
+        self.client.post('/auth/login', data={'email': 'admin_orders@example.com', 'password': 'admin123'}, follow_redirects=True)
+
+        # Akses /admin/orders (harus sukses)
+        response_admin = self.client.get('/admin/orders', follow_redirects=True)
+        self.assertEqual(response_admin.status_code, 200)
+        self.assertIn(b'Manajemen Pesanan', response_admin.data)
+
+    def test_admin_order_detail_view(self):
+        """Uji admin dapat melihat detail pesanan tertentu"""
+        # Buat Admin
+        u_admin = User(email='admin_detail@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+        db.session.flush()
+        
+        # Buat Kategori & Produk
+        cat = Category(name='Tenda', description='Tenda')
+        db.session.add(cat)
+        db.session.flush()
+        prod = Product(category_id=cat.id, name='Tenda Gold', price=1000000.0, stock=2, description='Tenda dekorasi')
+        db.session.add(prod)
+        db.session.flush()
+
+        # Buat Customer & Order
+        u_cust = User(email='cust_detail@example.com')
+        u_cust.set_password('cust123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        cust = Customer(user_id=u_cust.id, name='Siti', phone='081234567890', address='Alamat')
+        db.session.add(cust)
+        db.session.flush()
+
+        order = Order(
+            customer_id=cust.id,
+            order_date=date.today(),
+            start_date=date.today(),
+            end_date=date.today(),
+            event_address='Alamat Acara',
+            total_price=1000000.0,
+            status='Pending'
+        )
+        db.session.add(order)
+        db.session.flush()
+        order_item = OrderItem(order_id=order.id, product_id=prod.id, quantity=1, price=1000000.0)
+        db.session.add(order_item)
+        db.session.commit()
+
+        # Login Admin
+        self.client.post('/auth/login', data={'email': 'admin_detail@example.com', 'password': 'admin123'}, follow_redirects=True)
+
+        # Akses detail order
+        response = self.client.get(f'/admin/order/{order.id}', follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Rincian Pesanan', response.data)
+        self.assertIn(b'Tenda Gold', response.data)
+        self.assertIn(b'Siti', response.data)
+
+    def test_admin_order_status_update_workflow(self):
+        """Uji alur pembaruan status pesanan oleh admin (Pending -> Cancelled -> Processing)"""
+        # Buat Admin & Admin User
+        u_admin = User(email='admin_workflow@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+        db.session.flush()
+        admin_prof = Admin(user_id=u_admin.id, name='Admin Workflow', phone='08987654321')
+        db.session.add(admin_prof)
+        db.session.flush()
+        
+        # Buat Kategori & Produk
+        cat = Category(name='Tenda', description='Tenda')
+        db.session.add(cat)
+        db.session.flush()
+        prod = Product(category_id=cat.id, name='Tenda Gold', price=1000000.0, stock=2, description='Tenda dekorasi')
+        db.session.add(prod)
+        db.session.flush()
+
+        # Buat Customer & Order
+        u_cust = User(email='cust_workflow@example.com')
+        u_cust.set_password('cust123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        cust = Customer(user_id=u_cust.id, name='Siti', phone='081234567890', address='Alamat')
+        db.session.add(cust)
+        db.session.flush()
+
+        order = Order(
+            customer_id=cust.id,
+            order_date=date.today(),
+            start_date=date.today(),
+            end_date=date.today(),
+            event_address='Alamat Acara',
+            total_price=1000000.0,
+            status='Pending'
+        )
+        db.session.add(order)
+        db.session.flush()
+        
+        order_item = OrderItem(order_id=order.id, product_id=prod.id, quantity=1, price=1000000.0)
+        db.session.add(order_item)
+        
+        # Simulasikan adanya jadwal Rented
+        from datetime import time
+        sched = Schedule(
+            product_id=prod.id,
+            order_id=order.id,
+            date=date.today(),
+            start_time=time(8, 0),
+            end_time=time(22, 0),
+            status='Rented'
+        )
+        db.session.add(sched)
+        
+        # Simulasikan adanya bukti pembayaran
+        pay = Payment(
+            order_id=order.id,
+            payment_date=date.today(),
+            payment_method='transfer',
+            payment_proof='payments/proof.jpg',
+            status='Pending'
+        )
+        db.session.add(pay)
+        db.session.commit()
+
+        # Login Admin
+        self.client.post('/auth/login', data={'email': 'admin_workflow@example.com', 'password': 'admin123'}, follow_redirects=True)
+
+        # 1. Ubah status ke Cancelled
+        response_cancel = self.client.post(f'/admin/order/{order.id}/update_status', data={'status': 'Cancelled'}, follow_redirects=True)
+        self.assertIn(b'berhasil diperbarui menjadi Cancelled', response_cancel.data)
+        
+        # Periksa di DB
+        db.session.refresh(order)
+        self.assertEqual(order.status, 'Cancelled')
+        
+        # Jadwal Rented harusnya terhapus (kosong)
+        schedules_count = Schedule.query.filter_by(order_id=order.id).count()
+        self.assertEqual(schedules_count, 0)
+
+        # 2. Ubah status kembali dari Cancelled ke Processing
+        response_processing = self.client.post(f'/admin/order/{order.id}/update_status', data={'status': 'Processing'}, follow_redirects=True)
+        self.assertIn(b'berhasil diperbarui menjadi Processing', response_processing.data)
+        
+        # Periksa di DB
+        db.session.refresh(order)
+        self.assertEqual(order.status, 'Processing')
+        
+        # Jadwal Rented harusnya dibuat ulang
+        schedules_count = Schedule.query.filter_by(order_id=order.id).count()
+        self.assertEqual(schedules_count, 1)
+        
+        # Pembayaran otomatis Approved
+        db.session.refresh(pay)
+        self.assertEqual(pay.status, 'Approved')
+        self.assertEqual(pay.admin_id, admin_prof.id)
+
+    def test_admin_payments_list_access(self):
+        """Uji hak akses halaman daftar verifikasi pembayaran hanya untuk admin"""
+        # 1. Buat Pelanggan biasa
+        u_cust = User(email='cust_pay_list@example.com')
+        u_cust.set_password('cust123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        cust = Customer(user_id=u_cust.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(cust)
+        db.session.commit()
+
+        # Login Pelanggan
+        self.client.post('/auth/login', data={'email': 'cust_pay_list@example.com', 'password': 'cust123'}, follow_redirects=True)
+
+        # Akses /admin/payments (harus ditolak/diredirect)
+        response = self.client.get('/admin/payments', follow_redirects=True)
+        self.assertNotIn(b'Verifikasi Pembayaran', response.data)
+
+        # Logout pelanggan
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        # 2. Login Admin
+        u_admin = User(email='admin_pay_list@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+        db.session.commit()
+
+        self.client.post('/auth/login', data={'email': 'admin_pay_list@example.com', 'password': 'admin123'}, follow_redirects=True)
+
+        # Akses /admin/payments (harus sukses)
+        response_admin = self.client.get('/admin/payments', follow_redirects=True)
+        self.assertEqual(response_admin.status_code, 200)
+        self.assertIn(b'Verifikasi Pembayaran', response_admin.data)
+
+    def test_admin_verify_payment_workflow(self):
+        """Uji alur persetujuan (Approve) dan penolakan (Reject) pembayaran oleh admin"""
+        # Buat Admin & Admin User
+        u_admin = User(email='admin_verify_workflow@example.com')
+        u_admin.set_password('admin123')
+        u_admin.roles.append(self.admin_role)
+        db.session.add(u_admin)
+        db.session.flush()
+        admin_prof = Admin(user_id=u_admin.id, name='Admin Verify Workflow', phone='08987654321')
+        db.session.add(admin_prof)
+        db.session.flush()
+
+        # Buat Customer, Order & Payment
+        u_cust = User(email='cust_verify_workflow@example.com')
+        u_cust.set_password('cust123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        cust = Customer(user_id=u_cust.id, name='Siti', phone='081234567890', address='Alamat')
+        db.session.add(cust)
+        db.session.flush()
+
+        order = Order(
+            customer_id=cust.id,
+            order_date=date.today(),
+            start_date=date.today(),
+            end_date=date.today(),
+            event_address='Alamat Acara',
+            total_price=500000.0,
+            status='Pending'
+        )
+        db.session.add(order)
+        db.session.flush()
+
+        pay = Payment(
+            order_id=order.id,
+            payment_date=date.today(),
+            payment_method='transfer',
+            payment_proof='payments/proof.jpg',
+            status='Pending'
+        )
+        db.session.add(pay)
+        db.session.commit()
+
+        # Login Admin
+        self.client.post('/auth/login', data={'email': 'admin_verify_workflow@example.com', 'password': 'admin123'}, follow_redirects=True)
+
+        # 1. Uji Penolakan Pembayaran (Reject)
+        response_reject = self.client.post(f'/admin/payment/{pay.id}/verify', data={'action': 'reject'}, follow_redirects=True)
+        self.assertIn(b'telah ditolak', response_reject.data)
+        
+        # Cek di DB
+        db.session.refresh(pay)
+        self.assertEqual(pay.status, 'Rejected')
+        db.session.refresh(order)
+        self.assertEqual(order.status, 'Pending')
+
+        # 2. Uji Persetujuan Pembayaran (Approve)
+        pay.status = 'Pending'
+        db.session.commit()
+
+        response_approve = self.client.post(f'/admin/payment/{pay.id}/verify', data={'action': 'approve'}, follow_redirects=True)
+        self.assertIn(b'berhasil disetujui', response_approve.data)
+        
+        # Cek di DB
+        db.session.refresh(pay)
+        self.assertEqual(pay.status, 'Approved')
+        self.assertEqual(pay.admin_id, admin_prof.id)
+        db.session.refresh(order)
+        self.assertEqual(order.status, 'Processing')
 
 if __name__ == '__main__':
     unittest.main()

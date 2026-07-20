@@ -11,3 +11,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.path.join(basedir, 'app', 'static', 'uploads')
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # Max upload size 16MB
+    SECURITY_UNAUTHORIZED_VIEW = 'auth.login'
+    SECURITY_LOGIN_URL = '/auth/login'
+
+

@@ -1,6 +1,6 @@
 import unittest
 from app import create_app, db
-from app.models import User, Role, Customer, Admin, Category, Product
+from app.models import User, Role, Customer, Admin, Category, Product, Order, Payment
 from config import Config
 
 class TestConfig(Config):
@@ -445,13 +445,75 @@ class AuthTestCase(unittest.TestCase):
         response = self.client.get(f'/decoration/{prod.id}')
         self.assertEqual(response.status_code, 200)
         self.assertIn(b'Tenda Pernikahan Gold', response.data)
-        self.assertIn(b'Jadwal', response.data)
+        self.assertIn(b'Kalender', response.data)
         self.assertIn(b'Ketersediaan', response.data)
         self.assertIn(b'Tersedia: 2', response.data)
 
         # 2. Uji akses gagal 404 produk tidak ditemukan/tidak ada
         response_404 = self.client.get('/decoration/99999')
         self.assertEqual(response_404.status_code, 404)
+
+    def test_customer_upload_payment_proof(self):
+        """Uji pelanggan berhasil mengunggah berkas bukti transfer"""
+        from datetime import date
+        # 1. Buat peran & Pelanggan
+        u_cust = User(email='cust_pay@example.com')
+        u_cust.set_password('cust123')
+        u_cust.roles.append(self.customer_role)
+        db.session.add(u_cust)
+        db.session.flush()
+        cust = Customer(user_id=u_cust.id, name='Budi', phone='081234567890', address='Alamat')
+        db.session.add(cust)
+        db.session.flush()
+
+        # Buat Kategori & Produk
+        cat = Category(name='Tenda', description='Tenda')
+        db.session.add(cat)
+        db.session.flush()
+        prod = Product(category_id=cat.id, name='Tenda Gold', price=1000000.0, stock=2, description='Tenda dekorasi')
+        db.session.add(prod)
+        db.session.flush()
+
+        # Buat Order
+        order = Order(
+            customer_id=cust.id,
+            order_date=date.today(),
+            start_date=date.today(),
+            end_date=date.today(),
+            event_address='Alamat Acara',
+            total_price=1000000.0,
+            status='Pending'
+        )
+        db.session.add(order)
+        db.session.commit()
+
+        # Login Pelanggan
+        self.client.post('/auth/login', data={'email': 'cust_pay@example.com', 'password': 'cust123'}, follow_redirects=True)
+
+        # Coba upload bukti transfer (simulasi berkas gambar)
+        import io
+        data_upload = {
+            'payment_method': 'bca',
+            'payment_proof': (io.BytesIO(b"fake payment proof bytes"), 'proof.jpg')
+        }
+        response = self.client.post(
+            f'/order/{order.id}/upload_payment',
+            data=data_upload,
+            content_type='multipart/form-data',
+            follow_redirects=True
+        )
+        self.assertIn(b'Bukti pembayaran berhasil diunggah', response.data)
+
+        # Periksa di DB
+        db.session.refresh(order)
+        self.assertEqual(order.status, 'Pending') # Status pesanan tetap Pending
+        
+        # Cek entri Payment
+        payment = Payment.query.filter_by(order_id=order.id).first()
+        self.assertIsNotNone(payment)
+        self.assertEqual(payment.status, 'Pending')
+        self.assertEqual(payment.payment_method, 'bca')
+        self.assertIsNotNone(payment.payment_proof)
 
 if __name__ == '__main__':
     unittest.main()

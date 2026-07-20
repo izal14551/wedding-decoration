@@ -153,10 +153,11 @@ def product_detail(product_id):
                 total_rented = active_rentals + offline_rentals + maintenance_count
                 available_stock = max(0, product.stock - total_rented)
                 
-                if maintenance_count >= product.stock:
+                if maintenance_count > 0:
                     status = 'Maintenance'
                     note = 'Perawatan'
                     badge_class = 'bg-warning-subtle text-warning border border-warning-subtle'
+                    available_stock = 0
                 elif available_stock <= 0:
                     status = 'Fully Booked'
                     note = 'Penuh'
@@ -378,6 +379,11 @@ def checkout():
                 status='Maintenance'
             ).count()
             
+            if maintenance_count > 0:
+                flash(f'Maaf, {prod.name} sedang dalam pemeliharaan (Maintenance) pada tanggal {curr_date.strftime("%d %b %Y")}. Silakan pilih tanggal lain.', 'danger')
+                conflict_found = True
+                break
+                
             offline_rentals = Schedule.query.filter(
                 Schedule.product_id == prod.id,
                 Schedule.date == curr_date,
@@ -394,7 +400,7 @@ def checkout():
                     Order.end_date >= curr_date
                 ).scalar() or 0
                 
-            available_stock = prod.stock - active_rentals - maintenance_count - offline_rentals
+            available_stock = prod.stock - active_rentals - offline_rentals
             
             if qty > available_stock:
                 if available_stock <= 0:
@@ -593,3 +599,274 @@ def invoice(order_id):
         duration = 1
         
     return render_template('customer/invoice.html', title=f'Invoice #{order.id}', order=order, duration=duration)
+
+@bp.route('/order/<int:order_id>/invoice/pdf')
+@login_required
+def download_invoice_pdf(order_id):
+    order = db.session.get(Order, order_id)
+    if not order or order.customer_id != current_user.customer.id:
+        abort(404)
+        
+    is_verified = False
+    if order.payment and order.payment.status == 'Approved':
+        is_verified = True
+    elif order.status in ['Processing', 'Completed']:
+        is_verified = True
+        
+    if not is_verified:
+        flash('Invoice resmi dalam format PDF hanya dapat diunduh setelah pembayaran diverifikasi oleh Admin.', 'warning')
+        return redirect(url_for('customer.profile'))
+        
+    duration = (order.end_date - order.start_date).days
+    if duration <= 0:
+        duration = 1
+        
+    # Render HTML string for PDF
+    html_content = render_template('customer/invoice_pdf.html', order=order, duration=duration)
+    
+    import io
+    from xhtml2pdf import pisa
+    from flask import send_file
+    
+    pdf_buffer = io.BytesIO()
+    pisa_status = pisa.CreatePDF(html_content, dest=pdf_buffer)
+    
+    if pisa_status.err:
+        flash('Terjadi kesalahan saat menghasilkan berkas PDF.', 'danger')
+        return redirect(url_for('customer.profile'))
+        
+    pdf_buffer.seek(0)
+    return send_file(
+        pdf_buffer,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'invoice-{order.id}.pdf'
+    )
+
+@bp.route('/cart/validate-dates', methods=['POST'])
+@login_required
+def validate_dates():
+    cart_session = session.get('cart', {})
+    if not cart_session:
+        return {'valid': True}
+        
+    if request.is_json:
+        data = request.json
+    else:
+        data = request.form
+        
+    start_date_str = data.get('start_date')
+    end_date_str = data.get('end_date')
+    
+    if not start_date_str or not end_date_str:
+        return {'valid': False, 'message': 'Silakan pilih tanggal mulai dan selesai sewa.'}
+        
+    try:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return {'valid': False, 'message': 'Format tanggal tidak valid.'}
+        
+    if start_date < date.today():
+        return {'valid': False, 'message': 'Tanggal mulai sewa tidak boleh di masa lalu.'}
+        
+    if end_date < start_date:
+        return {'valid': False, 'message': 'Tanggal selesai sewa harus setelah atau sama dengan tanggal mulai.'}
+        
+    # Pengecekan stok & pemeliharaan persis logika checkout
+    for prod_id_str, qty in cart_session.items():
+        prod = db.session.get(Product, int(prod_id_str))
+        if not prod:
+            continue
+            
+        qty = int(qty)
+        is_service = 'rias' in prod.category.name.lower() or 'makeup' in prod.category.name.lower() or 'mc' in prod.category.name.lower() or 'dance' in prod.category.name.lower() or 'jasa' in prod.category.name.lower()
+        unit_name = 'Slot' if is_service else 'Unit'
+        
+        curr_date = start_date
+        while curr_date <= end_date:
+            # 1. Cek Pemeliharaan (Maintenance)
+            maintenance_count = Schedule.query.filter_by(
+                product_id=prod.id,
+                date=curr_date,
+                status='Maintenance'
+            ).count()
+            
+            if maintenance_count > 0:
+                return {
+                    'valid': False,
+                    'message': f'Maaf, {prod.name} sedang dalam pemeliharaan (Maintenance) pada tanggal {curr_date.strftime("%d %b %Y")}. Silakan pilih tanggal lain.'
+                }
+                
+            # 2. Cek Stok reguler
+            offline_rentals = Schedule.query.filter(
+                Schedule.product_id == prod.id,
+                Schedule.date == curr_date,
+                Schedule.status == 'Rented',
+                Schedule.order_id == None
+            ).count()
+            
+            active_rentals = db.session.query(func.sum(OrderItem.quantity))\
+                .join(Order, OrderItem.order_id == Order.id)\
+                .filter(
+                    OrderItem.product_id == prod.id,
+                    Order.status != 'Cancelled',
+                    Order.start_date <= curr_date,
+                    Order.end_date >= curr_date
+                ).scalar() or 0
+                
+            available_stock = prod.stock - active_rentals - offline_rentals
+            
+            if qty > available_stock:
+                if available_stock <= 0:
+                    return {
+                        'valid': False,
+                        'message': f'Maaf, {prod.name} sudah penuh dipesan (Fully Booked) pada tanggal {curr_date.strftime("%d %b %Y")}. Silakan pilih tanggal lain.'
+                    }
+                else:
+                    return {
+                        'valid': False,
+                        'message': f'Jumlah sewa untuk {prod.name} ({qty} {unit_name}) melebihi stok/kapasitas yang tersedia ({available_stock} {unit_name}) pada tanggal {curr_date.strftime("%d %b %Y")}.'
+                    }
+                    
+            curr_date += timedelta(days=1)
+            
+    return {'valid': True}
+
+@bp.route('/api/product/<int:product_id>/calendar')
+def api_product_calendar(product_id):
+    product = db.session.get(Product, product_id)
+    if not product:
+        return 'Produk tidak ditemukan.', 404
+        
+    today = date.today()
+    try:
+        month = int(request.args.get('month', today.month))
+        year = int(request.args.get('year', today.year))
+    except ValueError:
+        month = today.month
+        year = today.year
+        
+    if month < 1 or month > 12:
+        month = today.month
+    if year < today.year - 1 or year > today.year + 5:
+        year = today.year
+        
+    import calendar
+    if month == 1:
+        prev_month = 12
+        prev_year = year - 1
+    else:
+        prev_month = month - 1
+        prev_year = year
+        
+    if month == 12:
+        next_month = 1
+        next_year = year + 1
+    else:
+        next_month = month + 1
+        next_year = year
+        
+    is_prev_past = False
+    if prev_year < today.year or (prev_year == today.year and prev_month < today.month):
+        is_prev_past = True
+        
+    cal = calendar.Calendar(firstweekday=0)
+    weeks = cal.monthdayscalendar(year, month)
+    
+    is_service = 'rias' in product.category.name.lower() or 'makeup' in product.category.name.lower() or 'mc' in product.category.name.lower() or 'dance' in product.category.name.lower() or 'jasa' in product.category.name.lower()
+    
+    calendar_weeks = []
+    for week in weeks:
+        week_data = []
+        for day_num in week:
+            if day_num == 0:
+                week_data.append({
+                    'date': None,
+                    'day_num': '',
+                    'status': 'Empty',
+                    'note': '',
+                    'badge_class': ''
+                })
+            else:
+                check_date = date(year, month, day_num)
+                if check_date < today:
+                    week_data.append({
+                        'date': check_date,
+                        'day_num': day_num,
+                        'status': 'Past',
+                        'note': 'Lewat',
+                        'badge_class': 'bg-secondary-subtle text-secondary border border-secondary-subtle'
+                    })
+                    continue
+                    
+                maintenance_count = Schedule.query.filter_by(
+                    product_id=product.id,
+                    date=check_date,
+                    status='Maintenance'
+                ).count()
+                
+                offline_rentals = Schedule.query.filter(
+                    Schedule.product_id == product.id,
+                    Schedule.date == check_date,
+                    Schedule.status == 'Rented',
+                    Schedule.order_id == None
+                ).count()
+                
+                active_rentals = db.session.query(func.sum(OrderItem.quantity))\
+                    .join(Order, OrderItem.order_id == Order.id)\
+                    .filter(
+                        OrderItem.product_id == product.id,
+                        Order.status != 'Cancelled',
+                        Order.start_date <= check_date,
+                        Order.end_date >= check_date
+                    ).scalar() or 0
+                    
+                total_rented = active_rentals + offline_rentals + maintenance_count
+                available_stock = max(0, product.stock - total_rented)
+                
+                if maintenance_count > 0:
+                    status = 'Maintenance'
+                    note = 'Perawatan'
+                    badge_class = 'bg-warning-subtle text-warning border border-warning-subtle'
+                    available_stock = 0
+                elif available_stock <= 0:
+                    status = 'Fully Booked'
+                    note = 'Penuh'
+                    badge_class = 'bg-danger-subtle text-danger border border-danger-subtle'
+                else:
+                    status = 'Available'
+                    note = f"Tersedia: {available_stock} {'Slot' if is_service else 'Unit'}"
+                    badge_class = 'bg-success-subtle text-success border border-success-subtle'
+                    
+                week_data.append({
+                    'date': check_date,
+                    'day_num': day_num,
+                    'status': status,
+                    'note': note,
+                    'badge_class': badge_class,
+                    'available_stock': available_stock
+                })
+        calendar_weeks.append(week_data)
+        
+    month_name_id = format_date(date(year, month, 1), format='MMMM', locale='id')
+    day_names_dict = get_day_names(width='abbreviated', locale='id')
+    day_names = [day_names_dict[i] for i in range(7)]
+    
+    return render_template(
+        'shared/availability_calendar/_calendar.html',
+        product=product,
+        calendar_weeks=calendar_weeks,
+        current_month=month,
+        current_year=year,
+        month_name=month_name_id,
+        day_names=day_names,
+        prev_month=prev_month,
+        prev_year=prev_year,
+        next_month=next_month,
+        next_year=next_year,
+        is_prev_past=is_prev_past,
+        is_service=is_service
+    )
+
+

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Resmi #{{ order.id }}</title>
+    <style>
+        @page {
+            size: a4;
+            margin: 1.5cm;
+        }
+
+        body {
+            font-family: 'Helvetica', Arial, sans-serif;
+            color: #333333;
+            font-size: 10pt;
+            line-height: 1.4;
+        }
+
+        .header-table {
+            width: 100%;
+            border-bottom: 2px solid #c5a880;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .header-logo {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #1f272a;
+        }
+
+        .header-subtitle {
+            font-size: 9pt;
+            color: #777777;
+            margin-top: 3px;
+        }
+
+        .invoice-title-container {
+            text-align: right;
+        }
+
+        .invoice-title {
+            font-size: 22pt;
+            font-weight: bold;
+            color: #c5a880;
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        .invoice-number {
+            font-size: 11pt;
+            font-weight: bold;
+            color: #333333;
+            margin-top: 5px;
+        }
+
+        .meta-table {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .meta-col {
+            width: 50%;
+            vertical-align: top;
+        }
+
+        .section-title {
+            font-size: 9pt;
+            text-transform: uppercase;
+            color: #888888;
+            font-weight: bold;
+            border-bottom: 1px solid #eeeeee;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .meta-content {
+            font-size: 9.5pt;
+            color: #333333;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        .items-table th {
+            background-color: #1f272a;
+            color: #ffffff;
+            font-weight: bold;
+            font-size: 9pt;
+            text-align: left;
+            padding: 8px 10px;
+            border: 1px solid #1f272a;
+        }
+
+        .items-table td {
+            padding: 8px 10px;
+            border: 1px solid #dddddd;
+            font-size: 9pt;
+        }
+
+        .items-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .summary-table {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .summary-container {
+            background-color: #f8f9fa;
+            border-right: 4px solid #c5a880;
+            padding: 12px;
+        }
+
+        .divider {
+            border-top: 1px solid #dddddd;
+            margin: 6px 0;
+        }
+
+        .footer-note {
+            margin-top: 50px;
+            text-align: center;
+            border-top: 1px dashed #dddddd;
+            padding-top: 15px;
+        }
+
+        .footer-thankyou {
+            font-size: 10.5pt;
+            font-weight: bold;
+            color: #1f272a;
+            margin-bottom: 5px;
+        }
+
+        .footer-contact {
+            font-size: 8pt;
+            color: #777777;
+        }
+
+        .badge-lunas {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 8.5pt;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header Table -->
+    <table class="header-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="vertical-align: top;">
+                <div class="header-logo">Griya Rias Saraswati</div>
+                <div class="header-subtitle">Beauty, Elegance, and Wedding Needs</div>
+                <div class="header-subtitle" style="color: #555;">Sleman, Yogyakarta | Telp: 081234567890</div>
+            </td>
+            <td style="vertical-align: top; text-align: right;" class="invoice-title-container">
+                <div class="invoice-title">INVOICE RESMI</div>
+                <div class="invoice-number">#INV-{{ order.id }}</div>
+                <div style="margin-top: 8px;">
+                    <span class="badge-lunas">LUNAS</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Meta Info Table (Billing & Shipping) -->
+    <table class="meta-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <!-- Customer Billing Info -->
+            <td class="meta-col" style="padding-right: 20px;">
+                <div class="section-title">Ditagih Kepada</div>
+                <div class="meta-content">
+                    <strong style="font-size: 10.5pt;">{{ order.customer.name }}</strong><br>
+                    Email: {{ order.customer.email }}<br>
+                    Telp: {{ order.customer.phone or '-' }}
+                </div>
+            </td>
+            <!-- Order Details -->
+            <td class="meta-col" style="padding-left: 20px;">
+                <div class="section-title">Detail Acara & Sewa</div>
+                <div class="meta-content">
+                    Tanggal Order: {{ order.order_date.strftime('%d %B %Y') }}<br>
+                    Rentang Sewa: {{ order.start_date.strftime('%d %B %Y') }} s/d {{ order.end_date.strftime('%d %B %Y')
+                    }}<br>
+                    Durasi Sewa: <strong>{{ duration }} Hari</strong><br>
+                    Lokasi Acara: {{ order.event_address }}
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Items Table -->
+    <div class="section-title" style="margin-bottom: 5px;">Rincian Layanan & Barang</div>
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th style="width: 50%;">Nama Barang / Paket Dekorasi</th>
+                <th style="width: 15%; text-align: center;">Kuantitas</th>
+                <th style="width: 18%; text-align: right;">Harga Sewa / Hari</th>
+                <th style="width: 17%; text-align: right;">Total / Hari</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.order_items %}
+            <tr>
+                <td>
+                    <strong>{{ item.product.name }}</strong><br>
+                    <span style="font-size: 8pt; color: #666;">Kategori: {{ item.product.category.name }}</span>
+                </td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">Rp {{ "{:,.0f}".format(item.price).replace(',', '.') }}</td>
+                <td style="text-align: right; font-weight: bold;">Rp {{ "{:,.0f}".format(item.price *
+                    item.quantity).replace(',', '.') }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Summary Section -->
+    <table class="summary-table" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="width: 55%; vertical-align: top;">
+                {% if order.notes %}
+                <div style="font-size: 8.5pt; color: #555555; padding-right: 20px;">
+                    <strong>Catatan Pemesanan:</strong><br>
+                    {{ order.notes }}
+                </div>
+                {% endif %}
+            </td>
+            <td style="width: 45%; vertical-align: top;">
+                <div class="summary-container">
+                    <table style="width: 100%; border: 0;" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td style="font-size: 9pt; color: #666; padding-bottom: 4px;">Total / Hari:</td>
+                            <td style="font-size: 9pt; font-weight: bold; text-align: right; padding-bottom: 4px;">
+                                Rp {{ "{:,.0f}".format(order.total_price / duration).replace(',', '.') }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 9pt; color: #666; padding-bottom: 4px;">Durasi Sewa:</td>
+                            <td style="font-size: 9pt; font-weight: bold; text-align: right; padding-bottom: 4px;">
+                                {{ duration }} Hari
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div class="divider"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="font-size: 9.5pt; font-weight: bold; color: #1f272a; padding-top: 4px;">Total
+                                Pembayaran:</td>
+                            <td
+                                style="font-size: 10.5pt; font-weight: bold; color: #2e7d32; text-align: right; padding-top: 4px;">
+                                Rp {{ "{:,.0f}".format(order.total_price).replace(',', '.') }}
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer Thank You Note -->
+    <div class="footer-note">
+        <div class="footer-thankyou">Terima Kasih Telah Mempercayakan Pernikahan Anda Bersama Kami!</div>
+        <div class="footer-contact">Jika Anda memiliki pertanyaan mengenai invoice resmi ini, silakan hubungi Customer
+            Service Griya Rias Saraswati.</div>
+    </div>
+
+</body>
+
+</html>

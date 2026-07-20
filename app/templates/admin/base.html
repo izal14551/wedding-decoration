@@ -201,19 +201,22 @@
         </a>
       </li>
       <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
+        <a href="{{ url_for('admin.orders') }}"
+          class="sidebar-link {% if request.endpoint in ['admin.orders', 'admin.order_detail'] %}active{% endif %}">
           <i class="bi bi-cart-check-fill"></i>
           <span>Orders</span>
         </a>
       </li>
       <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
+        <a href="{{ url_for('admin.payments') }}"
+          class="sidebar-link {% if request.endpoint == 'admin.payments' %}active{% endif %}">
           <i class="bi bi-cash-coin"></i>
           <span>Verify Payments</span>
         </a>
       </li>
       <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
+        <a href="{{ url_for('admin.schedules') }}"
+          class="sidebar-link {% if request.endpoint == 'admin.schedules' %}active{% endif %}">
           <i class="bi bi-calendar3"></i>
           <span>Schedules</span>
         </a>
@@ -226,7 +229,8 @@
         </a>
       </li>
       <li class="sidebar-item">
-        <a href="#" class="sidebar-link">
+        <a href="{{ url_for('admin.reports') }}"
+          class="sidebar-link {% if request.endpoint == 'admin.reports' %}active{% endif %}">
           <i class="bi bi-graph-up-arrow"></i>
           <span>Reports</span>
         </a>

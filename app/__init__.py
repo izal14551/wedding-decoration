@@ -21,12 +21,10 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     login_manager.init_app(app)
 
-    # Initializing Flask-Security (using blueprint=False to avoid overwriting self-made routes)
     from app.models import User, Role
     user_datastore = SQLAlchemyUserDatastore(db, User, Role)
     security.init_app(app, user_datastore, register_blueprint=False)
 
-    # Register blueprints
     from app.auth import bp as auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')
 
@@ -36,6 +34,19 @@ def create_app(config_class=Config):
     from app.admin import bp as admin_bp
     app.register_blueprint(admin_bp, url_prefix='/admin')
 
+    def unauthorized():
+        from flask import flash, redirect, url_for
+        flash('Silakan login terlebih dahulu untuk mengakses halaman ini.', 'info')
+        return redirect(url_for('auth.login'))
+        
+    app.login_manager.unauthorized_callback = unauthorized
+
+    @app.route('/auth/login', endpoint='security.login', methods=['GET', 'POST'])
+    def security_login_alias():
+        from flask import redirect, url_for
+        return redirect(url_for('auth.login'))
+
     return app
+
 
 from app import models

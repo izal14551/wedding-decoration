@@ -71,7 +71,7 @@ Proses penyewaan resmi dari keranjang belanja menjadi pesanan yang tercatat dala
 - [x] **4.2 Invoice & Riwayat Pesanan (Pelanggan)**
   - Tampilan halaman riwayat pesanan pelanggan beserta status transaksinya.
   - Halaman rincian invoice pemesanan sementara dengan status "Menunggu Pembayaran".
-- [ ] **4.3 Manajemen Pesanan (Admin)**
+- [x] **4.3 Manajemen Pesanan (Admin)**
   - Dashboard admin untuk memantau semua pesanan masuk.
   - Fitur bagi admin untuk mengubah status pesanan (Waiting for payment, Processing, Completed, Cancelled).
 
@@ -81,10 +81,10 @@ Proses penyewaan resmi dari keranjang belanja menjadi pesanan yang tercatat dala
 
 Proses pelunasan sewa dekorasi dan verifikasi keabsahan pembayaran oleh administrator.
 
-- [ ] **5.1 Upload Bukti Pembayaran (Pelanggan)**
+- [x] **5.1 Upload Bukti Pembayaran (Pelanggan)**
   - Pelanggan mengunggah foto/file bukti transfer pembayaran untuk pesanan tertentu.
   - Status pesanan berubah menjadi "Pending Verification" (Menunggu Verifikasi).
-- [ ] **5.2 Verifikasi Pembayaran (Admin)**
+- [x] **5.2 Verifikasi Pembayaran (Admin)**
   - Admin meninjau bukti transfer yang diunggah pelanggan.
   - Admin dapat menyetujui (Approve) atau menolak (Reject) pembayaran.
   - Persetujuan pembayaran akan otomatis mengubah status pesanan menjadi "Processing" (Diproses/Disiapkan).
@@ -95,10 +95,27 @@ Proses pelunasan sewa dekorasi dan verifikasi keabsahan pembayaran oleh administ
 
 Fase final untuk pelaporan administrasi bisnis dan pencetakan dokumen resmi.
 
-- [ ] **6.1 Ekspor Invoice Resmi (PDF)**
+- [x] **6.1 Ekspor Invoice Resmi (PDF)**
   - Sistem menghasilkan berkas PDF Invoice resmi yang dapat diunduh oleh pelanggan setelah pembayaran berhasil diverifikasi.
-- [ ] **6.2 Laporan Keuangan & Statistik (Admin)**
+- [x] **6.2 Laporan Keuangan & Statistik (Admin)**
   - Halaman laporan berisi visualisasi total pendapatan, total pesanan, barang terlaris, dan statistik lainnya.
   - Fitur filter laporan berdasarkan periode (harian, mingguan, bulanan, tahunan).
-- [ ] **6.3 Ekspor Laporan Transaksi**
+- [x] **6.3 Ekspor Laporan Transaksi**
   - Fitur bagi admin untuk mengunduh laporan transaksi dalam format PDF atau Excel (`OpenPyXL`/`Pandas`).
+
+---
+
+## 📅 Fase 7: Manajemen Jadwal & Pemeliharaan (Admin)
+
+Modul manajemen jadwal bagi admin untuk mengendalikan ketersediaan barang dekorasi.
+
+- [x] **7.1 Manajemen Jadwal & Pemeliharaan (Admin)**
+  - Halaman untuk memantau detail status penyewaan barang per tanggal.
+  - Fitur untuk menentukan jadwal pemeliharaan (Maintenance) barang yang otomatis mencegah penyewaan (double booking) oleh pelanggan.
+  - Kalender ketersediaan detail produk menampilkan status "Perawatan" (Maintenance) secara absolut jika produk dijadwalkan untuk pemeliharaan.
+  - Proses checkout memblokir pesanan secara otomatis dengan flash message kustom jika produk dalam masa pemeliharaan pada tanggal acara.
+  - Halaman keranjang belanja menampilkan tab kalender ketersediaan dinamis untuk tiap barang yang ada di keranjang.
+  - Form checkout di keranjang belanja melakukan validasi AJAX real-time untuk memblokir tombol checkout jika kuantitas melebihi stok tersedia atau bertabrakan dengan jadwal perawatan (Maintenance).
+  - Mengintegrasikan Modal Widget Kalender interaktif saat input tanggal sewa diklik, menonaktifkan pemilihan tanggal perawatan/penuh secara absolut, dan mengisi form input tanggal secara otomatis.
+  - Menyempurnakan responsivitas kalender di handphone (mobile) dengan meniadakan scroll horizontal, memperkecil sel hari, dan menampilkan indikator status berbentuk dot warna minimalis.
+  - Memperlebar tata letak Modal Widget Kalender di desktop/tablet menjadi Extra Large (modal-xl) demi kenyamanan navigasi tanggal sewa.

@@ -1,0 +1,246 @@
+{% extends "admin/base.html" %}
+{% block content %}
+<style>
+  .card-schedule {
+    border: none;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    margin-bottom: 1.5rem;
+  }
+
+  .card-schedule-header {
+    background: transparent;
+    border-bottom: 1px solid #f1f2f6;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .card-schedule-body {
+    padding: 1.5rem;
+  }
+
+  .table-custom th {
+    font-weight: 600;
+    color: #7f8c8d;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    border-top: none;
+    background-color: #fafbfc;
+    padding: 12px 16px;
+  }
+
+  .table-custom td {
+    padding: 16px;
+    vertical-align: middle;
+    color: #2c3e50;
+    border-bottom: 1px solid #f1f2f6;
+    font-size: 0.9rem;
+  }
+
+  .badge-rented {
+    background-color: #fef9c3;
+    color: #854d0e;
+    border: 1px solid #fef08a;
+  }
+
+  .badge-maintenance {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
+</style>
+
+<!-- Header -->
+<div class="row align-items-center mb-4">
+  <div class="col-md-6">
+    <h2 class="fw-bold text-dark-slate mb-1">Manajemen Jadwal & Ketersediaan</h2>
+    <p class="text-muted mb-0">Pantau jadwal pemesanan aktif dan kelola waktu pemeliharaan barang.</p>
+  </div>
+  <div class="col-md-6 text-md-end mt-3 mt-md-0">
+    <button class="btn rounded-pill px-4 text-white" data-bs-toggle="modal" data-bs-target="#maintenanceModal"
+      style="background-color: #2c3e50; border-color: #2c3e50;">
+      <i class="bi bi-tools me-1"></i> Atur Pemeliharaan
+    </button>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card card-schedule border-0 mb-4 shadow-sm">
+  <div class="card-body">
+    <form method="GET" action="{{ url_for('admin.schedules') }}" class="row g-3">
+      <div class="col-md-4">
+        <label for="product_filter" class="form-label small fw-semibold text-muted">Pilih Barang / Jasa</label>
+        <select name="product_id" id="product_filter" class="form-select rounded-pill">
+          <option value="All">-- Semua Barang --</option>
+          {% for prod in products_list %}
+          <option value="{{ prod.id }}" {% if current_product==prod.id|string %}selected{% endif %}>
+            {{ prod.name }} (Stok: {{ prod.stock }})
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="status_filter" class="form-label small fw-semibold text-muted">Status</label>
+        <select name="status" id="status_filter" class="form-select rounded-pill">
+          <option value="All" {% if current_status=='All' %}selected{% endif %}>Semua Status</option>
+          <option value="Rented" {% if current_status=='Rented' %}selected{% endif %}>Disewa (Rented)</option>
+          <option value="Maintenance" {% if current_status=='Maintenance' %}selected{% endif %}>Pemeliharaan
+            (Maintenance)</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label for="date_filter" class="form-label small fw-semibold text-muted">Tanggal</label>
+        <input type="date" name="date" id="date_filter" class="form-control rounded-pill" value="{{ current_date }}">
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary w-100 rounded-pill"
+          style="background-color: #c5a880; border-color: #c5a880;">
+          <i class="bi bi-search me-1"></i> Filter
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Schedules List -->
+<div class="card card-schedule shadow-sm border-0">
+  <div class="card-schedule-header">
+    <span><i class="bi bi-calendar-event-fill text-primary me-2"></i> Jadwal Terdaftar</span>
+    <span class="badge rounded-pill" style="background-color: #2c3e50;">{{ schedules|length }} Entri Jadwal</span>
+  </div>
+  <div class="card-schedule-body p-0">
+    {% if schedules %}
+    <div class="table-responsive">
+      <table class="table table-hover table-custom mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama Barang / Layanan</th>
+            <th>Tanggal</th>
+            <th>Waktu</th>
+            <th>Status</th>
+            <th>Keterangan</th>
+            <th class="text-center" style="width: 100px;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for sch in schedules %}
+          <tr>
+            <td><strong>#{{ sch.id }}</strong></td>
+            <td>
+              <span class="fw-semibold">{{ sch.product.name }}</span><br>
+              <small class="text-muted">{{ sch.product.category.name }}</small>
+            </td>
+            <td><strong>{{ sch.date.strftime('%d %B %Y') }}</strong></td>
+            <td>{{ sch.start_time.strftime('%H:%M') }} - {{ sch.end_time.strftime('%H:%M') }}</td>
+            <td>
+              {% if sch.status == 'Rented' %}
+              <span class="badge rounded-pill badge-rented px-3 py-1 fs-8">DISEWA</span>
+              {% else %}
+              <span class="badge rounded-pill badge-maintenance px-3 py-1 fs-8">PEMELIHARAAN</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if sch.status == 'Rented' and sch.order_id %}
+              <a href="{{ url_for('admin.order_detail', order_id=sch.order_id) }}"
+                class="text-decoration-none fw-medium">
+                Pesanan #{{ sch.order_id }} ({{ sch.order.customer.name }})
+              </a>
+              {% else %}
+              <span class="text-muted small"><i class="bi bi-info-circle me-1"></i> Pemeliharaan Rutin /
+                Perbaikan</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              {% if sch.status == 'Maintenance' %}
+              <form action="{{ url_for('admin.schedule_delete', schedule_id=sch.id) }}" method="POST"
+                onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan/menghapus jadwal pemeliharaan ini?')">
+                <button type="submit" class="btn btn-outline-danger btn-sm rounded-circle"
+                  title="Selesaikan Pemeliharaan">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </form>
+              {% else %}
+              <span class="text-muted small">-</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-calendar-x text-muted display-4"></i>
+      <p class="text-muted mt-2">Tidak ada entri jadwal ketersediaan untuk filter ini.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Modal Atur Pemeliharaan -->
+<div class="modal fade" id="maintenanceModal" tabindex="-1" aria-labelledby="maintenanceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+      <div class="modal-header border-bottom-0 pt-4 px-4">
+        <h5 class="modal-title fw-bold" id="maintenanceModalLabel"><i class="bi bi-tools me-2 text-danger"></i> Atur
+          Pemeliharaan Barang</h5>
+        <button type="button" class="btn-close" data-bs-close="modal" aria-label="Close"></button>
+      </div>
+      <form action="{{ url_for('admin.schedule_add') }}" method="POST">
+        <div class="modal-body px-4 pb-4">
+          <p class="text-muted small mb-4">Pilih barang dan rentang tanggal untuk dimasukkan ke jadwal pemeliharaan
+            (Maintenance) sehingga barang tidak bisa disewa oleh pelanggan pada periode tersebut.</p>
+
+          <div class="mb-3">
+            <label for="m_product_id" class="form-label fw-medium small">Pilih Barang / Jasa</label>
+            <select name="product_id" id="m_product_id" class="form-select rounded-pill" required>
+              <option value="" disabled selected>-- Pilih Barang --</option>
+              {% for prod in products_list %}
+              <option value="{{ prod.id }}">{{ prod.name }} (Stok: {{ prod.stock }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-6">
+              <label for="m_start_date" class="form-label fw-medium small">Tanggal Mulai</label>
+              <input type="date" name="start_date" id="m_start_date" class="form-control rounded-pill" required
+                min="{{ today_str }}">
+            </div>
+            <div class="col-6">
+              <label for="m_end_date" class="form-label fw-medium small">Tanggal Selesai</label>
+              <input type="date" name="end_date" id="m_end_date" class="form-control rounded-pill" required
+                min="{{ today_str }}">
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6">
+              <label for="m_start_time" class="form-label fw-medium small">Jam Mulai</label>
+              <input type="time" name="start_time" id="m_start_time" class="form-control rounded-pill" value="08:00"
+                required>
+            </div>
+            <div class="col-6">
+              <label for="m_end_time" class="form-label fw-medium small">Jam Selesai</label>
+              <input type="time" name="end_time" id="m_end_time" class="form-control rounded-pill" value="22:00"
+                required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 px-4 pb-4 pt-0">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-3" data-bs-close="modal">Batal</button>
+          <button type="submit" class="btn btn-danger rounded-pill px-4"><i class="bi bi-check-circle me-1"></i> Simpan
+            Jadwal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
