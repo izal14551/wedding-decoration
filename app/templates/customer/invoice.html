@@ -58,11 +58,24 @@
   <div class="invoice-card">
     <!-- Invoice Action Buttons -->
     <div class="d-flex justify-content-between mb-4 no-print">
+      {% if current_user.is_authenticated and current_user.is_admin() %}
+      <a href="{{ url_for('admin.order_detail', order_id=order.id) }}"
+        class="btn btn-outline-secondary btn-sm rounded-pill">
+        <i class="bi bi-arrow-left"></i> Kembali ke Detail Pesanan
+      </a>
+      {% else %}
       <a href="{{ url_for('customer.profile') }}" class="btn btn-outline-secondary btn-sm rounded-pill">
         <i class="bi bi-arrow-left"></i> Kembali ke Profil
       </a>
+      {% endif %}
       <div class="d-flex gap-2">
-        {% if order.payment and order.payment.status == 'Approved' or order.status in ['Processing', 'Completed'] %}
+        {% if current_user.is_authenticated and current_user.is_admin() %}
+        <a href="{{ url_for('admin.download_invoice_pdf', order_id=order.id) }}"
+          class="btn btn-sm btn-primary rounded-pill px-3"
+          style="background-color: #c5a880; border-color: #c5a880; color: #ffffff;">
+          <i class="bi bi-file-earmark-pdf-fill me-1"></i> Unduh PDF Resmi
+        </a>
+        {% elif order.payment and order.payment.status == 'Approved' or order.status in ['Processing', 'Completed'] %}
         <a href="{{ url_for('customer.download_invoice_pdf', order_id=order.id) }}"
           class="btn btn-sm btn-primary rounded-pill px-3"
           style="background-color: #c5a880; border-color: #c5a880; color: #ffffff;">

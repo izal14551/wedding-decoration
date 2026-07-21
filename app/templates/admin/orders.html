@@ -175,8 +175,13 @@
               </td>
               <td class="text-end pe-4">
                 <a href="{{ url_for('admin.order_detail', order_id=order.id) }}"
-                  class="btn btn-sm btn-outline-primary px-3" style="border-radius: 6px;">
+                  class="btn btn-sm btn-outline-primary px-3 me-1" style="border-radius: 6px;">
                   <i class="bi bi-search me-1"></i> Detail
+                </a>
+                <a href="{{ url_for('admin.order_invoice', order_id=order.id) }}"
+                  class="btn btn-sm btn-outline-secondary px-2" style="border-radius: 6px;"
+                  title="Cetak / Lihat Invoice">
+                  <i class="bi bi-printer-fill me-1"></i> Invoice
                 </a>
               </td>
             </tr>

@@ -149,13 +149,14 @@
   <!-- Card Pendapatan -->
   <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-success-subtle text-success me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-success-subtle text-success me-3 flex-shrink-0">
           <i class="bi bi-cash-coin"></i>
         </div>
-        <div>
-          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Total Pendapatan</p>
-          <h3 class="fw-bold text-dark-slate mb-0">Rp {{ "{:,.0f}".format(total_revenue).replace(',', '.') }}</h3>
+        <div class="overflow-hidden">
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">Total Pendapatan</p>
+          <h4 class="fw-bold text-dark-slate mb-0 text-nowrap" style="font-size: 1.2rem;">Rp {{
+            "{:,.0f}".format(total_revenue).replace(',', '.') }}</h4>
         </div>
       </div>
     </div>
@@ -164,12 +165,12 @@
   <!-- Card Jumlah Pesanan -->
   <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-primary-subtle text-primary me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-primary-subtle text-primary me-3 flex-shrink-0">
           <i class="bi bi-receipt"></i>
         </div>
         <div>
-          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Total Pesanan</p>
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">Total Pesanan</p>
           <h3 class="fw-bold text-dark-slate mb-0">{{ total_orders }}</h3>
         </div>
       </div>
@@ -179,13 +180,14 @@
   <!-- Card Rata-rata Transaksi -->
   <div class="col-xl-3 col-md-6 mb-4 mb-md-0">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-info-subtle text-info me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-info-subtle text-info me-3 flex-shrink-0">
           <i class="bi bi-calculator"></i>
         </div>
-        <div>
-          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Rata-rata Transaksi</p>
-          <h3 class="fw-bold text-dark-slate mb-0">Rp {{ "{:,.0f}".format(avg_transaction).replace(',', '.') }}</h3>
+        <div class="overflow-hidden">
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">Rata-rata Transaksi</p>
+          <h4 class="fw-bold text-dark-slate mb-0 text-nowrap" style="font-size: 1.2rem;">Rp {{
+            "{:,.0f}".format(avg_transaction).replace(',', '.') }}</h4>
         </div>
       </div>
     </div>
@@ -194,12 +196,12 @@
   <!-- Card Pesanan Sukses -->
   <div class="col-xl-3 col-md-6">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-warning-subtle text-warning me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-warning-subtle text-warning me-3 flex-shrink-0">
           <i class="bi bi-check2-circle"></i>
         </div>
         <div>
-          <p class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider">Pesanan Sukses</p>
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">Pesanan Sukses</p>
           <h3 class="fw-bold text-dark-slate mb-0">{{ successful_orders }}</h3>
         </div>
       </div>

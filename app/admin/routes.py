@@ -1103,3 +1103,62 @@ def settings_save():
     db.session.commit()
     flash('Pengaturan situs berhasil disimpan!', 'success')
     return redirect(url_for('admin.settings'))
+
+
+# ==================== ADMIN INVOICE & PRINT ====================
+
+@bp.route('/order/<int:order_id>/invoice')
+@login_required
+@admin_required
+def order_invoice(order_id):
+    order = db.session.get(Order, order_id)
+    if not order:
+        flash('Pesanan tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.orders'))
+        
+    duration = (order.end_date - order.start_date).days
+    if duration <= 0:
+        duration = 1
+        
+    return render_template(
+        'customer/invoice.html',
+        title=f'Invoice #{order.id}',
+        order=order,
+        duration=duration
+    )
+
+
+@bp.route('/order/<int:order_id>/invoice/pdf')
+@login_required
+@admin_required
+def download_invoice_pdf(order_id):
+    order = db.session.get(Order, order_id)
+    if not order:
+        flash('Pesanan tidak ditemukan.', 'danger')
+        return redirect(url_for('admin.orders'))
+        
+    duration = (order.end_date - order.start_date).days
+    if duration <= 0:
+        duration = 1
+        
+    html_content = render_template('customer/invoice_pdf.html', order=order, duration=duration)
+    
+    import io
+    from xhtml2pdf import pisa
+    from flask import send_file
+    
+    pdf_buffer = io.BytesIO()
+    pisa_status = pisa.CreatePDF(html_content, dest=pdf_buffer)
+    
+    if pisa_status.err:
+        flash('Terjadi kesalahan saat menghasilkan berkas PDF.', 'danger')
+        return redirect(url_for('admin.order_detail', order_id=order.id))
+        
+    pdf_buffer.seek(0)
+    return send_file(
+        pdf_buffer,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=f'invoice-{order.id}.pdf'
+    )
+

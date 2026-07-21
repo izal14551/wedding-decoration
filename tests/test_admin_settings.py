@@ -163,5 +163,52 @@ class AdminSettingsTestCase(unittest.TestCase):
         self.assertIn(b'Hero Title Test', res.data)
         self.assertIn(b'08123999888777', res.data)
 
+    def test_admin_invoice_view_and_pdf(self):
+        """Uji akses admin untuk melihat invoice web dan mengunduh berkas PDF invoice."""
+        from datetime import date, timedelta
+        from app.models import Category, Product, Order, OrderItem
+
+        # Buat dummy order
+        cat = Category(name='Dekorasi')
+        db.session.add(cat)
+        db.session.flush()
+
+        prod = Product(category_id=cat.id, name='Dekorasi Minimalis', price=2500000.0, stock=5)
+        db.session.add(prod)
+        db.session.flush()
+
+        order = Order(
+            customer_id=self.customer.id,
+            order_date=date.today(),
+            start_date=date.today() + timedelta(days=1),
+            end_date=date.today() + timedelta(days=3),
+            total_price=2500000.0,
+            status='Completed'
+        )
+        db.session.add(order)
+        db.session.flush()
+
+        item = OrderItem(order_id=order.id, product_id=prod.id, quantity=1, price=2500000.0)
+        db.session.add(item)
+        db.session.commit()
+
+        # 1. Akses tanpa login -> Redirect
+        res_unauth = self.client.get(f'/admin/order/{order.id}/invoice')
+        self.assertEqual(res_unauth.status_code, 302)
+
+        # 2. Login Admin -> Bisa akses /admin/order/<id>/invoice (Halaman Web Invoice)
+        self.client.post('/auth/login', data={'email': 'admin@example.com', 'password': 'admin123'})
+        res_invoice = self.client.get(f'/admin/order/{order.id}/invoice')
+        self.assertEqual(res_invoice.status_code, 200)
+        self.assertIn(f'#INV-{order.id}'.encode('utf-8'), res_invoice.data)
+        self.assertIn(b'Kembali ke Detail Pesanan', res_invoice.data)
+
+        # 3. Login Admin -> Bisa unduh PDF /admin/order/<id>/invoice/pdf
+        res_pdf = self.client.get(f'/admin/order/{order.id}/invoice/pdf')
+        self.assertEqual(res_pdf.status_code, 200)
+        self.assertEqual(res_pdf.content_type, 'application/pdf')
+        self.assertTrue(len(res_pdf.data) > 0)
+
 if __name__ == '__main__':
     unittest.main()
+
