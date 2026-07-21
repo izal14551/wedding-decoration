@@ -388,6 +388,13 @@
   padding: 1rem;
 }
 
+.order-actions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 @media (max-width: 991.98px) {
   .profile-summary,
   .profile-main {
@@ -408,6 +415,26 @@
   .order-actions {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .order-actions-buttons {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  .order-actions-buttons .btn {
+    width: 100% !important;
+    justify-content: center !important;
+    font-size: 0.85rem !important;
+    padding: 0.55rem 0.5rem !important;
+    white-space: nowrap;
+  }
+
+  .order-actions-buttons .btn span {
+    font-size: 0.82rem;
   }
 
   .order-card-body {
@@ -416,5 +443,11 @@
 
   .status-badge {
     align-self: flex-start;
+  }
+}
+
+@media (max-width: 400px) {
+  .order-actions-buttons {
+    grid-template-columns: 1fr !important;
   }
 }

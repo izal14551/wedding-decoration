@@ -1,31 +1,19 @@
 <article class="card h-100 decor-item-card">
   <div class="product-img-container">
     {% if prod.image_path %}
-    <img
-      src="{{ url_for('static', filename='uploads/products/' ~ prod.image_path) }}"
-      class="card-img-top product-card-img"
-      alt="{{ prod.name }}"
-      onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80';"
-    />
+    <img src="{{ url_for('static', filename='uploads/products/' ~ prod.image_path) }}"
+      class="card-img-top product-card-img" alt="{{ prod.name }}"
+      onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80';" />
     {% else %}
     {% if 'package' in prod.category.name|lower or 'paket' in prod.category.name|lower %}
-    <img
-      src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80"
-      class="card-img-top product-card-img"
-      alt="{{ prod.name }}"
-    />
+    <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=700&q=80"
+      class="card-img-top product-card-img" alt="{{ prod.name }}" />
     {% elif 'makeup' in prod.category.name|lower or 'rias' in prod.category.name|lower %}
-    <img
-      src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=700&q=80"
-      class="card-img-top product-card-img"
-      alt="{{ prod.name }}"
-    />
+    <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=700&q=80"
+      class="card-img-top product-card-img" alt="{{ prod.name }}" />
     {% else %}
-    <img
-      src="https://images.unsplash.com/photo-1478812954026-9c750f0e89fc?auto=format&fit=crop&w=700&q=80"
-      class="card-img-top product-card-img"
-      alt="{{ prod.name }}"
-    />
+    <img src="https://images.unsplash.com/photo-1478812954026-9c750f0e89fc?auto=format&fit=crop&w=700&q=80"
+      class="card-img-top product-card-img" alt="{{ prod.name }}" />
     {% endif %}
     {% endif %}
 
