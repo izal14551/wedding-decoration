@@ -15,11 +15,40 @@
   --shadow-premium-hover: 0 15px 35px rgba(197, 168, 128, 0.2);
 }
 
+html,
 body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
   font-family: var(--font-sans);
   background-color: var(--bg-warm-white);
   color: var(--text-dark);
-  overflow-x: hidden;
+  position: relative;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.row {
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.container,
+.container-fluid {
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* --- Typography --- */
@@ -100,7 +129,7 @@ h5,
 /* --- Hero Section --- */
 .hero-section {
   position: relative;
-  height: 90vh;
+  height: 100vh;
   min-height: 550px;
   background-size: cover;
   background-position: center;
@@ -383,14 +412,99 @@ h5,
 
 /* --- Footer --- */
 .footer-section {
-  background-color: #e2e2e2;
-  color: #555555;
-  text-align: center;
-  padding: 50px 20px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  letter-spacing: 1px;
-  text-transform: lowercase;
+  background-color: var(--dark-slate);
+  color: rgba(255, 255, 255, 0.8);
+  padding: 70px 0 30px 0;
+  border-top: 2px solid var(--primary-gold);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+.footer-brand {
+  font-family: var(--font-serif);
+  color: #ffffff;
+  font-size: 1.5rem;
+  letter-spacing: 0.5px;
+}
+
+.footer-text {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+.footer-heading {
+  font-family: var(--font-serif);
+  color: #ffffff;
+  font-size: 1.15rem;
+  letter-spacing: 0.5px;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.footer-heading::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 35px;
+  height: 2px;
+  background: var(--primary-gold);
+  border-radius: 2px;
+}
+
+.footer-links li {
+  margin-bottom: 8px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.footer-links a:hover {
+  color: var(--primary-gold);
+  transform: translateX(4px);
+}
+
+.footer-contact-info li {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.88rem;
+}
+
+.text-gold {
+  color: var(--primary-gold) !important;
+}
+
+.footer-socials .social-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  transition: all 0.3s ease;
+}
+
+.footer-socials .social-icon:hover {
+  background: var(--primary-gold);
+  color: var(--dark-slate);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(197, 168, 128, 0.3);
+}
+
+.footer-divider {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.text-muted-footer {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 /* --- Animations --- */
@@ -417,32 +531,80 @@ h5,
 }
 
 /* --- Responsive Adjustments --- */
-@media (max-width: 991px) {
+@media (max-width: 991.98px) {
+  .hero-section {
+    height: 100vh;
+    min-height: 450px;
+  }
   .hero-title {
     font-size: 2.5rem;
+    letter-spacing: 2px;
   }
   .hero-subtitle {
     font-size: 1.1rem;
   }
   .gallery-container {
+    display: flex;
     flex-wrap: wrap;
+    gap: 12px;
   }
   .gallery-card {
     flex: 1 1 calc(50% - 10px);
-    height: 300px;
+    height: 280px;
+  }
+  .package-card {
+    padding: 26px;
+    margin-bottom: 15px;
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 575.98px) {
+  .navbar-custom {
+    padding: 10px 0;
+  }
+  .navbar-custom .navbar-brand {
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+  }
+  .hero-section {
+    height: 100vh;
+    min-height: 380px;
+  }
+  .hero-title {
+    font-size: 1.75rem;
+    letter-spacing: 1px;
+  }
+  .hero-subtitle {
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+  }
+  .btn-gold-cta {
+    padding: 10px 24px;
+    font-size: 0.9rem;
+  }
   .gallery-card {
     flex: 1 1 100%;
-    height: 250px;
+    height: 220px;
   }
   .section-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
   .why-choose-us-p {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .package-card {
+    padding: 20px 16px;
+    border-radius: 12px;
+  }
+  .package-name {
+    font-size: 1.35rem;
+  }
+  .package-price {
+    font-size: 1.15rem;
+  }
+  .footer-section {
+    padding: 45px 0 20px 0;
   }
 }
 

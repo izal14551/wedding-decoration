@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/decorations.css') }}" />
+{% endblock %}
+
 {% block content %}
 <!-- Set up Package variables from database query -->
 {% set silver = None %}
@@ -93,151 +97,30 @@
 </div>
 
 <!-- Packages Section -->
-<div id="catalog" class="packages-section">
+<div id="catalog" class="packages-section py-5">
   <div class="container text-center">
-    <h2 class="serif-font mb-5" style="font-size: 2.5rem; letter-spacing: 1px;">Packages</h2>
+    <div class="mb-5">
+      <p class="decorations-eyebrow text-uppercase fw-bold mb-1" style="letter-spacing: 2px;">Pilihan Paket Spesial</p>
+      <h2 class="serif-font mb-0" style="font-size: 2.5rem; letter-spacing: 1px;">Paket Dekorasi &amp; Rias</h2>
+    </div>
 
     <div class="row g-4 justify-content-center text-start">
-      <!-- Silver Package -->
+      {% if packages %}
+      {% for prod in packages %}
       <div class="col-lg-4 col-md-6">
-        <div class="package-card shadow">
-          <div class="package-name">Silver Package</div>
-          <ul class="package-features">
-            <li>Makeup Busana Pengantin 1x ganti</li>
-            <li>Makeup Busana Orang Tua (2)</li>
-            <li>Makeup Busana Penerima Tamu (2)</li>
-            <li>Tarub 6x 12 Meter + Gerbang</li>
-            <li>Unlimited High Res Photos + Cetak Album Magnetic</li>
-            <li>Accessories + Melati Asli</li>
-            <li>Dekorasi Kamar</li>
-            <li>Wedding Gate</li>
-            <li>Henna</li>
-            <li>MC</li>
-            <li>Untuk 1 hari</li>
-          </ul>
-          <div class="package-footer-area">
-            <div class="package-price">Rp. 12.200.000</div>
-            {% if silver %}
-            {% if current_user.is_authenticated %}
-            <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
-              data-product-id="{{ silver.id }}" data-product-name="{{ silver.name }}"
-              data-product-price="Rp. 12.200.000" aria-label="Book Silver Package">
-              <i class="bi bi-cart3"></i>
-            </button>
-            {% else %}
-            <a href="{{ url_for('auth.login', next=url_for('customer.index') ~ '#catalog') }}"
-              class="btn btn-cart-bronze d-inline-flex align-items-center justify-content-center text-decoration-none"
-              aria-label="Book Silver Package" style="width: 40px; height: 40px; border-radius: 50%;">
-              <i class="bi bi-cart3"></i>
-            </a>
-            {% endif %}
-            {% else %}
-            <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
-                class="bi bi-cart3"></i></button>
-            {% endif %}
-          </div>
-        </div>
+        {% include 'shared/_decor_card.html' %}
       </div>
-
-      <!-- Gold Package -->
-      <div class="col-lg-4 col-md-6">
-        <div class="package-card shadow">
-          <div class="package-name">Gold Package</div>
-          <ul class="package-features">
-            <li>Makeup Busana Pengantin 3x Ganti</li>
-            <li>Makeup Busana Orang Tua (2)</li>
-            <li>Makeup Busana Resepsi (2)</li>
-            <li>Makeup Busana Pagar Ayu (4)</li>
-            <li>Makeup Busana Manggolo (2)</li>
-            <li>Tarub 6x 12 Meter + Cetabah</li>
-            <li>Unlimited High Res Photos + Cetak Album Magnetic</li>
-            <li>Accessories + Melati Asli</li>
-            <li>Dekorasi Kamar</li>
-            <li>Wedding Gate</li>
-            <li>Henna</li>
-            <li>MC + Tari Pengiring</li>
-            <li>Hiburan Organ Tunggal + Singer</li>
-            <li>Genset</li>
-            <li>Sound System</li>
-            <li>Kursi VIP Kursi Alum</li>
-          </ul>
-          <div class="package-footer-area">
-            <div class="package-price">Rp. 15.300.000</div>
-            {% if gold %}
-            {% if current_user.is_authenticated %}
-            <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
-              data-product-id="{{ gold.id }}" data-product-name="{{ gold.name }}" data-product-price="Rp. 15.300.000"
-              aria-label="Book Gold Package">
-              <i class="bi bi-cart3"></i>
-            </button>
-            {% else %}
-            <a href="{{ url_for('auth.login', next=url_for('customer.index') ~ '#catalog') }}"
-              class="btn btn-cart-bronze d-inline-flex align-items-center justify-content-center text-decoration-none"
-              aria-label="Book Gold Package" style="width: 40px; height: 40px; border-radius: 50%;">
-              <i class="bi bi-cart3"></i>
-            </a>
-            {% endif %}
-            {% else %}
-            <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
-                class="bi bi-cart3"></i></button>
-            {% endif %}
-          </div>
-        </div>
+      {% endfor %}
+      {% else %}
+      <div class="col-12 text-center text-muted my-4">
+        <p class="fs-5">Belum ada paket dekorasi yang tersedia saat ini.</p>
       </div>
-
-      <!-- Platinum Package -->
-      <div class="col-lg-4 col-md-6">
-        <div class="package-card shadow">
-          <div class="package-name">Platinum Package</div>
-          <ul class="package-features">
-            <li>Makeup Busana Pengantin 3x ganti</li>
-            <li>Makeup Busana Orang Tua (2)</li>
-            <li>Makeup Busana Resepsi (2)</li>
-            <li>Makeup Busana Pagar Ayu (4)</li>
-            <li>Makeup Busana Manggolo (2)</li>
-            <li>Tarub 6x 12 Meter</li>
-            <li>Unlimited High Res Photos + Cetak Album Magnetic</li>
-            <li>Hiburan + Organ Tunggal + Singer</li>
-            <li>Dekorasi Utama</li>
-            <li>Wedding Gate</li>
-            <li>Henna Putih + Melati Asli</li>
-            <li>MC + Tari Pengiring</li>
-            <li>Genset + Sound System</li>
-            <li>Free Acara Adat Panggih</li>
-            <li>Free Makeup Pre-Wedding</li>
-            <li>Gunting + Full Karpet (Bebas Request Warna Karpet)</li>
-          </ul>
-          <div class="package-footer-area">
-            <div class="package-price">Rp. 17.400.000</div>
-            {% if platinum %}
-            {% if current_user.is_authenticated %}
-            <button class="btn btn-cart-bronze" data-bs-toggle="modal" data-bs-target="#orderModal"
-              data-product-id="{{ platinum.id }}" data-product-name="{{ platinum.name }}"
-              data-product-price="Rp. 17.400.000" aria-label="Book Platinum Package">
-              <i class="bi bi-cart3"></i>
-            </button>
-            {% else %}
-            <a href="{{ url_for('auth.login', next=url_for('customer.index') ~ '#catalog') }}"
-              class="btn btn-cart-bronze d-inline-flex align-items-center justify-content-center text-decoration-none"
-              aria-label="Book Platinum Package" style="width: 40px; height: 40px; border-radius: 50%;">
-              <i class="bi bi-cart3"></i>
-            </a>
-            {% endif %}
-            {% else %}
-            <button class="btn btn-cart-bronze" disabled aria-label="Package Unavailable"><i
-                class="bi bi-cart3"></i></button>
-            {% endif %}
-          </div>
-        </div>
-      </div>
+      {% endif %}
     </div>
   </div>
 </div>
 
-<!-- Footer Section -->
-<div class="footer-section">
-  footer
-</div>
+
 
 <!-- Booking Modal -->
 <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">

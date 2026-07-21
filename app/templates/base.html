@@ -112,6 +112,96 @@
   <!-- Main Content Block (No constrained container to allow full-width components) -->
   {% block content %}{% endblock %}
 
+  <!-- Footer Section -->
+  {% block footer %}
+  <footer class="footer-section">
+    <div class="container">
+      <div class="row g-4 text-start">
+        <!-- Col 1: Brand Info -->
+        <div class="col-lg-4 col-md-6">
+          <h4 class="footer-brand mb-3">
+            <i class="bi bi-flower1 text-gold me-2"></i>Griya Rias Saraswati
+          </h4>
+          <p class="footer-text mb-4">
+            Layanan tata rias pengantin profesional, penyewaan dekorasi pelaminan, tenda, dan paket pernikahan lengkap
+            di Sleman, Yogyakarta &amp; sekitarnya.
+          </p>
+          <div class="footer-socials d-flex gap-2">
+            <a href="https://wa.me/6281234567890" target="_blank" class="social-icon" aria-label="WhatsApp"><i
+                class="bi bi-whatsapp"></i></a>
+            <a href="#" class="social-icon" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="social-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="social-icon" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+          </div>
+        </div>
+
+        <!-- Col 2: Navigasi -->
+        <div class="col-lg-2 col-md-6 col-6">
+          <h5 class="footer-heading mb-3">Navigasi</h5>
+          <ul class="footer-links list-unstyled">
+            <li><a href="{{ url_for('customer.index') }}"><i class="bi bi-chevron-right me-1"></i> Home</a></li>
+            <li><a href="{{ url_for('customer.decorations') }}"><i class="bi bi-chevron-right me-1"></i> Katalog
+                Dekorasi</a></li>
+            <li><a href="{{ url_for('customer.cart') }}"><i class="bi bi-chevron-right me-1"></i> Keranjang</a></li>
+            <li><a href="{{ url_for('customer.profile') }}"><i class="bi bi-chevron-right me-1"></i> Profil &amp;
+                Pesanan</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Paket Utama -->
+        <div class="col-lg-3 col-md-6 col-6">
+          <h5 class="footer-heading mb-3">Paket Utama</h5>
+          <ul class="footer-links list-unstyled">
+            <li><a href="{{ url_for('customer.index') }}#catalog"><i class="bi bi-chevron-right me-1"></i> Silver
+                Package</a></li>
+            <li><a href="{{ url_for('customer.index') }}#catalog"><i class="bi bi-chevron-right me-1"></i> Gold
+                Package</a></li>
+            <li><a href="{{ url_for('customer.index') }}#catalog"><i class="bi bi-chevron-right me-1"></i> Platinum
+                Package</a></li>
+            <li><a href="{{ url_for('customer.decorations') }}"><i class="bi bi-chevron-right me-1"></i> Rias &amp;
+                Busana</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Hubungi Kami -->
+        <div class="col-lg-3 col-md-6">
+          <h5 class="footer-heading mb-3">Hubungi Kami</h5>
+          <ul class="footer-contact-info list-unstyled">
+            <li class="d-flex align-items-start gap-2 mb-2">
+              <i class="bi bi-geo-alt-fill text-gold mt-1"></i>
+              <span>Sleman, Daerah Istimewa Yogyakarta</span>
+            </li>
+            <li class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-telephone-fill text-gold"></i>
+              <span>0812-3456-7890</span>
+            </li>
+            <li class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-clock-fill text-gold"></i>
+              <span>Senin - Minggu: 08.00 - 21.00 WIB</span>
+            </li>
+            <li class="d-flex align-items-center gap-2">
+              <i class="bi bi-envelope-fill text-gold"></i>
+              <span>info@griyarias-saraswati.com</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <hr class="footer-divider my-4">
+
+      <div class="row align-items-center copyright-area text-center text-md-start">
+        <div class="col-md-6 mb-2 mb-md-0">
+          <p class="mb-0 small text-muted-footer">&copy; 2026 Griya Rias Saraswati. All rights reserved.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <span class="small text-muted-footer me-3"><i class="bi bi-shield-check text-gold me-1"></i> Sistem Sewa
+            Dekorasi Online</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+  {% endblock %}
+
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

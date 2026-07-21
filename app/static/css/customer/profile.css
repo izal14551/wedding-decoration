@@ -261,7 +261,8 @@
 }
 
 .btn-profile-primary,
-.btn-profile-outline {
+.btn-profile-outline,
+.btn-profile-whatsapp {
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
@@ -270,6 +271,8 @@
   min-height: 40px;
   font-weight: 800;
   padding: 0.55rem 0.85rem;
+  transition: all 0.25s ease;
+  text-decoration: none;
 }
 
 .btn-profile-primary {
@@ -295,6 +298,20 @@
   border-color: var(--dark-slate);
   background: var(--dark-slate);
   color: #ffffff;
+}
+
+.btn-profile-whatsapp {
+  border: 1px solid #25d366;
+  background: #ffffff;
+  color: #128c7e;
+}
+
+.btn-profile-whatsapp:hover,
+.btn-profile-whatsapp:focus {
+  background: #25d366;
+  color: #ffffff;
+  border-color: #25d366;
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
 }
 
 .profile-control {

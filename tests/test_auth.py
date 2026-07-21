@@ -492,9 +492,15 @@ class AuthTestCase(unittest.TestCase):
 
         # Coba upload bukti transfer (simulasi berkas gambar)
         import io
+        from PIL import Image
+        img_byte_arr = io.BytesIO()
+        test_img = Image.new('RGB', (10, 10), color='red')
+        test_img.save(img_byte_arr, format='PNG')
+        img_byte_arr.seek(0)
+        
         data_upload = {
             'payment_method': 'bca',
-            'payment_proof': (io.BytesIO(b"fake payment proof bytes"), 'proof.jpg')
+            'payment_proof': (img_byte_arr, 'proof.jpg')
         }
         response = self.client.post(
             f'/order/{order.id}/upload_payment',

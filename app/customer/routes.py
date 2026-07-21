@@ -14,8 +14,22 @@ import os
 @bp.route('/')
 @bp.route('/index')
 def index():
-    products = Product.query.filter_by(status='Active').all()
-    return render_template('customer/index.html', title='Home', products=products)
+    package_category = Category.query.filter(
+        db.or_(
+            Category.name.ilike('%package%'),
+            Category.name.ilike('%paket%')
+        )
+    ).first()
+    
+    if package_category:
+        packages = Product.query.filter_by(
+            category_id=package_category.id,
+            status='Active'
+        ).all()
+    else:
+        packages = Product.query.filter_by(status='Active').all()
+        
+    return render_template('customer/index.html', title='Home', packages=packages)
 
 @bp.route('/decorations')
 def decorations():
@@ -548,19 +562,25 @@ def upload_payment(order_id):
         return redirect(url_for('customer.profile'))
         
     # Validasi berkas gambar
-    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+    allowed_extensions = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
     ext = file.filename.rsplit('.', 1)[-1].lower() if '.' in file.filename else ''
     if ext not in allowed_extensions:
-        flash('Tipe berkas tidak diperbolehkan. Hanya berkas gambar (PNG, JPG, JPEG, GIF) yang diterima.', 'danger')
+        flash('Tipe berkas tidak diperbolehkan. Hanya berkas gambar (PNG, JPG, JPEG, GIF, WEBP) yang diterima.', 'danger')
         return redirect(url_for('customer.profile'))
         
-    # Simpan file
-    filename = secure_filename(f"proof_order_{order.id}_{int(datetime.utcnow().timestamp())}.{ext}")
+    # Simpan file dengan konversi ke WebP
+    from PIL import Image
+    filename = secure_filename(f"proof_order_{order.id}_{int(datetime.utcnow().timestamp())}.webp")
     upload_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'payments')
     os.makedirs(upload_dir, exist_ok=True)
     
     file_path = os.path.join(upload_dir, filename)
-    file.save(file_path)
+    try:
+        with Image.open(file) as img:
+            img.save(file_path, 'WEBP', quality=80)
+    except Exception as e:
+        flash('Gagal memproses berkas gambar. Pastikan berkas gambar tidak rusak.', 'danger')
+        return redirect(url_for('customer.profile'))
     
     # Cek apakah entri pembayaran sudah ada untuk pesanan ini
     payment = Payment.query.filter_by(order_id=order.id).first()
