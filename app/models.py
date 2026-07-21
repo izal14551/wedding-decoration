@@ -235,6 +235,32 @@ class Schedule(db.Model):
     def __repr__(self):
         return f'<Schedule {self.id}>'
 
+# 10. SiteSetting (Key-Value Configuration)
+class SiteSetting(db.Model):
+    __tablename__ = 'site_setting'
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    value = db.Column(db.Text, default='')
+
+    @staticmethod
+    def get(key, default=''):
+        """Get a setting value by key, return default if not found."""
+        setting = SiteSetting.query.filter_by(key=key).first()
+        return setting.value if setting else default
+
+    @staticmethod
+    def set(key, value):
+        """Set a setting value by key, create if not exists."""
+        setting = SiteSetting.query.filter_by(key=key).first()
+        if setting:
+            setting.value = value
+        else:
+            setting = SiteSetting(key=key, value=value)
+            db.session.add(setting)
+
+    def __repr__(self):
+        return f'<SiteSetting {self.key}>'
+
 # Flask-Login user_loader (integrated with Flask-Security User model)
 @login_manager.user_loader
 def load_user(user_id):

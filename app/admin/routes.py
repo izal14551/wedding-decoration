@@ -2,11 +2,12 @@ import os
 import uuid
 from datetime import date, datetime, timedelta
 from collections import defaultdict
-from flask import render_template, redirect, url_for, flash, request, abort
+from flask import render_template, redirect, url_for, flash, request, abort, current_app
 from sqlalchemy import func
+from werkzeug.utils import secure_filename
 from app import db
 from app.admin import bp
-from app.models import Customer, Product, Order, OrderItem, Payment, Schedule, User, Category
+from app.models import Customer, Product, Order, OrderItem, Payment, Schedule, User, Category, SiteSetting
 from flask_login import login_required, current_user
 from functools import wraps
 
@@ -1040,3 +1041,65 @@ def schedule_delete(schedule_id):
     return redirect(url_for('admin.schedules'))
 
 
+# ==================== SITE SETTINGS ====================
+
+SETTINGS_TEXT_FIELDS = [
+    'brand_name', 'brand_tagline',
+    'hero_title', 'hero_subtitle',
+    'why_choose_us_p1', 'why_choose_us_p2',
+    'gallery_title',
+    'gallery_caption_1', 'gallery_caption_2', 'gallery_caption_3',
+    'gallery_caption_4', 'gallery_caption_5',
+    'footer_description', 'footer_address', 'footer_phone',
+    'footer_email', 'footer_hours',
+    'social_whatsapp', 'social_instagram', 'social_facebook', 'social_tiktok',
+    'invoice_company_name', 'invoice_tagline', 'invoice_address', 'invoice_phone',
+]
+
+SETTINGS_FILE_FIELDS = [
+    'logo_path', 'hero_bg_path',
+    'gallery_img_1', 'gallery_img_2', 'gallery_img_3',
+    'gallery_img_4', 'gallery_img_5',
+]
+
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp', 'gif'}
+
+def _allowed_image(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_IMAGE_EXTENSIONS
+
+
+@bp.route('/settings', methods=['GET'])
+@login_required
+@admin_required
+def settings():
+    settings_dict = {s.key: s.value for s in SiteSetting.query.all()}
+    return render_template('admin/settings.html', title='Site Settings', settings=settings_dict)
+
+
+@bp.route('/settings', methods=['POST'])
+@login_required
+@admin_required
+def settings_save():
+    # 1. Save all text fields
+    for field in SETTINGS_TEXT_FIELDS:
+        value = request.form.get(field, '').strip()
+        SiteSetting.set(field, value)
+
+    # 2. Save file uploads
+    upload_dir = os.path.join(current_app.config['UPLOAD_FOLDER'], 'settings')
+    os.makedirs(upload_dir, exist_ok=True)
+
+    for field in SETTINGS_FILE_FIELDS:
+        file = request.files.get(field)
+        if file and file.filename and _allowed_image(file.filename):
+            ext = file.filename.rsplit('.', 1)[1].lower()
+            safe_name = f"{field}_{uuid.uuid4().hex[:8]}.{ext}"
+            file_path = os.path.join(upload_dir, safe_name)
+            file.save(file_path)
+            # Store relative path from static/
+            relative_path = f"uploads/settings/{safe_name}"
+            SiteSetting.set(field, relative_path)
+
+    db.session.commit()
+    flash('Pengaturan situs berhasil disimpan!', 'success')
+    return redirect(url_for('admin.settings'))

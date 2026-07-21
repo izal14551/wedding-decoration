@@ -80,13 +80,14 @@
     <div class="row align-items-center mb-5">
       <div class="col-sm-6 text-center text-sm-start">
         <h3 class="invoice-title mb-1">
-          <i class="bi bi-flower1"></i> Griya Rias Saraswati
+          <i class="bi bi-flower1"></i> {{ site.get('invoice_company_name', 'Griya Rias Saraswati') }}
         </h3>
         <p class="text-muted small mb-0">
-          Beauty, Elegance, and Wedding Needs
+          {{ site.get('invoice_tagline', 'Beauty, Elegance, and Wedding Needs') }}
         </p>
         <p class="text-muted small">
-          Sleman, Yogyakarta | Telp: 081234567890
+          {{ site.get('invoice_address', 'Sleman, Yogyakarta') }} | Telp: {{ site.get('invoice_phone', '081234567890')
+          }}
         </p>
       </div>
       <div class="col-sm-6 text-center text-sm-end mt-3 mt-sm-0">

@@ -10,10 +10,12 @@
     transition: all 0.3s ease;
     overflow: hidden;
   }
+
   .card-stat:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
   }
+
   .card-dashboard {
     border: none;
     border-radius: 16px;
@@ -21,6 +23,7 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     margin-bottom: 1.5rem;
   }
+
   .card-dashboard-header {
     background: transparent;
     border-bottom: 1px solid #f1f2f6;
@@ -32,9 +35,11 @@
     justify-content: space-between;
     align-items: center;
   }
+
   .card-dashboard-body {
     padding: 1.5rem;
   }
+
   .stat-icon-wrapper {
     width: 48px;
     height: 48px;
@@ -44,6 +49,7 @@
     justify-content: center;
     font-size: 1.5rem;
   }
+
   .table-custom th {
     font-weight: 600;
     color: #7f8c8d;
@@ -53,6 +59,7 @@
     background-color: #fafbfc;
     padding: 12px 16px;
   }
+
   .table-custom td {
     padding: 16px;
     vertical-align: middle;
@@ -60,18 +67,22 @@
     border-bottom: 1px solid #f1f2f6;
     font-size: 0.9rem;
   }
+
   .badge-pending {
     background-color: #ffeaa7;
     color: #d63031;
   }
+
   .badge-processing {
     background-color: #dfe6e9;
     color: #2d3436;
   }
+
   /* Custom scrollbar untuk table-responsive */
   .table-responsive::-webkit-scrollbar {
     height: 6px;
   }
+
   .table-responsive::-webkit-scrollbar-thumb {
     background: #dfe6e9;
     border-radius: 3px;
@@ -89,7 +100,7 @@
   </div>
   <div class="col-md-6 text-md-end mt-3 mt-md-0">
     <span class="badge bg-white text-dark-slate shadow-sm px-3 py-2 border">
-      <i class="bi bi-calendar3 me-2 text-primary"></i> Hari ini: {{
+      <i class="bi bi-calendar3 me-2 text-dark"></i> Hari ini: {{
       today.strftime('%d %B %Y') }}
     </span>
   </div>
@@ -100,19 +111,17 @@
   <!-- Card Pendapatan -->
   <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-success-subtle text-success me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-success-subtle text-success me-3 flex-shrink-0">
           <i class="bi bi-cash-coin"></i>
         </div>
-        <div>
-          <p
-            class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider"
-          >
+        <div class="overflow-hidden">
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">
             Total Pendapatan
           </p>
-          <h3 class="fw-bold text-dark-slate mb-0">
+          <h4 class="fw-bold text-dark-slate mb-0 text-nowrap" style="font-size: 1.2rem;">
             Rp {{ "{:,.0f}".format(total_revenue).replace(',', '.') }}
-          </h3>
+          </h4>
         </div>
       </div>
     </div>
@@ -121,14 +130,12 @@
   <!-- Card Pesanan -->
   <div class="col-xl-3 col-md-6 mb-4 mb-xl-0">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-primary-subtle text-primary me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-primary-subtle text-primary me-3 flex-shrink-0">
           <i class="bi bi-cart-check"></i>
         </div>
         <div>
-          <p
-            class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider"
-          >
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">
             Total Pesanan
           </p>
           <h3 class="fw-bold text-dark-slate mb-0">{{ total_orders }}</h3>
@@ -140,14 +147,12 @@
   <!-- Card Pelanggan -->
   <div class="col-xl-3 col-md-6 mb-4 mb-md-0">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-info-subtle text-info me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-info-subtle text-info me-3 flex-shrink-0">
           <i class="bi bi-people"></i>
         </div>
         <div>
-          <p
-            class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider"
-          >
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">
             Total Pelanggan
           </p>
           <h3 class="fw-bold text-dark-slate mb-0">{{ total_customers }}</h3>
@@ -159,14 +164,12 @@
   <!-- Card Produk -->
   <div class="col-xl-3 col-md-6">
     <div class="card card-stat shadow-sm h-100 bg-white">
-      <div class="card-body p-4 d-flex align-items-center">
-        <div class="stat-icon-wrapper bg-warning-subtle text-warning me-3">
+      <div class="card-body p-3.5 p-3 d-flex align-items-center">
+        <div class="stat-icon-wrapper bg-warning-subtle text-warning me-3 flex-shrink-0">
           <i class="bi bi-flower1"></i>
         </div>
         <div>
-          <p
-            class="text-muted mb-1 fs-7 fw-medium text-uppercase tracking-wider"
-          >
+          <p class="text-muted mb-1 small fw-medium text-uppercase tracking-wider text-nowrap">
             Paket Dekorasi
           </p>
           <h3 class="fw-bold text-dark-slate mb-0">{{ total_products }}</h3>
@@ -199,9 +202,7 @@
       <div class="card-dashboard-header">
         <span>Status Pesanan</span>
       </div>
-      <div
-        class="card-dashboard-body d-flex flex-column justify-content-center"
-      >
+      <div class="card-dashboard-body d-flex flex-column justify-content-center">
         <div style="position: relative; height: 240px; margin-bottom: 1.5rem">
           <canvas id="statusChart"></canvas>
         </div>
@@ -235,25 +236,17 @@
               <tr>
                 <td class="fw-semibold">{{ ev.customer.name }}</td>
                 <td>
-                  <span class="d-block fw-medium"
-                    >{{ ev.start_date.strftime('%d %b %Y') }}</span
-                  >
-                  <small class="text-muted"
-                    >s.d {{ ev.end_date.strftime('%d %b %Y') }}</small
-                  >
+                  <span class="d-block fw-medium">{{ ev.start_date.strftime('%d %b %Y') }}</span>
+                  <small class="text-muted">s.d {{ ev.end_date.strftime('%d %b %Y') }}</small>
                 </td>
                 <td>{{ ev.event_address if ev.event_address else '-' }}</td>
                 <td>
                   {% if ev.status == 'Completed' %}
-                  <span class="badge bg-success-subtle text-success"
-                    >Completed</span
-                  >
+                  <span class="badge bg-success-subtle text-success">Completed</span>
                   {% elif ev.status == 'Processing' %}
                   <span class="badge bg-info-subtle text-info">Processing</span>
                   {% else %}
-                  <span class="badge bg-warning-subtle text-warning"
-                    >Pending</span
-                  >
+                  <span class="badge bg-warning-subtle text-warning">Pending</span>
                   {% endif %}
                 </td>
               </tr>
@@ -300,17 +293,11 @@
                 </td>
                 <td>
                   {% if item.status == 'Available' %}
-                  <span class="badge bg-success-subtle text-success"
-                    >Tersedia ({{ item.available }})</span
-                  >
+                  <span class="badge bg-success-subtle text-success">Tersedia ({{ item.available }})</span>
                   {% elif item.status == 'Fully Booked' %}
-                  <span class="badge bg-danger-subtle text-danger"
-                    >Habis Disewa</span
-                  >
+                  <span class="badge bg-danger-subtle text-danger">Habis Disewa</span>
                   {% else %}
-                  <span class="badge bg-warning-subtle text-warning"
-                    >Perawatan</span
-                  >
+                  <span class="badge bg-warning-subtle text-warning">Perawatan</span>
                   {% endif %}
                 </td>
               </tr>
@@ -345,31 +332,21 @@
               {% if recent_orders %} {% for ord in recent_orders %}
               <tr>
                 <td>
-                  <span class="d-block fw-semibold"
-                    >{{ ord.customer.name }}</span
-                  >
-                  <small class="text-muted"
-                    >{{ ord.order_date.strftime('%d/%m/%Y') }}</small
-                  >
+                  <span class="d-block fw-semibold">{{ ord.customer.name }}</span>
+                  <small class="text-muted">{{ ord.order_date.strftime('%d/%m/%Y') }}</small>
                 </td>
                 <td class="fw-medium">
                   Rp {{ "{:,.0f}".format(ord.total_price).replace(',', '.') }}
                 </td>
                 <td>
                   {% if ord.status == 'Completed' %}
-                  <span class="badge bg-success-subtle text-success"
-                    >Completed</span
-                  >
+                  <span class="badge bg-success-subtle text-success">Completed</span>
                   {% elif ord.status == 'Processing' %}
                   <span class="badge bg-info-subtle text-info">Processing</span>
                   {% elif ord.status == 'Cancelled' %}
-                  <span class="badge bg-danger-subtle text-danger"
-                    >Cancelled</span
-                  >
+                  <span class="badge bg-danger-subtle text-danger">Cancelled</span>
                   {% else %}
-                  <span class="badge bg-warning-subtle text-warning"
-                    >Pending</span
-                  >
+                  <span class="badge bg-warning-subtle text-warning">Pending</span>
                   {% endif %}
                 </td>
               </tr>
@@ -407,12 +384,8 @@
               {% if recent_payments %} {% for pay in recent_payments %}
               <tr>
                 <td>
-                  <span class="d-block fw-semibold"
-                    >{{ pay.order.customer.name }}</span
-                  >
-                  <small class="text-muted"
-                    >{{ pay.payment_date.strftime('%d/%m/%Y') }}</small
-                  >
+                  <span class="d-block fw-semibold">{{ pay.order.customer.name }}</span>
+                  <small class="text-muted">{{ pay.payment_date.strftime('%d/%m/%Y') }}</small>
                 </td>
                 <td>{{ pay.payment_method }}</td>
                 <td>
@@ -450,21 +423,16 @@
         {% if top_rented %}
         <div class="list-group list-group-flush">
           {% for item in top_rented %}
-          <div
-            class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3"
-          >
+          <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 py-3">
             <div class="d-flex align-items-center">
               <span
                 class="badge bg-secondary-subtle text-secondary rounded-circle me-3 d-flex align-items-center justify-content-center"
-                style="width: 28px; height: 28px"
-              >
+                style="width: 28px; height: 28px">
                 {{ loop.index }}
               </span>
               <span class="fw-semibold text-dark-slate">{{ item.name }}</span>
             </div>
-            <span class="badge bg-primary rounded-pill px-3 py-2"
-              >{{ item.total_rented }}x Sewa</span
-            >
+            <span class="badge bg-primary rounded-pill px-3 py-2">{{ item.total_rented }}x Sewa</span>
           </div>
           {% endfor %}
         </div>
@@ -479,121 +447,114 @@
 </div>
 <!-- Scripts Chart.js Render -->
 <script>
-  // 1. Line Chart: Pendapatan Bulanan
-  const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-
-  // Buat gradient background untuk Chart
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 1. Line Chart: Pendapatan Bulanan
+    const revenueCanvas = document.getElementById('revenueChart');
+  if (revenueCanvas) {
+      const revenueCtx = revenueCanvas.getContext('2d');
   const revGradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
   revGradient.addColorStop(0, 'rgba(52, 152, 219, 0.4)');
   revGradient.addColorStop(1, 'rgba(52, 152, 219, 0.0)');
 
-  const revenueChart = new Chart(revenueCtx, {
+  new Chart(revenueCtx, {
     type: 'line',
-    data: {
-      labels: {{ months_labels|tojson }},
-      datasets: [{
-        label: 'Pendapatan (Rp)',
-        data: {{ revenue_values|tojson }},
-        backgroundColor: revGradient,
-        borderColor: '#3498db',
-        borderWidth: 3,
-        pointBackgroundColor: '#ffffff',
-        pointBorderColor: '#3498db',
-        pointBorderWidth: 2,
-        pointRadius: 6,
-        pointHoverRadius: 8,
-        fill: true,
-        tension: 0.3
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
+  data: {
+    labels: {{ months_labels| tojson}},
+  datasets: [{
+    label: 'Pendapatan (Rp)',
+  data: {{ revenue_values| tojson}},
+  backgroundColor: revGradient,
+  borderColor: '#3498db',
+  borderWidth: 3,
+  pointBackgroundColor: '#ffffff',
+  pointBorderColor: '#3498db',
+  pointBorderWidth: 2,
+  pointRadius: 6,
+  pointHoverRadius: 8,
+  fill: true,
+  tension: 0.3
+          }]
         },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              let val = context.parsed.y;
-              return ' Pendapatan: Rp ' + val.toLocaleString('id-ID');
-            }
-          }
-        }
-      },
-      scales: {
-        y: {
-          grid: {
-            color: '#f1f2f6'
-          },
-          ticks: {
-            callback: function(value) {
-              if (value >= 1000000) {
-                return 'Rp ' + (value / 1000000) + ' M';
+  options: {
+    responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {display: false },
+  tooltip: {
+    callbacks: {
+    label: function(context) {
+    let val = context.parsed.y;
+  return ' Pendapatan: Rp ' + val.toLocaleString('id-ID');
+                }
               }
-              return 'Rp ' + value;
-            },
-            font: {
-              size: 11
             }
-          }
-        },
-        x: {
-          grid: {
-            display: false
           },
-          ticks: {
-            font: {
-              size: 11
+  scales: {
+    y: {
+    grid: {color: '#f1f2f6' },
+  ticks: {
+    callback: function(value) {
+                  if (value >= 1000000) {
+                    return 'Rp ' + (value / 1000000) + ' M';
+                  }
+  return 'Rp ' + value;
+                },
+  font: {size: 11 }
+              }
+            },
+  x: {
+    grid: {display: false },
+  ticks: {font: {size: 11 } }
             }
           }
         }
-      }
+      });
     }
-  });
 
-  // 2. Pie Chart: Status Pesanan
-  const statusCtx = document.getElementById('statusChart').getContext('2d');
-
+  // 2. Pie/Doughnut Chart: Status Pesanan
+  const statusCanvas = document.getElementById('statusChart');
+  if (statusCanvas) {
+      const statusCtx = statusCanvas.getContext('2d');
   const statusData = {
     labels: ['Pending', 'Processing', 'Completed', 'Cancelled'],
-    datasets: [{
-      data: [
-        {{ status_data['Pending'] }},
-        {{ status_data['Processing'] }},
-        {{ status_data['Completed'] }},
-        {{ status_data['Cancelled'] }}
-      ],
-      backgroundColor: [
-        '#f1c40f', // Pending (Kuning)
-        '#3498db', // Processing (Biru)
-        '#2ecc71', // Completed (Hijau)
-        '#e74c3c'  // Cancelled (Merah)
-      ],
-      borderWidth: 2,
-      borderColor: '#ffffff'
-    }]
-  };
+  datasets: [{
+    data: [
+  {{ status_data['Pending'] }},
+  {{ status_data['Processing'] }},
+  {{ status_data['Completed'] }},
+  {{ status_data['Cancelled'] }}
+  ],
+  backgroundColor: [
+  '#f1c40f', // Pending (Kuning)
+  '#3498db', // Processing (Biru)
+  '#2ecc71', // Completed (Hijau)
+  '#e74c3c'  // Cancelled (Merah)
+  ],
+  borderWidth: 2,
+  borderColor: '#ffffff'
+        }]
+      };
 
-  const statusChart = new Chart(statusCtx, {
+  new Chart(statusCtx, {
     type: 'doughnut',
-    data: statusData,
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            font: {
-              size: 11
+  data: statusData,
+  options: {
+    responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+    position: 'bottom',
+  labels: {
+    boxWidth: 12,
+  font: {size: 11 }
+              }
             }
-          }
+          },
+  cutout: '70%'
         }
-      },
-      cutout: '70%'
+      });
     }
   });
 </script>

@@ -24,6 +24,10 @@
       --color-primary: #3498db;
     }
 
+    .text-dark-slate {
+      color: #2c3e50 !important;
+    }
+
     body {
       font-family: "Inter", sans-serif;
       background-color: #f8f9fa;
@@ -233,6 +237,13 @@
           class="sidebar-link {% if request.endpoint == 'admin.reports' %}active{% endif %}">
           <i class="bi bi-graph-up-arrow"></i>
           <span>Reports</span>
+        </a>
+      </li>
+      <li class="sidebar-item">
+        <a href="{{ url_for('admin.settings') }}"
+          class="sidebar-link {% if request.endpoint in ['admin.settings', 'admin.settings_save'] %}active{% endif %}">
+          <i class="bi bi-gear-fill"></i>
+          <span>Site Settings</span>
         </a>
       </li>
     </ul>

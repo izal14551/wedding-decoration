@@ -16,11 +16,13 @@
 {% endfor %}
 
 <!-- Hero Section -->
-<div class="hero-section" style="background-image: url('{{ url_for('static', filename='images/wedding_hero.png') }}');">
+<div class="hero-section"
+  style="background-image: url('{% if site.get('hero_bg_path', '').startswith('http') %}{{ site.hero_bg_path }}{% else %}{{ url_for('static', filename=site.get('hero_bg_path', 'images/wedding_hero.png')) }}{% endif %}');">
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <h1 class="hero-title">Griya Rias Saraswati</h1>
-    <p class="hero-subtitle">"Beauty, Elegance, and Wedding Needs All in One Place."</p>
+    <h1 class="hero-title">{{ site.get('hero_title', 'Griya Rias Saraswati') }}</h1>
+    <p class="hero-subtitle">{{ site.get('hero_subtitle', '"Beauty, Elegance, and Wedding Needs All in One Place."') }}
+    </p>
     <a href="#catalog" class="btn btn-gold-cta">Book Now <i class="bi bi-chevron-right ms-1"></i></a>
   </div>
 </div>
@@ -31,12 +33,14 @@
   <div class="row justify-content-center">
     <div class="col-lg-10 col-xl-8">
       <p class="why-choose-us-p">
-        Kami percaya bahwa setiap pernikahan memiliki cerita istimewa. Melalui layanan rias professional dan penyewaan
-        peralatan pernikahan, kami hadir untuk mempercantik setiap momen berharga di hari bahagia Anda.
+        {{ site.get('why_choose_us_p1', 'Kami percaya bahwa setiap pernikahan memiliki cerita istimewa. Melalui layanan
+        rias professional dan penyewaan peralatan pernikahan, kami hadir untuk mempercantik setiap momen berharga di
+        hari bahagia Anda.') }}
       </p>
       <p class="why-choose-us-p">
-        Dengan sentuhan keahlian dari tim yang berpengalaman, serta pelayanan yang tulus, kami berkomitmen memberikan
-        pengalaman terbaik agar Anda dapat menikmati hari pernikahan dengan penuh percaya diri dan kebahagiaan.
+        {{ site.get('why_choose_us_p2', 'Dengan sentuhan keahlian dari tim yang berpengalaman, serta pelayanan yang
+        tulus, kami berkomitmen memberikan pengalaman terbaik agar Anda dapat menikmati hari pernikahan dengan penuh
+        percaya diri dan kebahagiaan.') }}
       </p>
     </div>
   </div>
@@ -45,49 +49,25 @@
 <!-- Gallery Section -->
 <div class="gallery-section text-center">
   <div class="container">
-    <h2 class="serif-font mb-4">Wujudkan Momen Spesialmu Bersama Kami</h2>
+    <h2 class="serif-font mb-4">{{ site.get('gallery_title', 'Wujudkan Momen Spesialmu Bersama Kami') }}</h2>
 
     <div class="gallery-container">
-      <!-- Card 1 -->
+      {% for i in range(1, 6) %}
+      {% set img_key = 'gallery_img_' ~ i %}
+      {% set cap_key = 'gallery_caption_' ~ i %}
+      {% set img_src = site.get(img_key, '') %}
+      {% set cap_text = site.get(cap_key, 'Gambar Dekor') %}
+      {% if img_src %}
       <div class="gallery-card">
-        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=500&q=80"
-          alt="Dekorasi Pengantin Premium">
+        <img
+          src="{% if img_src.startswith('http') %}{{ img_src }}{% else %}{{ url_for('static', filename=img_src) }}{% endif %}"
+          alt="{{ cap_text }}">
         <div class="gallery-card-overlay">
-          <h4 class="gallery-card-title">Gambar Dekor</h4>
+          <h4 class="gallery-card-title">{{ cap_text }}</h4>
         </div>
       </div>
-      <!-- Card 2 -->
-      <div class="gallery-card">
-        <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?auto=format&fit=crop&w=500&q=80"
-          alt="Pelaminan Mewah">
-        <div class="gallery-card-overlay">
-          <h4 class="gallery-card-title">Gambar Dekor</h4>
-        </div>
-      </div>
-      <!-- Card 3 -->
-      <div class="gallery-card">
-        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=500&q=80"
-          alt="Tenda Resepsi & Pencahayaan">
-        <div class="gallery-card-overlay">
-          <h4 class="gallery-card-title">Gambar Dekor</h4>
-        </div>
-      </div>
-      <!-- Card 4 -->
-      <div class="gallery-card">
-        <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?auto=format&fit=crop&w=500&q=80"
-          alt="Setup Meja Jamuan Pernikahan">
-        <div class="gallery-card-overlay">
-          <h4 class="gallery-card-title">Gambar Dekor</h4>
-        </div>
-      </div>
-      <!-- Card 5 -->
-      <div class="gallery-card">
-        <img src="https://images.unsplash.com/photo-1523438885200-e635ba2c371e?auto=format&fit=crop&w=500&q=80"
-          alt="Aksesoris Jalur Pengantin">
-        <div class="gallery-card-overlay">
-          <h4 class="gallery-card-title">Gambar Dekor</h4>
-        </div>
-      </div>
+      {% endif %}
+      {% endfor %}
     </div>
 
     <div class="mt-5">
@@ -95,6 +75,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- Packages Section -->
 <div id="catalog" class="packages-section py-5">

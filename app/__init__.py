@@ -46,6 +46,16 @@ def create_app(config_class=Config):
         from flask import redirect, url_for
         return redirect(url_for('auth.login'))
 
+    @app.context_processor
+    def inject_site_settings():
+        from app.models import SiteSetting
+        try:
+            settings = SiteSetting.query.all()
+            site = {s.key: s.value for s in settings}
+        except Exception:
+            site = {}
+        return dict(site=site)
+
     return app
 
 

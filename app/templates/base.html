@@ -40,7 +40,12 @@
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top navbar-custom">
     <div class="container">
       <a class="navbar-brand" href="{{ url_for('customer.index') }}">
-        <i class="bi bi-flower1"></i> Griya Rias Saraswati
+        {% if site.get('logo_path') %}
+        <img src="{{ url_for('static', filename=site.logo_path) }}" alt="Logo" style="max-height: 30px;" class="me-2">
+        {% else %}
+        <i class="bi bi-flower1"></i>
+        {% endif %}
+        {{ site.get('brand_name', 'Griya Rias Saraswati') }}
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
         aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -128,18 +133,27 @@
         <!-- Col 1: Brand Info -->
         <div class="col-lg-4 col-md-6">
           <h4 class="footer-brand mb-3">
-            <i class="bi bi-flower1 text-gold me-2"></i>Griya Rias Saraswati
+            {% if site.get('logo_path') %}
+            <img src="{{ url_for('static', filename=site.logo_path) }}" alt="Logo" style="max-height: 24px;"
+              class="me-2">
+            {% else %}
+            <i class="bi bi-flower1 text-gold me-2"></i>
+            {% endif %}
+            {{ site.get('brand_name', 'Griya Rias Saraswati') }}
           </h4>
           <p class="footer-text mb-4">
-            Layanan tata rias pengantin profesional, penyewaan dekorasi pelaminan, tenda, dan paket pernikahan lengkap
-            di Sleman, Yogyakarta &amp; sekitarnya.
+            {{ site.get('footer_description', 'Layanan tata rias pengantin profesional, penyewaan dekorasi pelaminan,
+            tenda, dan paket pernikahan lengkap di Sleman, Yogyakarta & sekitarnya.') }}
           </p>
           <div class="footer-socials d-flex gap-2">
-            <a href="https://wa.me/6281234567890" target="_blank" class="social-icon" aria-label="WhatsApp"><i
-                class="bi bi-whatsapp"></i></a>
-            <a href="#" class="social-icon" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-            <a href="#" class="social-icon" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-            <a href="#" class="social-icon" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+            <a href="{{ site.get('social_whatsapp', '#') }}" target="_blank" class="social-icon"
+              aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
+            <a href="{{ site.get('social_instagram', '#') }}" target="_blank" class="social-icon"
+              aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="{{ site.get('social_facebook', '#') }}" target="_blank" class="social-icon"
+              aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="{{ site.get('social_tiktok', '#') }}" target="_blank" class="social-icon" aria-label="TikTok"><i
+                class="bi bi-tiktok"></i></a>
           </div>
         </div>
 
@@ -177,19 +191,19 @@
           <ul class="footer-contact-info list-unstyled">
             <li class="d-flex align-items-start gap-2 mb-2">
               <i class="bi bi-geo-alt-fill text-gold mt-1"></i>
-              <span>Sleman, Daerah Istimewa Yogyakarta</span>
+              <span>{{ site.get('footer_address', 'Sleman, Daerah Istimewa Yogyakarta') }}</span>
             </li>
             <li class="d-flex align-items-center gap-2 mb-2">
               <i class="bi bi-telephone-fill text-gold"></i>
-              <span>0812-3456-7890</span>
+              <span>{{ site.get('footer_phone', '0812-3456-7890') }}</span>
             </li>
             <li class="d-flex align-items-center gap-2 mb-2">
               <i class="bi bi-clock-fill text-gold"></i>
-              <span>Senin - Minggu: 08.00 - 21.00 WIB</span>
+              <span>{{ site.get('footer_hours', 'Senin - Minggu: 08.00 - 21.00 WIB') }}</span>
             </li>
             <li class="d-flex align-items-center gap-2">
               <i class="bi bi-envelope-fill text-gold"></i>
-              <span>info@griyarias-saraswati.com</span>
+              <span>{{ site.get('footer_email', 'info@griyarias-saraswati.com') }}</span>
             </li>
           </ul>
         </div>
@@ -199,7 +213,8 @@
 
       <div class="row align-items-center copyright-area text-center text-md-start">
         <div class="col-md-6 mb-2 mb-md-0">
-          <p class="mb-0 small text-muted-footer">&copy; 2026 Griya Rias Saraswati. All rights reserved.</p>
+          <p class="mb-0 small text-muted-footer">&copy; 2026 {{ site.get('brand_name', 'Griya Rias Saraswati') }}. All
+            rights reserved.</p>
         </div>
         <div class="col-md-6 text-md-end">
           <span class="small text-muted-footer me-3"><i class="bi bi-shield-check text-gold me-1"></i> Sistem Sewa
