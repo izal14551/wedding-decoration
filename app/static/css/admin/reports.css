@@ -1,0 +1,36 @@
+/* Admin Reports Page Specific Styles */
+.btn-period {
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  border: 1.5px solid #2c3e50;
+  color: #2c3e50;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.btn-period:hover {
+  background-color: #2c3e50;
+  color: #ffffff;
+}
+
+.btn-period.active {
+  background-color: #c5a880 !important;
+  border-color: #c5a880 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(197, 168, 128, 0.25);
+}
+
+.progress-bar-custom {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #f1f2f6;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background-color: #c5a880;
+}

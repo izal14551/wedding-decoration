@@ -1,0 +1,44 @@
+{# Reusable Status Badge Partial #}
+{% set status_lower = (status or '')|lower %}
+
+{% if status_lower in ['waiting for payment', 'menunggu pembayaran'] %}
+<span
+  class="badge bg-warning-subtle text-dark border border-warning-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  <i class="bi bi-clock-history me-1"></i>Menunggu Pembayaran
+</span>
+{% elif status_lower in ['pending verification', 'pending', 'menunggu konfirmasi'] %}
+<span
+  class="badge bg-info-subtle text-info-emphasis border border-info-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  <i class="bi bi-hourglass-split me-1"></i>Menunggu Verifikasi
+</span>
+{% elif status_lower in ['processing', 'diproses'] %}
+<span
+  class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  <i class="bi bi-gear-wide-connected me-1"></i>Diproses
+</span>
+{% elif status_lower in ['completed', 'approved', 'disetujui', 'selesai'] %}
+<span
+  class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  <i class="bi bi-check-circle-fill me-1"></i>Selesai / Disetujui
+</span>
+{% elif status_lower in ['cancelled', 'rejected', 'dibatalkan', 'ditolak'] %}
+<span
+  class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  <i class="bi bi-x-circle-fill me-1"></i>Dibatalkan / Ditolak
+</span>
+{% elif status_lower == 'rented' %}
+<span
+  class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  <i class="bi bi-calendar-event me-1"></i>Disewa
+</span>
+{% elif status_lower == 'maintenance' %}
+<span
+  class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  <i class="bi bi-tools me-1"></i>Pemeliharaan
+</span>
+{% else %}
+<span
+  class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-1.5 fw-semibold {{ extra_class or '' }}">
+  {{ status }}
+</span>
+{% endif %}

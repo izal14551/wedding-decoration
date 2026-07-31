@@ -1,93 +1,7 @@
-{% extends "admin/base.html" %} {% block content %}
+{% extends "admin/base.html" %}
+{% block content %}
 <!-- Impor Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-  /* Desain Aesthetic Tambahan */
-  .card-stat {
-    border: none;
-    border-radius: 16px;
-    transition: all 0.3s ease;
-    overflow: hidden;
-  }
-
-  .card-stat:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08) !important;
-  }
-
-  .card-dashboard {
-    border: none;
-    border-radius: 16px;
-    background: #ffffff;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-    margin-bottom: 1.5rem;
-  }
-
-  .card-dashboard-header {
-    background: transparent;
-    border-bottom: 1px solid #f1f2f6;
-    padding: 1.25rem 1.5rem;
-    font-weight: 600;
-    font-size: 1.1rem;
-    color: #2c3e50;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .card-dashboard-body {
-    padding: 1.5rem;
-  }
-
-  .stat-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-  }
-
-  .table-custom th {
-    font-weight: 600;
-    color: #7f8c8d;
-    font-size: 0.82rem;
-    text-transform: uppercase;
-    border-top: none;
-    background-color: #fafbfc;
-    padding: 12px 16px;
-  }
-
-  .table-custom td {
-    padding: 16px;
-    vertical-align: middle;
-    color: #2c3e50;
-    border-bottom: 1px solid #f1f2f6;
-    font-size: 0.9rem;
-  }
-
-  .badge-pending {
-    background-color: #ffeaa7;
-    color: #d63031;
-  }
-
-  .badge-processing {
-    background-color: #dfe6e9;
-    color: #2d3436;
-  }
-
-  /* Custom scrollbar untuk table-responsive */
-  .table-responsive::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  .table-responsive::-webkit-scrollbar-thumb {
-    background: #dfe6e9;
-    border-radius: 3px;
-  }
-</style>
 
 <!-- Header -->
 <div class="row align-items-center mb-4">
@@ -449,110 +363,110 @@
 <script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
     // 1. Line Chart: Pendapatan Bulanan
     const revenueCanvas = document.getElementById('revenueChart');
-  if (revenueCanvas) {
+    if (revenueCanvas) {
       const revenueCtx = revenueCanvas.getContext('2d');
-  const revGradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
-  revGradient.addColorStop(0, 'rgba(52, 152, 219, 0.4)');
-  revGradient.addColorStop(1, 'rgba(52, 152, 219, 0.0)');
+    const revGradient = revenueCtx.createLinearGradient(0, 0, 0, 300);
+    revGradient.addColorStop(0, 'rgba(52, 152, 219, 0.4)');
+    revGradient.addColorStop(1, 'rgba(52, 152, 219, 0.0)');
 
-  new Chart(revenueCtx, {
-    type: 'line',
-  data: {
-    labels: {{ months_labels| tojson}},
-  datasets: [{
-    label: 'Pendapatan (Rp)',
-  data: {{ revenue_values| tojson}},
-  backgroundColor: revGradient,
-  borderColor: '#3498db',
-  borderWidth: 3,
-  pointBackgroundColor: '#ffffff',
-  pointBorderColor: '#3498db',
-  pointBorderWidth: 2,
-  pointRadius: 6,
-  pointHoverRadius: 8,
-  fill: true,
-  tension: 0.3
+    new Chart(revenueCtx, {
+      type: 'line',
+    data: {
+      labels: {{ months_labels| tojson}},
+    datasets: [{
+      label: 'Pendapatan (Rp)',
+    data: {{ revenue_values| tojson}},
+    backgroundColor: revGradient,
+    borderColor: '#3498db',
+    borderWidth: 3,
+    pointBackgroundColor: '#ffffff',
+    pointBorderColor: '#3498db',
+    pointBorderWidth: 2,
+    pointRadius: 6,
+    pointHoverRadius: 8,
+    fill: true,
+    tension: 0.3
           }]
         },
-  options: {
-    responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {display: false },
-  tooltip: {
-    callbacks: {
-    label: function(context) {
-    let val = context.parsed.y;
-  return ' Pendapatan: Rp ' + val.toLocaleString('id-ID');
+    options: {
+      responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {display: false },
+    tooltip: {
+      callbacks: {
+      label: function(context) {
+      let val = context.parsed.y;
+    return ' Pendapatan: Rp ' + val.toLocaleString('id-ID');
                 }
               }
             }
           },
-  scales: {
-    y: {
-    grid: {color: '#f1f2f6' },
-  ticks: {
-    callback: function(value) {
+    scales: {
+      y: {
+      grid: {color: '#f1f2f6' },
+    ticks: {
+      callback: function(value) {
                   if (value >= 1000000) {
                     return 'Rp ' + (value / 1000000) + ' M';
                   }
-  return 'Rp ' + value;
+    return 'Rp ' + value;
                 },
-  font: {size: 11 }
+    font: {size: 11 }
               }
             },
-  x: {
-    grid: {display: false },
-  ticks: {font: {size: 11 } }
+    x: {
+      grid: {display: false },
+    ticks: {font: {size: 11 } }
             }
           }
         }
       });
     }
 
-  // 2. Pie/Doughnut Chart: Status Pesanan
-  const statusCanvas = document.getElementById('statusChart');
-  if (statusCanvas) {
+    // 2. Pie/Doughnut Chart: Status Pesanan
+    const statusCanvas = document.getElementById('statusChart');
+    if (statusCanvas) {
       const statusCtx = statusCanvas.getContext('2d');
-  const statusData = {
-    labels: ['Pending', 'Processing', 'Completed', 'Cancelled'],
-  datasets: [{
-    data: [
-  {{ status_data['Pending'] }},
-  {{ status_data['Processing'] }},
-  {{ status_data['Completed'] }},
-  {{ status_data['Cancelled'] }}
-  ],
-  backgroundColor: [
-  '#f1c40f', // Pending (Kuning)
-  '#3498db', // Processing (Biru)
-  '#2ecc71', // Completed (Hijau)
-  '#e74c3c'  // Cancelled (Merah)
-  ],
-  borderWidth: 2,
-  borderColor: '#ffffff'
+    const statusData = {
+      labels: ['Pending', 'Processing', 'Completed', 'Cancelled'],
+    datasets: [{
+      data: [
+    {{ status_data['Pending'] }},
+    {{ status_data['Processing'] }},
+    {{ status_data['Completed'] }},
+    {{ status_data['Cancelled'] }}
+    ],
+    backgroundColor: [
+    '#f1c40f', // Pending (Kuning)
+    '#3498db', // Processing (Biru)
+    '#2ecc71', // Completed (Hijau)
+    '#e74c3c'  // Cancelled (Merah)
+    ],
+    borderWidth: 2,
+    borderColor: '#ffffff'
         }]
       };
 
-  new Chart(statusCtx, {
-    type: 'doughnut',
-  data: statusData,
-  options: {
-    responsive: true,
-  maintainAspectRatio: false,
-  plugins: {
-    legend: {
-    position: 'bottom',
-  labels: {
-    boxWidth: 12,
-  font: {size: 11 }
+    new Chart(statusCtx, {
+      type: 'doughnut',
+    data: statusData,
+    options: {
+      responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+      position: 'bottom',
+    labels: {
+      boxWidth: 12,
+    font: {size: 11 }
               }
             }
           },
-  cutout: '70%'
+    cutout: '70%'
         }
       });
     }
