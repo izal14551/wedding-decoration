@@ -1139,7 +1139,7 @@ SETTINGS_TEXT_FIELDS = [
 ]
 
 SETTINGS_FILE_FIELDS = [
-    'logo_path', 'hero_bg_path',
+    'logo_path', 'hero_bg_path', 'decorations_hero_bg_path',
     'gallery_img_1', 'gallery_img_2', 'gallery_img_3',
     'gallery_img_4', 'gallery_img_5',
 ]

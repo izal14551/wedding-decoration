@@ -64,13 +64,27 @@
             value="{{ settings.get('hero_subtitle', '') }}">
         </div>
         <div class="col-md-6">
-          <label for="hero_bg_path" class="form-label fw-semibold">Gambar Background Hero (Upload)</label>
+          <label for="hero_bg_path" class="form-label fw-semibold">Gambar Background Hero Beranda (Upload)</label>
           <input type="file" class="form-control" id="hero_bg_path" name="hero_bg_path" accept="image/*">
           {% if settings.get('hero_bg_path') %}
           <div class="mt-2">
-            <small class="text-muted">Background saat ini:</small>
+            <small class="text-muted">Background Beranda saat ini:</small>
             <img src="{{ url_for('static', filename=settings.get('hero_bg_path')) }}" alt="Hero BG"
               style="max-height: 80px; display: block; margin-top: 4px;" class="rounded border p-1">
+          </div>
+          {% endif %}
+        </div>
+        <div class="col-md-6">
+          <label for="decorations_hero_bg_path" class="form-label fw-semibold">Gambar Hero Halaman Dekorasi/Katalog
+            (Upload)</label>
+          <input type="file" class="form-control" id="decorations_hero_bg_path" name="decorations_hero_bg_path"
+            accept="image/*">
+          {% if settings.get('decorations_hero_bg_path') %}
+          <div class="mt-2">
+            <small class="text-muted">Hero Katalog saat ini:</small>
+            <img src="{{ url_for('static', filename=settings.get('decorations_hero_bg_path')) }}"
+              alt="Decorations Hero BG" style="max-height: 80px; display: block; margin-top: 4px;"
+              class="rounded border p-1">
           </div>
           {% endif %}
         </div>
@@ -102,7 +116,7 @@
   <!-- ====== GALLERY SECTION ====== -->
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-white border-bottom py-3">
-      <h5 class="mb-0 fw-semibold"><i class="bi bi-images me-2 text-info"></i>Gallery — Wujudkan Momen Spesialmu</h5>
+      <h5 class="mb-0 fw-semibold"><i class="bi bi-images me-2 text-info"></i>Gallery Wujudkan Momen Spesialmu</h5>
     </div>
     <div class="card-body">
       <div class="row g-3 mb-3">
