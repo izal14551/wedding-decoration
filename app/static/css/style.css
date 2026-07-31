@@ -174,6 +174,29 @@ h5,
   background-color: var(--primary-gold-dark);
 }
 
+.navbar-custom .btn-nav-admin {
+  border: 1px solid var(--accent-gold);
+  background: rgba(197, 168, 128, 0.12);
+  color: var(--accent-gold) !important;
+  border-radius: 20px;
+  padding: 5px 16px !important;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.navbar-custom .btn-nav-admin:hover {
+  background-color: var(--primary-gold);
+  color: var(--dark-slate) !important;
+  border-color: var(--primary-gold);
+}
+
+.text-gold {
+  color: var(--primary-gold) !important;
+}
+
 /* --- Hero Section --- */
 .hero-section {
   position: relative;
