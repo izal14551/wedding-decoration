@@ -181,7 +181,11 @@
                     data-product-price="{{ product.price }}" data-product-stock="{{ product.stock }}"
                     data-product-desc="{{ product.description or '' }}" data-product-status="{{ product.status }}"
                     data-product-image="{% if product.image_path %}{{ url_for('static', filename='uploads/products/' ~ product.image_path) }}{% endif %}"
-                    title="Edit Barang" style="border-radius: 6px;">
+                    data-product-includes='[
+                      {% for inc in product.includes %}
+                        {"name": {{ inc.item_name|tojson }}, "qty": {{ (inc.quantity or '')|tojson }}, "img": {{ (inc.image_path or '')|tojson }}}{% if not loop.last %},{% endif %}
+                      {% endfor %}
+                    ]' title="Edit Barang" style="border-radius: 6px;">
                     <i class="bi bi-pencil-square"></i>
                     <span class="small ms-1 d-none d-lg-inline">Edit</span>
                   </button>
@@ -286,6 +290,23 @@
                 placeholder="Deskripsi mengenai detail, kelengkapan, atau syarat barang/jasa..."
                 style="border-radius: 8px;"></textarea>
             </div>
+            <!-- Package Includes Section -->
+            <div class="col-12 mt-3 pt-3 border-top">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-bold text-dark-slate mb-0">
+                  <i class="bi bi-list-check me-1 text-primary"></i>Rincian Package Includes (Fasilitas Paket)
+                </label>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btnAddIncludeRow"
+                  style="border-radius: 6px;">
+                  <i class="bi bi-plus-lg me-1"></i>Tambah Include
+                </button>
+              </div>
+              <p class="text-muted small mb-2">Masukkan rincian item/fasilitas yang termasuk dalam paket ini. Bisa
+                ditambahkan lebih dari 1 atau dikosongkan jika barang biasa.</p>
+              <div id="addIncludesContainer" class="d-flex flex-column gap-2">
+                <!-- Baris include dinamis ditambahkan lewat JS -->
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer border-0 pt-0 pb-4 justify-content-center">
@@ -365,6 +386,22 @@
               <label for="editDesc" class="form-label fw-semibold text-dark-slate">Deskripsi Lengkap</label>
               <textarea class="form-control" id="editDesc" name="description" rows="3"
                 style="border-radius: 8px;"></textarea>
+            </div>
+            <!-- Package Includes Section (Edit) -->
+            <div class="col-12 mt-3 pt-3 border-top">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-bold text-dark-slate mb-0">
+                  <i class="bi bi-list-check me-1 text-primary"></i>Rincian Package Includes (Fasilitas Paket)
+                </label>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btnEditIncludeRow"
+                  style="border-radius: 6px;">
+                  <i class="bi bi-plus-lg me-1"></i>Tambah Include
+                </button>
+              </div>
+              <p class="text-muted small mb-2">Kelola rincian item/fasilitas yang termasuk dalam paket ini.</p>
+              <div id="editIncludesContainer" class="d-flex flex-column gap-2">
+                <!-- Baris include dinamis ditambahkan lewat JS -->
+              </div>
             </div>
           </div>
         </div>
@@ -451,7 +488,50 @@
     }
   }
 
+  function createIncludeRowHTML(name = '', qty = '', img = '') {
+    const escapedName = (name || '').replace(/"/g, '&quot;');
+    const escapedQty = (qty || '').replace(/"/g, '&quot;');
+    const imgPreviewHTML = img ? `<img src="/static/uploads/includes/${img}" class="rounded border" style="width: 32px; height: 32px; object-fit: cover;" title="Foto Portofolio">` : '';
+    return `
+      <div class="row g-2 align-items-center include-row p-2 rounded border bg-light-subtle mb-1">
+        <input type="hidden" name="include_existing_images[]" value="${img || ''}">
+        <div class="col-4">
+          <input type="text" name="include_names[]" class="form-control form-control-sm" placeholder="Nama item/fasilitas (misal: Rias Pengantin)" value="${escapedName}" style="border-radius: 6px;">
+        </div>
+        <div class="col-3">
+          <input type="text" name="include_quantities[]" class="form-control form-control-sm" placeholder="Ket (misal: 1x ganti)" value="${escapedQty}" style="border-radius: 6px;">
+        </div>
+        <div class="col-4 d-flex align-items-center gap-1">
+          <input type="file" name="include_images[]" accept="image/*" class="form-control form-control-sm" style="border-radius: 6px; font-size: 0.75rem;" title="Upload Foto Hasil/Portofolio">
+          ${imgPreviewHTML}
+        </div>
+        <div class="col-1 text-end">
+          <button type="button" class="btn btn-sm btn-outline-danger p-1" onclick="this.closest('.include-row').remove();" title="Hapus Include" style="border-radius: 6px;">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    // Handler Tambah Include Row di Modal Add & Edit
+    const btnAddInclude = document.getElementById('btnAddIncludeRow');
+    const addIncludesContainer = document.getElementById('addIncludesContainer');
+    if (btnAddInclude && addIncludesContainer) {
+      btnAddInclude.addEventListener('click', function () {
+        addIncludesContainer.insertAdjacentHTML('beforeend', createIncludeRowHTML());
+      });
+    }
+
+    const btnEditInclude = document.getElementById('btnEditIncludeRow');
+    const editIncludesContainer = document.getElementById('editIncludesContainer');
+    if (btnEditInclude && editIncludesContainer) {
+      btnEditInclude.addEventListener('click', function () {
+        editIncludesContainer.insertAdjacentHTML('beforeend', createIncludeRowHTML());
+      });
+    }
+
     // C. Inisialisasi Tooltip Bootstrap (tombol Hapus disabled)
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -495,6 +575,7 @@
         const productDesc = button.getAttribute("data-product-desc");
         const productStatus = button.getAttribute("data-product-status");
         const productImgUrl = button.getAttribute("data-product-image");
+        const productIncludesRaw = button.getAttribute("data-product-includes");
 
         const form = editModal.querySelector("#editProductForm");
         const nameInput = editModal.querySelector("#editName");
@@ -521,6 +602,23 @@
             previewImg.style.display = "inline-block";
           } else {
             previewImg.src = "https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=150&q=80";
+          }
+        }
+
+        // Render Includes pada modal Edit
+        if (editIncludesContainer) {
+          editIncludesContainer.innerHTML = "";
+          if (productIncludesRaw) {
+            try {
+              const includesData = JSON.parse(productIncludesRaw);
+              if (Array.isArray(includesData) && includesData.length > 0) {
+                includesData.forEach(item => {
+                  editIncludesContainer.insertAdjacentHTML('beforeend', createIncludeRowHTML(item.name || '', item.qty || '', item.img || ''));
+                });
+              }
+            } catch (e) {
+              console.error("Error parsing product includes JSON:", e);
+            }
           }
         }
       });

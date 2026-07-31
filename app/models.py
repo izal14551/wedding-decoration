@@ -128,9 +128,22 @@ class Product(db.Model):
     
     order_items = db.relationship('OrderItem', backref='product', lazy='dynamic')
     schedules = db.relationship('Schedule', backref='product', lazy='dynamic')
+    includes = db.relationship('ProductInclude', backref='product', lazy='joined', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Product {self.name}>'
+
+# 3.1 ProductInclude (Included items for package decorations/services)
+class ProductInclude(db.Model):
+    __tablename__ = 'product_include'
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    item_name = db.Column(db.String(200), nullable=False)
+    quantity = db.Column(db.String(50), nullable=True)
+    image_path = db.Column(db.String(255), nullable=True)
+
+    def __repr__(self):
+        return f'<ProductInclude {self.item_name}>'
 
 # 4. Order (formerly Pesanan)
 class Order(db.Model):

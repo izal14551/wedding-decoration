@@ -1,6 +1,10 @@
 .product-detail-page {
-  background:
-    linear-gradient(180deg, rgba(252, 251, 249, 0.96) 0%, #ffffff 42%, var(--bg-warm-white) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(252, 251, 249, 0.96) 0%,
+    #ffffff 42%,
+    var(--bg-warm-white) 100%
+  );
 }
 
 .detail-crumb {
@@ -50,7 +54,11 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(31, 39, 42, 0.04) 0%, rgba(31, 39, 42, 0.42) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(31, 39, 42, 0.04) 0%,
+    rgba(31, 39, 42, 0.42) 100%
+  );
   pointer-events: none;
 }
 
@@ -186,4 +194,68 @@
     max-width: none;
     width: 100%;
   }
+}
+
+/* Package Includes Card Styling dengan Warna Tema */
+.includes-card {
+  border: 1px solid rgba(197, 168, 128, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow-premium);
+}
+
+.includes-card-title {
+  color: var(--dark-slate);
+  font-family: var(--font-serif);
+}
+
+.includes-card-title i {
+  color: var(--primary-gold-dark);
+}
+
+.includes-badge {
+  background: rgba(197, 168, 128, 0.12);
+  color: var(--primary-gold-dark);
+  border: 1px solid rgba(197, 168, 128, 0.3);
+  font-weight: 600;
+}
+
+.includes-item-box {
+  border: 1px solid rgba(197, 168, 128, 0.2);
+  border-radius: 10px;
+  background: #fbfaf7;
+  transition: all 0.25s ease;
+}
+
+.includes-item-box:hover {
+  border-color: var(--primary-gold);
+  box-shadow: 0 6px 20px rgba(197, 168, 128, 0.15);
+  transform: translateY(-2px);
+}
+
+.includes-icon-check {
+  width: 44px;
+  height: 44px;
+  background: rgba(197, 168, 128, 0.15);
+  color: var(--primary-gold-dark);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-include-photo {
+  border: 1px solid var(--primary-gold);
+  color: var(--primary-gold-dark);
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-include-photo:hover {
+  background: var(--primary-gold);
+  color: #ffffff;
+  border-color: var(--primary-gold);
 }

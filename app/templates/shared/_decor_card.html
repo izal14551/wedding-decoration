@@ -25,6 +25,13 @@
   <div class="card-body product-card-body">
     <div class="flex-grow-1">
       <h3 class="card-title serif-font product-card-title mb-2">{{ prod.name }}</h3>
+      {% if prod.includes %}
+      <div class="mb-2">
+        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill small">
+          <i class="bi bi-list-check me-1"></i>{{ prod.includes|length }} Fasilitas Termasuk
+        </span>
+      </div>
+      {% endif %}
       <p class="card-text product-card-description">
         {{ prod.description|truncate(120) if prod.description else 'Tidak ada deskripsi detail untuk produk ini.' }}
       </p>

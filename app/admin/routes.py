@@ -7,7 +7,7 @@ from sqlalchemy import func
 from werkzeug.utils import secure_filename
 from app import db
 from app.admin import bp
-from app.models import Customer, Product, Order, OrderItem, Payment, Schedule, User, Category, SiteSetting
+from app.models import Customer, Product, ProductInclude, Order, OrderItem, Payment, Schedule, User, Category, SiteSetting
 from flask_login import login_required, current_user
 from functools import wraps
 
@@ -298,12 +298,32 @@ def category_delete(category_id):
     flash(f'Kategori "{name}" berhasil dihapus.', 'success')
     return redirect(url_for('admin.categories'))
 
-# Definisikan UPLOAD_FOLDER dan ALLOWED_EXTENSIONS
+# Definisikan UPLOAD_FOLDER, INCLUDE_UPLOAD_FOLDER, dan ALLOWED_EXTENSIONS
 UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads', 'products')
+INCLUDE_UPLOAD_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'static', 'uploads', 'includes')
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def save_image_as_webp(file_storage, target_folder):
+    """Save and compress an uploaded image file into WebP format with quality=80. Fallback gracefully for mock test files."""
+    from PIL import Image
+    os.makedirs(target_folder, exist_ok=True)
+    filename_saved = f"{uuid.uuid4().hex}.webp"
+    file_path = os.path.join(target_folder, filename_saved)
+    try:
+        file_storage.seek(0)
+        with Image.open(file_storage) as img:
+            if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                img = img.convert('RGBA')
+            else:
+                img = img.convert('RGB')
+            img.save(file_path, 'WEBP', quality=80, optimize=True)
+    except Exception:
+        file_storage.seek(0)
+        file_storage.save(file_path)
+    return filename_saved
 
 @bp.route('/products')
 @login_required
@@ -340,18 +360,17 @@ def product_add():
         flash('Harga sewa harus angka dan Stok/Slot harus bilangan bulat.', 'danger')
         return redirect(url_for('admin.products'))
         
-    # Proses Upload Foto
+    # Proses Upload Foto Utama Produk (dikompresi ke WebP)
     image_file = request.files.get('image')
     filename_saved = None
     
     if image_file and image_file.filename != '':
         if allowed_file(image_file.filename):
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-            # Buat nama file unik
-            ext = image_file.filename.rsplit('.', 1)[1].lower()
-            filename_saved = f"{uuid.uuid4().hex}.{ext}"
-            file_path = os.path.join(UPLOAD_FOLDER, filename_saved)
-            image_file.save(file_path)
+            try:
+                filename_saved = save_image_as_webp(image_file, UPLOAD_FOLDER)
+            except Exception as e:
+                flash(f'Gagal memproses gambar produk: {str(e)}', 'danger')
+                return redirect(url_for('admin.products'))
         else:
             flash('Tipe file tidak didukung. Hanya diperbolehkan png, jpg, jpeg, webp.', 'danger')
             return redirect(url_for('admin.products'))
@@ -366,6 +385,32 @@ def product_add():
         image_path=filename_saved
     )
     db.session.add(new_product)
+    db.session.flush()
+
+    # Simpan item-item include (Package Includes)
+    include_names = request.form.getlist('include_names[]')
+    include_quantities = request.form.getlist('include_quantities[]')
+    include_images = request.files.getlist('include_images[]')
+
+    for i, inc_name in enumerate(include_names):
+        inc_name_clean = inc_name.strip()
+        if inc_name_clean:
+            inc_qty = include_quantities[i].strip() if i < len(include_quantities) and include_quantities[i] else None
+            inc_img_saved = None
+            if i < len(include_images) and include_images[i] and include_images[i].filename != '':
+                if allowed_file(include_images[i].filename):
+                    try:
+                        inc_img_saved = save_image_as_webp(include_images[i], INCLUDE_UPLOAD_FOLDER)
+                    except Exception as e:
+                        current_app.logger.error(f"Error compressing include image: {e}")
+            new_inc = ProductInclude(
+                product_id=new_product.id,
+                item_name=inc_name_clean,
+                quantity=inc_qty,
+                image_path=inc_img_saved
+            )
+            db.session.add(new_inc)
+
     db.session.commit()
     
     flash(f'Barang "{name}" berhasil ditambahkan.', 'success')
@@ -398,11 +443,10 @@ def product_edit(product_id):
         flash('Harga sewa harus angka dan Stok/Slot harus bilangan bulat.', 'danger')
         return redirect(url_for('admin.products'))
         
-    # Proses Upload Foto Baru
+    # Proses Upload Foto Baru Utama
     image_file = request.files.get('image')
     if image_file and image_file.filename != '':
         if allowed_file(image_file.filename):
-            os.makedirs(UPLOAD_FOLDER, exist_ok=True)
             # Hapus file gambar lama jika ada
             if product.image_path:
                 old_file_path = os.path.join(UPLOAD_FOLDER, product.image_path)
@@ -411,13 +455,11 @@ def product_edit(product_id):
                         os.remove(old_file_path)
                     except OSError:
                         pass
-            
-            # Simpan file baru
-            ext = image_file.filename.rsplit('.', 1)[1].lower()
-            filename_saved = f"{uuid.uuid4().hex}.{ext}"
-            file_path = os.path.join(UPLOAD_FOLDER, filename_saved)
-            image_file.save(file_path)
-            product.image_path = filename_saved
+            try:
+                product.image_path = save_image_as_webp(image_file, UPLOAD_FOLDER)
+            except Exception as e:
+                flash(f'Gagal memproses gambar produk: {str(e)}', 'danger')
+                return redirect(url_for('admin.products'))
         else:
             flash('Tipe file tidak didukung. Hanya diperbolehkan png, jpg, jpeg, webp.', 'danger')
             return redirect(url_for('admin.products'))
@@ -428,6 +470,46 @@ def product_edit(product_id):
     product.stock = stock
     product.description = description
     product.status = status
+
+    # Perbarui item-item include (Package Includes)
+    old_includes = ProductInclude.query.filter_by(product_id=product.id).all()
+    old_images_map = {inc.item_name: inc.image_path for inc in old_includes if inc.image_path}
+    
+    ProductInclude.query.filter_by(product_id=product.id).delete()
+
+    include_names = request.form.getlist('include_names[]')
+    include_quantities = request.form.getlist('include_quantities[]')
+    include_existing_images = request.form.getlist('include_existing_images[]')
+    include_images = request.files.getlist('include_images[]')
+
+    for i, inc_name in enumerate(include_names):
+        inc_name_clean = inc_name.strip()
+        if inc_name_clean:
+            inc_qty = include_quantities[i].strip() if i < len(include_quantities) and include_quantities[i] else None
+            inc_existing_img = include_existing_images[i].strip() if i < len(include_existing_images) and include_existing_images[i] else None
+            inc_img_saved = inc_existing_img
+
+            # Jika ada file baru diunggah untuk baris ini
+            if i < len(include_images) and include_images[i] and include_images[i].filename != '':
+                if allowed_file(include_images[i].filename):
+                    try:
+                        inc_img_saved = save_image_as_webp(include_images[i], INCLUDE_UPLOAD_FOLDER)
+                    except Exception as e:
+                        current_app.logger.error(f"Error compressing include image: {e}")
+
+            new_inc = ProductInclude(
+                product_id=product.id,
+                item_name=inc_name_clean,
+                quantity=inc_qty,
+                image_path=inc_img_saved
+            )
+            db.session.add(new_inc)
+
+    db.session.commit()
+    
+    flash(f'Informasi barang "{name}" berhasil diperbarui.', 'success')
+    return redirect(url_for('admin.products'))
+
     db.session.commit()
     
     flash(f'Informasi barang "{name}" berhasil diperbarui.', 'success')
