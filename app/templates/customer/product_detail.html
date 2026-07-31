@@ -84,6 +84,19 @@
 
         <div class="booking-box mt-auto">
           {% if current_user.is_authenticated %}
+          {% if current_user.is_admin() %}
+          <div class="alert alert-warning border-0 small mb-0 rounded-3 p-3">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="bi bi-shield-lock-fill text-warning fs-5"></i>
+              <strong class="text-dark">Akun Administrator</strong>
+            </div>
+            <p class="mb-2 text-muted">Anda sedang login sebagai Administrator. Transaksi penyewaan hanya dapat
+              dilakukan oleh akun Pelanggan.</p>
+            <a href="{{ url_for('admin.products') }}" class="btn btn-sm btn-dark rounded-pill px-3">
+              <i class="bi bi-pencil-square me-1"></i> Kelola Produk Ini di Dashboard Admin
+            </a>
+          </div>
+          {% else %}
           <form action="{{ url_for('customer.cart_add', product_id=product.id) }}" method="POST"
             class="d-flex flex-wrap gap-3 align-items-end">
             <div class="flex-grow-1">
@@ -98,6 +111,7 @@
               <span>{{ 'Stok Tidak Tersedia' if product.stock <= 0 else 'Tambah ke Keranjang' }}</span>
             </button>
           </form>
+          {% endif %}
           {% else %}
           <div class="booking-login-grid d-flex flex-wrap gap-3 align-items-end">
             <div class="flex-grow-1">

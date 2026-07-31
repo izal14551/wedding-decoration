@@ -216,6 +216,10 @@ def product_detail(product_id):
 @bp.route('/cart')
 @login_required
 def cart():
+    if current_user.is_admin():
+        flash('Akun Administrator hanya dapat mengelola sistem dan tidak dapat melakukan transaksi penyewaan.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+
     cart_session = session.get('cart', {})
     cart_items = []
     total_price = 0
@@ -239,6 +243,10 @@ def cart():
 @bp.route('/cart/add/<int:product_id>', methods=['POST'])
 @login_required
 def cart_add(product_id):
+    if current_user.is_admin():
+        flash('Akun Administrator hanya dapat mengelola sistem dan tidak dapat melakukan transaksi penyewaan.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+
     product = db.session.get(Product, product_id)
     if not product:
         flash('Produk tidak ditemukan.', 'danger')
@@ -316,6 +324,10 @@ def cart_remove(product_id):
 @bp.route('/book', methods=['POST'])
 @login_required
 def book():
+    if current_user.is_admin():
+        flash('Akun Administrator hanya dapat mengelola sistem dan tidak dapat melakukan transaksi penyewaan.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+
     # Bridge dari Booking Modal di beranda langsung dimasukkan ke keranjang dan checkout
     product_id = request.form.get('product_id')
     if product_id:
@@ -336,6 +348,10 @@ def book():
 @bp.route('/checkout', methods=['POST'])
 @login_required
 def checkout():
+    if current_user.is_admin():
+        flash('Akun Administrator hanya dapat mengelola sistem dan tidak dapat melakukan transaksi penyewaan.', 'warning')
+        return redirect(url_for('admin.dashboard'))
+
     cart_session = session.get('cart', {})
     if not cart_session:
         flash('Keranjang Anda kosong.', 'danger')

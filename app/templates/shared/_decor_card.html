@@ -49,11 +49,18 @@
           <i class="bi bi-info-circle me-1"></i> Detail
         </a>
         {% if current_user.is_authenticated %}
+        {% if current_user.is_admin() %}
+        <a href="{{ url_for('admin.products') }}"
+          class="btn btn-sm btn-outline-dark btn-decor-action flex-grow-1 text-center" title="Kelola Produk di Admin">
+          <i class="bi bi-pencil-square me-1"></i> Edit
+        </a>
+        {% else %}
         <form action="{{ url_for('customer.cart_add', product_id=prod.id) }}" method="POST" class="m-0 flex-grow-1">
           <button type="submit" class="btn btn-sm btn-gold-cta btn-decor-action w-100" title="Tambah ke Keranjang">
             <i class="bi bi-cart-plus-fill me-1"></i> Sewa
           </button>
         </form>
+        {% endif %}
         {% else %}
         <a href="{{ url_for('auth.login', next=url_for('customer.decorations')) }}"
           class="btn btn-sm btn-gold-cta btn-decor-action w-100 text-center flex-grow-1" title="Login untuk Menyewa">
