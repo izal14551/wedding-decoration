@@ -1,58 +1,111 @@
-# Production Deployment Guide
+# Wedding Decoration & Bridal Makeup Rental System
 
-### **Griya Rias Saraswati - Wedding Decoration & Bridal Makeup Rental System**
+### **Griya Rias Saraswati - Web-Based Rental & Management System**
 
-This guide provides step-by-step instructions for deploying the **Griya Rias Saraswati** web application to a production environment running **Linux (Ubuntu/Debian)** using **Nginx** as a reverse proxy, **Gunicorn** as the WSGI application server, **Systemd** for process supervision, and **MySQL/MariaDB** as the database engine.
+A web application designed for renting wedding decorations and booking bridal makeup/services online. It streamlines customer reservations, prevents double bookings, automates availability scheduling, and provides administrators with comprehensive dashboard analytics, payment verification, and transaction reports.
 
 ---
 
-## 🏗️ Production Architecture
+## 📌 Key System Features
 
+### 👤 Customer Module
+
+- **Interactive Catalog & Product Details**: View decoration packages and makeup services with full portfolio images, package details (_includes_), item availability, and interactive availability calendars.
+- **Cart & Date-Based Checkout**: Add items to cart and check out by selecting event dates (`start_date` to `end_date`), event location, and custom notes.
+- **Double Booking Prevention**: Automatic date availability checking against physical item stock and daily makeup/service slot capacities.
+- **Payment Proof Upload**: Upload bank transfer payment proofs with automatic WebP image compression.
+- **Official Invoice & PDF/Print**: Automatically generated invoices with official print and PDF download capabilities.
+
+### 🛡️ Administrator Module
+
+- **Interactive Analytics Dashboard**: Visual revenue trends (Line Chart) and order status distribution (Doughnut Chart) powered by Chart.js.
+- **Product & Category Management**: Full CRUD operations for decorations, makeup services, categories, stock/slots, and package items.
+- **Availability Schedule Management**: Real-time management of rental schedules (Rented, Maintenance, Available).
+- **Order & Payment Verification**: Verify customer payment proofs and manage order states (Waiting for Payment, Processing, Completed, Cancelled).
+- **Site Settings**: Customize business details (Name, Tagline, Address, Phone) and upload dynamic catalog hero background images.
+- **Automated Transaction Reports**: Filter transactions (Daily, Weekly, Monthly, Yearly) and export reports to PDF or Excel.
+- **Administrator Transaction Restriction**: Safety controls preventing admin accounts from placing rental orders on storefront pages.
+
+---
+
+## 🛠️ Technology Stack
+
+- **Backend**: Python 3.8+, Flask, Flask-SQLAlchemy, Flask-Login, Flask-Migrate (Alembic)
+- **Frontend**: HTML5, Custom CSS, Bootstrap 5, JavaScript (Vanilla JS), Chart.js
+- **Database**: MySQL / MariaDB (SQLAlchemy ORM)
+- **WSGI / Web Server**: Gunicorn, Nginx
+- **Helper Libraries**: Pillow (WebP image processing), Pandas / OpenPyXL (Excel export), xhtml2pdf (PDF invoice export), bcrypt (Security)
+
+---
+
+## 💻 Part 1: Local Development Setup
+
+Follow these steps to run the application locally on your machine (Windows / Laragon / XAMPP / macOS / Linux):
+
+### 1. Clone & Set Up Project Directory
+
+```bash
+git clone https://github.com/username/wedding-decoration.git
+cd wedding-decoration
 ```
-[ Client / Browser ]
-       │ (HTTPS / Port 443)
-       ▼
-[ Nginx Web Server ] ──(Static Files & Uploads)──► [/app/static & /uploads]
-       │ (Proxy Pass / HTTP Port 8000)
-       ▼
-[ WSGI Server: Gunicorn ] (Multi-Worker Processes)
-       │
-       ▼
-[ Flask Web Application ]
-       │ (SQLAlchemy ORM)
-       ▼
-[ MySQL / MariaDB Server ]
+
+### 2. Create & Activate Virtual Environment
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate on Windows (PowerShell):
+.\venv\Scripts\Activate.ps1
+
+# Activate on Windows (CMD):
+venv\Scripts\activate.bat
+
+# Activate on Linux / macOS:
+source venv/bin/activate
 ```
 
+### 3. Install Dependencies
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+### 4. Configure Local Database
+
+By default, the application connects to MySQL via `mysql+pymysql://root:@localhost/wedding_db`.
+
+Create the database in your local MySQL instance (Laragon / XAMPP):
+
+```sql
+CREATE DATABASE IF NOT EXISTS wedding_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 5. Seed Initial Data & Run Server
+
+```bash
+# Initialize database tables and populate sample data
+python seed_dashboard.py
+
+# Start local development server
+python run.py
+```
+
+Access the application in your browser at: **[http://127.0.0.1:5000](http://127.0.0.1:5000)**
+
 ---
 
-## 📋 Server Requirements & Prerequisites
+## 🚀 Part 2: Production Deployment Guide (Linux VPS)
 
-### 1. Minimum Server Specifications
+Follow these step-by-step instructions for deploying to a production VPS (Ubuntu/Debian) under your user home directory (`/home/$USER/wedding-decoration`).
 
-- **Operating System**: Ubuntu 22.04 LTS / 24.04 LTS or Debian 11/12
-- **CPU**: Minimum 1 vCPU (2 vCPUs recommended)
-- **RAM**: Minimum 1 GB (2 GB+ recommended)
-- **Storage**: Minimum 20 GB SSD
-- **Access Rights**: Linux user with `sudo` privileges
+### Step 1: Server Package Installation
 
-### 2. Domain Name & DNS Setup
-
-- A Domain or Subdomain with its **A Record** pointed to your server's Public IP address (e.g., `griyariassaraswati.com`).
-
----
-
-## 🛠️ Step 1: System Package Update & Server Preparation
-
-Connect to your production server via SSH and update system packages:
+Connect to your VPS via SSH and install required system packages:
 
 ```bash
 sudo apt update && sudo apt upgrade -y
-```
-
-Install Python, MySQL client development tools, Nginx, Git, and build tools:
-
-```bash
 sudo apt install -y python3 python3-venv python3-dev build-essential \
                     libmysqlclient-dev pkg-config nginx git curl \
                     mariadb-server mariadb-client
@@ -60,142 +113,57 @@ sudo apt install -y python3 python3-venv python3-dev build-essential \
 
 ---
 
-## 🗄️ Step 2: Database Configuration (MySQL / MariaDB)
+### Step 2: Database Setup via Direct Terminal Shell
 
-### 1. Secure MySQL Installation
-
-Run the security script to secure your database server:
+Execute database and user creation directly from your terminal:
 
 ```bash
-sudo mysql_secure_installation
+# Create database, user, and grant privileges
+sudo mysql -e "CREATE DATABASE IF NOT EXISTS wedding_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; CREATE USER IF NOT EXISTS 'wedding_user'@'localhost' IDENTIFIED BY 'StrongPassword123!'; GRANT ALL PRIVILEGES ON wedding_db.* TO 'wedding_user'@'localhost'; FLUSH PRIVILEGES;"
 ```
 
-_(Follow the prompt instructions: set root password, remove anonymous users, disallow root remote login, and drop test database)._
-
-### 2. Create Production Database & User
-
-Log into the MySQL shell:
+Export `DATABASE_URL` directly in your terminal session:
 
 ```bash
-sudo mysql -u root -p
-```
-
-Execute the following SQL commands (replace `StrongProductionPassword123!` with a secure password):
-
-```sql
-CREATE DATABASE wedding_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-CREATE USER 'wedding_user'@'localhost' IDENTIFIED BY 'StrongProductionPassword123!';
-GRANT ALL PRIVILEGES ON wedding_db.* TO 'wedding_user'@'localhost';
-
-FLUSH PRIVILEGES;
-EXIT;
+export DATABASE_URL="mysql+pymysql://wedding_user:StrongPassword123!@localhost:3306/wedding_db"
 ```
 
 ---
 
-## 📂 Step 3: Source Code & Virtual Environment Setup
-
-### 1. Clone the Application Repository
-
-Clone the codebase into `/var/www/wedding-decoration`:
+### Step 3: Clone Codebase & Setup Production Environment
 
 ```bash
-cd /var/www
-sudo git clone https://github.com/username/wedding-decoration.git wedding-decoration
-sudo chown -R $USER:$USER /var/www/wedding-decoration
-cd /var/www/wedding-decoration
-```
+# Clone to your user home directory
+cd $HOME
+git clone https://github.com/username/wedding-decoration.git wedding-decoration
+cd $HOME/wedding-decoration
 
-### 2. Create & Activate Virtual Environment
-
-```bash
+# Setup Virtual Environment
 python3 -m venv venv
 source venv/bin/activate
-```
 
-### 3. Install Python Dependencies & Gunicorn
-
-Upgrade `pip` and install all required libraries along with Gunicorn and PyMySQL:
-
-```bash
+# Install production dependencies
 pip install --upgrade pip
-pip install -r requirements.txt
-pip install gunicorn pymysql
-```
+pip install -r requirements.txt gunicorn pymysql
 
----
+# Create required upload directories under app/static/uploads
+mkdir -p app/static/uploads/payments app/static/uploads/decorations app/static/uploads/settings
 
-## 🔐 Step 4: Production Environment Variables (`.env`)
-
-Create a `.env` file in the project root directory (`/var/www/wedding-decoration/.env`):
-
-```bash
-nano /var/www/wedding-decoration/.env
-```
-
-Add the following environment configuration:
-
-```env
-# Production Environment Configuration
-FLASK_ENV=production
-FLASK_APP=run.py
-SECRET_KEY=9b8f2e7a1c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f
-
-# Production Database Connection URL
-DATABASE_URL=mysql+pymysql://wedding_user:StrongProductionPassword123!@localhost:3306/wedding_db
-
-# Media Uploads Path
-UPLOAD_FOLDER=/var/www/wedding-decoration/uploads
-```
-
-_Tip: Generate a strong random `SECRET_KEY` by running `python3 -c "import secrets; print(secrets.token_hex(32))"` in your terminal._
-
----
-
-## 🌱 Step 5: Directory Structure & Initial Database Seeding
-
-### 1. Create Media Upload Directories
-
-```bash
-mkdir -p /var/www/wedding-decoration/uploads/payments
-mkdir -p /var/www/wedding-decoration/uploads/decorations
-mkdir -p /var/www/wedding-decoration/uploads/settings
-```
-
-### 2. Initialize Database & Seed Demo Data
-
-Initialize database schema and populate initial administrator account and catalog items:
-
-```bash
-# Seed complete database & sample dashboard data
+# Initialize database schema and initial data
 python seed_dashboard.py
-
-# Alternatively, to seed only the Administrator account:
-# python seed_admin.py
 ```
 
 ---
 
-## ⚙️ Step 6: Gunicorn & Systemd Service Configuration
+### Step 4: Systemd Service Configuration
 
-Configure a Systemd service to manage the Gunicorn application process in the background and ensure automatic restart on system reboots.
-
-### 1. Test Gunicorn Manually (Optional)
-
-```bash
-gunicorn --bind 127.0.0.1:8000 "app:create_app()"
-```
-
-Press `Ctrl+C` after verifying that the application starts without errors.
-
-### 2. Create Systemd Service File
+Create a Systemd service configuration for Gunicorn:
 
 ```bash
 sudo nano /etc/systemd/system/wedding.service
 ```
 
-Add the following configuration:
+Paste the following configuration (replace `meliana` with your actual Linux username if different):
 
 ```ini
 [Unit]
@@ -203,73 +171,68 @@ Description=Gunicorn instance serving Wedding Decoration Application
 After=network.target mysql.service
 
 [Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/wedding-decoration
-Environment="PATH=/var/www/wedding-decoration/venv/bin"
-EnvironmentFile=/var/www/wedding-decoration/.env
-ExecStart=/var/www/wedding-decoration/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 --access-logfile /var/log/wedding_access.log --error-logfile /var/log/wedding_error.log "app:create_app()"
+User=meliana
+Group=meliana
+WorkingDirectory=/home/meliana/wedding-decoration
+Environment="PATH=/home/meliana/wedding-decoration/venv/bin"
+Environment="DATABASE_URL=mysql+pymysql://wedding_user:StrongPassword123!@localhost:3306/wedding_db"
+EnvironmentFile=-/home/meliana/wedding-decoration/.env
+ExecStart=/home/meliana/wedding-decoration/venv/bin/gunicorn --workers 3 --bind 127.0.0.1:8000 "app:create_app()"
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-### 3. Adjust File Permissions for `www-data`
+Enable and start the service:
 
 ```bash
-sudo chown -R www-data:www-data /var/www/wedding-decoration
-sudo chmod -R 775 /var/www/wedding-decoration/uploads
-```
-
-### 4. Enable & Start Systemd Service
-
-```bash
+# Reload systemd manager configuration
 sudo systemctl daemon-reload
+
+# Start and enable service on boot
 sudo systemctl start wedding
 sudo systemctl enable wedding
-```
 
-Verify that the service is **active (running)**:
-
-```bash
+# Check service status
 sudo systemctl status wedding
 ```
 
 ---
 
-## 🌐 Step 7: Nginx Web Server Setup (Reverse Proxy & Static Asset Serving)
+### Step 5: Nginx Web Server Configuration (Reverse Proxy)
 
-### 1. Create Nginx Site Configuration
+Create an Nginx configuration file:
 
 ```bash
 sudo nano /etc/nginx/sites-available/wedding-decoration
 ```
 
-Add the following Nginx server block (replace `yourdomain.com` with your domain name):
+Paste the Nginx server block (replace `griyariassaraswati.com` with your domain and `116.193.191.159` with your VPS IP):
 
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com www.yourdomain.com;
+    # Separate multiple domains/IPs with spaces
+    server_name griyariassaraswati.com www.griyariassaraswati.com [IP_ADDRESS];
 
     client_max_body_size 16M;
 
-    # Serve Static Assets Directly (CSS, JS, Fonts)
+    # Serve static assets directly
     location /static/ {
-        alias /var/www/wedding-decoration/app/static/;
+        alias /home/meliana/wedding-decoration/app/static/;
         expires 30d;
         add_header Cache-Control "public, no-transform";
     }
 
-    # Serve User Uploaded Media Files (Payment Proofs, Product Images)
+    # Serve media upload files directly
     location /uploads/ {
-        alias /var/www/wedding-decoration/uploads/;
+        alias /home/meliana/wedding-decoration/app/static/uploads/;
         expires 7d;
         add_header Cache-Control "public, no-transform";
     }
 
-    # Pass All Other Requests to Gunicorn WSGI Server
+    # Proxy all application requests to Gunicorn
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
@@ -281,69 +244,56 @@ server {
 }
 ```
 
-### 2. Enable Configuration & Restart Nginx
+Enable configuration and restart Nginx:
 
 ```bash
-# Enable the site configuration link
+# Enable site configuration
 sudo ln -s /etc/nginx/sites-available/wedding-decoration /etc/nginx/sites-enabled/
-
-# Remove default site configuration if present
 sudo rm -f /etc/nginx/sites-enabled/default
 
-# Test Nginx syntax configuration
+# Test configuration syntax & restart Nginx
 sudo nginx -t
-
-# Reload Nginx service
 sudo systemctl restart nginx
 ```
 
 ---
 
-## 🔒 Step 8: SSL/TLS HTTPS Certificate Setup (Let's Encrypt)
+### Step 6: SSL/TLS Certificate Setup (HTTPS)
 
-Secure your application with free HTTPS SSL certificates using **Certbot**:
+Install Certbot to enable free HTTPS encryption:
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
 sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
 ```
 
-_Certbot will automatically configure HTTP to HTTPS redirects and maintain SSL certificate renewals via cron._
-
 ---
 
-## 🔄 How to Update Production (Maintenance & Redeployment Guide)
+## 🔄 Part 3: How to Update Production (Maintenance & Redeployment)
 
-Follow these instructions whenever you need to deploy new features, bug fixes, or code updates to the live production server.
+Follow these instructions whenever deploying code updates to the live server.
 
 ### 1. Standard Production Update Checklist
 
-Execute the following commands on your production server:
-
 ```bash
-# Navigate to application root
-cd /var/www/wedding-decoration
+cd $HOME/wedding-decoration
 
-# 1. Fetch & pull latest commits from the main branch
-sudo git pull origin main
+# 1. Pull latest code from main branch
+git pull origin main
 
 # 2. Activate virtual environment
 source venv/bin/activate
 
-# 3. Update Python packages if requirements.txt was modified
+# 3. Update dependencies if requirements.txt was modified
 pip install -r requirements.txt
 
-# 4. Apply any pending database schema migrations
+# 4. Apply database schema migrations
 flask db upgrade
 
-# 5. Fix & verify file permissions for www-data user
-sudo chown -R www-data:www-data /var/www/wedding-decoration
-sudo chmod -R 775 /var/www/wedding-decoration/uploads
+# 5. Reload application service gracefully (zero-downtime)
+sudo systemctl reload wedding
 
-# 6. Gracefully reload or restart the Gunicorn service
-sudo systemctl reload wedding || sudo systemctl restart wedding
-
-# 7. Check service status to confirm clean startup
+# 6. Check status
 sudo systemctl status wedding
 ```
 
@@ -351,59 +301,48 @@ sudo systemctl status wedding
 
 ### 2. Zero-Downtime Graceful Reload
 
-Gunicorn supports graceful process reloads without dropping active HTTP connections. To reload worker processes gracefully without interrupting active customer sessions:
+Gunicorn reloads worker processes without dropping active HTTP requests:
 
 ```bash
-# Option A: Systemd reload signal (Sends HUP to Gunicorn master process)
 sudo systemctl reload wedding
-
-# Option B: Direct HUP signal via Process ID
-sudo kill -HUP $(pgrep -f "gunicorn.*wedding")
 ```
 
 ---
 
 ### 3. One-Click Automated Update Script (`deploy.sh`)
 
-You can create an automated deployment helper script on your server to execute updates in a single command:
-
-1. Create a script named `deploy.sh` in `/var/www/wedding-decoration/deploy.sh`:
+Create an automated update script in `$HOME/wedding-decoration/deploy.sh`:
 
 ```bash
 #!/bin/bash
 set -e
 
-echo "🚀 Starting Production Update Procedure..."
+echo "🚀 Starting Production Update..."
+cd $HOME/wedding-decoration
 
-cd /var/www/wedding-decoration
-
-echo "📥 Pulling latest code from Git..."
+echo "📥 Pulling latest code..."
 git pull origin main
 
-echo "🐍 Activating Virtual Environment & updating dependencies..."
+echo "🐍 Updating virtual environment dependencies..."
 source venv/bin/activate
 pip install -r requirements.txt --quiet
 
-echo "🗄️ Executing Database Migrations..."
+echo "🗄️ Running Database Migrations..."
 flask db upgrade
 
-echo "🔒 Setting file ownership and permissions..."
-sudo chown -R www-data:www-data /var/www/wedding-decoration
-sudo chmod -R 775 /var/www/wedding-decoration/uploads
-
-echo "🔄 Reloading Gunicorn application service..."
+echo "🔄 Reloading Application Service..."
 sudo systemctl reload wedding
 
-echo "✅ Production Update Successfully Completed!"
+echo "✅ Production Update Complete!"
 ```
 
-2. Grant execute permissions to the script:
+Grant execution permissions:
 
 ```bash
-chmod +x /var/www/wedding-decoration/deploy.sh
+chmod +x $HOME/wedding-decoration/deploy.sh
 ```
 
-3. Run the automated deployment anytime:
+Execute anytime:
 
 ```bash
 ./deploy.sh
@@ -413,56 +352,74 @@ chmod +x /var/www/wedding-decoration/deploy.sh
 
 ### 4. Emergency Rollback Procedure
 
-If an update introduces unexpected errors or breaks functionality in production, execute an emergency rollback immediately:
+If a deployed update breaks functionality:
 
 ```bash
-cd /var/www/wedding-decoration
+cd $HOME/wedding-decoration
 
-# 1. Rollback code to the previous Git commit
-sudo git reset --hard HEAD~1
+# 1. Rollback code to previous commit
+git reset --hard HEAD~1
 
-# 2. Rollback the database migration (if schema was altered)
+# 2. Rollback database migration if needed
 source venv/bin/activate
 flask db downgrade
 
-# 3. Restore ownership & permissions
-sudo chown -R www-data:www-data /var/www/wedding-decoration
-
-# 4. Restart application service
+# 3. Restart application service
 sudo systemctl restart wedding
 
-# 5. Verify system recovery from logs
+# 4. Inspect system logs
 sudo journalctl -u wedding.service -n 50 --no-pager
 ```
 
 ---
 
-## 📊 Logging & Troubleshooting
+## 📊 Part 4: Troubleshooting Common Errors
 
-- **Check Application Runtime Logs (Systemd)**:
-  ```bash
-  sudo journalctl -u wedding.service -f
-  ```
-- **Check Gunicorn Error Logs**:
-  ```bash
-  sudo tail -f /var/log/wedding_error.log
-  ```
-- **Check Nginx Access & Error Logs**:
-  ```bash
-  sudo tail -f /var/log/nginx/error.log
-  ```
+### 1. MySQL Error 1698: `Access denied for user 'root'@'localhost'`
+
+Ubuntu/Debian uses `auth_socket` for `root` by default. Fix by creating a dedicated user or switching auth plugin:
+
+```bash
+# Option A: Create dedicated user (Recommended)
+sudo mysql -e "CREATE DATABASE IF NOT EXISTS wedding_db; CREATE USER IF NOT EXISTS 'wedding_user'@'localhost' IDENTIFIED BY 'StrongPassword123!'; GRANT ALL PRIVILEGES ON wedding_db.* TO 'wedding_user'@'localhost'; FLUSH PRIVILEGES;"
+export DATABASE_URL="mysql+pymysql://wedding_user:StrongPassword123!@localhost:3306/wedding_db"
+
+# Option B: Change root plugin
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root123'; FLUSH PRIVILEGES;"
+export DATABASE_URL="mysql+pymysql://root:root123@localhost:3306/wedding_db"
+```
+
+### 2. Systemd Service Failures (`Job for wedding.service failed`)
+
+Check detailed log output:
+
+```bash
+sudo journalctl -xeu wedding.service -n 30 --no-pager
+```
+
+Common causes & fixes:
+
+- **Path mismatch**: Ensure `WorkingDirectory` and `ExecStart` in `/etc/systemd/system/wedding.service` point to `/home/$USER/wedding-decoration` (matching your actual user home path).
+- **Log permissions**: Omit `/var/log/wedding_access.log` flags or let Gunicorn output to standard output (`stdout`/`journald`).
 
 ---
 
 ## 🔑 Default Initial Credentials
 
-After running `python seed_dashboard.py`, you can log into the Administrator Dashboard:
+After running `python seed_dashboard.py`:
 
-- **Login URL**: `https://yourdomain.com/admin/login`
-- **Email**: `admin@example.com`
-- **Password**: `admin123`
+- **Administrator**: `admin@example.com` / `admin123`
+- **Customer**: `budi@example.com` / `budi123`
 
-⚠️ **IMPORTANT**: _Change the default Administrator password immediately after your first login in a production environment!_
+---
+
+## 🧪 Running Automated Unit Tests
+
+To run the full unit test suite (63 tests):
+
+```bash
+python -m unittest discover tests
+```
 
 ---
 
