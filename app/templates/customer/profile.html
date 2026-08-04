@@ -153,13 +153,13 @@
                         <i class="bi bi-file-earmark-image"></i>
                         <span>Lihat Bukti</span>
                       </a>
-                      <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Griya%20Rias%20Saraswati%2C%20saya%20ingin%20mengonfirmasi%20bukti%20pembayaran%20untuk%20Order%20%23{{ order.id }}"
+                      <a href="{{ site.wa_base }}?text=Halo%20Admin%20Griya%20Rias%20Saraswati%2C%20saya%20ingin%20mengonfirmasi%20bukti%20pembayaran%20untuk%20Order%20%23{{ order.id }}"
                         class="btn btn-profile-whatsapp" target="_blank" title="Hubungi Admin via WhatsApp">
                         <i class="bi bi-whatsapp"></i>
                         <span>Hubungi Admin</span>
                       </a>
                       {% else %}
-                      <a href="https://wa.me/6281234567890?text=Halo%20Admin%20Griya%20Rias%20Saraswati%2C%20saya%20butuh%20bantuan%20mengenai%20pembayaran%20untuk%20Order%20%23{{ order.id }}"
+                      <a href="{{ site.wa_base }}?text=Halo%20Admin%20Griya%20Rias%20Saraswati%2C%20saya%20butuh%20bantuan%20mengenai%20pembayaran%20untuk%20Order%20%23{{ order.id }}"
                         class="btn btn-profile-whatsapp" target="_blank" title="Hubungi Admin via WhatsApp">
                         <i class="bi bi-whatsapp"></i>
                         <span>Hubungi Admin</span>

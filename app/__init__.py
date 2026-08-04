@@ -54,6 +54,18 @@ def create_app(config_class=Config):
             site = {s.key: s.value for s in settings}
         except Exception:
             site = {}
+
+        # Resolusi wa_base dinamis (utamanya dari invoice_phone, fallback ke social_whatsapp / footer_phone)
+        raw_phone = (site.get('invoice_phone') or site.get('social_whatsapp') or site.get('footer_phone') or '6282242948572').strip()
+        if raw_phone.startswith('http'):
+            wa_base = raw_phone.split('?')[0]
+        else:
+            clean_digits = ''.join(filter(str.isdigit, raw_phone))
+            if clean_digits.startswith('0'):
+                clean_digits = '62' + clean_digits[1:]
+            wa_base = f"https://wa.me/{clean_digits}" if clean_digits else "https://wa.me/6282242948572"
+
+        site['wa_base'] = wa_base
         return dict(site=site)
 
     return app

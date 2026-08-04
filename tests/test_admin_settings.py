@@ -163,6 +163,16 @@ class AdminSettingsTestCase(unittest.TestCase):
         self.assertIn(b'Hero Title Test', res.data)
         self.assertIn(b'08123999888777', res.data)
 
+    def test_dynamic_whatsapp_base_resolution(self):
+        """Uji bahwa resolusi wa_base mengutamakan invoice_phone dan merespons perubahan settings."""
+        SiteSetting.set('invoice_phone', '082242948572')
+        db.session.commit()
+
+        with self.app.test_request_context('/'):
+            from flask import render_template_string
+            rendered = render_template_string("{{ site.wa_base }}")
+            self.assertEqual(rendered, 'https://wa.me/6282242948572')
+
     def test_admin_invoice_view_and_pdf(self):
         """Uji akses admin untuk melihat invoice web dan mengunduh berkas PDF invoice."""
         from datetime import date, timedelta
